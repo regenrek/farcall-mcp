@@ -1,0 +1,39 @@
+{
+  "name": "agent-worker-mcp",
+  "version": "0.1.0",
+  "description": "Completion-wait MCP workers for Claude Code and Codex CLI",
+  "type": "module",
+  "license": "MIT",
+  "author": "Kevin Kern",
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@10.32.1",
+  "bin": {
+    "agent-worker-mcp": "dist/cli.mjs"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "docs"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test test/*.test.mjs",
+    "lint": "oxlint --deny-warnings src scripts test",
+    "format": "prettier --write src scripts test docs README.md package.json plugins/*/skills .github .oxlintrc.json",
+    "format:check": "prettier --check src scripts test docs README.md package.json plugins/*/skills .github .oxlintrc.json",
+    "check": "pnpm lint && pnpm format:check && pnpm build && pnpm test",
+    "prepack": "pnpm build",
+    "test:long": "node scripts/long-preflight.mjs",
+    "test:pack": "pnpm pack --pack-destination artifacts && node scripts/pack-smoke.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "oxlint": "1.56.0",
+    "prettier": "3.8.2",
+    "@modelcontextprotocol/sdk": "1.30.1",
+    "zod": "4.6.5"
+  }
+}

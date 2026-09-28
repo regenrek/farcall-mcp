@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "claude_worker": {
+      "command": "node",
+      "args": [
+        "./server.mjs"
+      ],
+      "cwd": ".",
+      "tool_timeout_sec": 7200,
+      "startup_timeout_sec": 20
+    }
+  }
+}

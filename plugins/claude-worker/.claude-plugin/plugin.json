@@ -1,0 +1,18 @@
+{
+  "name": "claude-worker",
+  "version": "0.1.0",
+  "description": "Delegate to Claude with one MCP call that waits for completion.",
+  "author": {
+    "name": "Kevin Kern"
+  },
+  "license": "MIT",
+  "mcpServers": {
+    "claude_worker": {
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/server.mjs"
+      ],
+      "timeout": 7200000
+    }
+  }
+}

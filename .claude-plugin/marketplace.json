@@ -1,0 +1,21 @@
+{
+  "name": "agent-workers",
+  "owner": {
+    "name": "Kevin Kern"
+  },
+  "plugins": [
+    {
+      "name": "claude-worker",
+      "source": "./plugins/claude-worker",
+      "description": "Delegate to Claude with a pending MCP call."
+    },
+    {
+      "name": "codex-worker",
+      "source": "./plugins/codex-worker",
+      "description": "Delegate to Codex with a pending MCP call."
+    }
+  ],
+  "metadata": {
+    "description": "Local Claude Code and Codex workers with pending MCP calls."
+  }
+}

@@ -1,0 +1,3 @@
+dist/** linguist-generated=true
+plugins/*/server.mjs linguist-generated=true
+plugins/*/THIRD-PARTY-NOTICES.txt linguist-generated=true

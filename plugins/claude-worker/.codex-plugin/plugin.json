@@ -1,0 +1,24 @@
+{
+  "name": "claude-worker",
+  "version": "0.1.0",
+  "description": "Delegate to Claude with one MCP call that waits for completion.",
+  "author": {
+    "name": "Kevin Kern"
+  },
+  "license": "MIT",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Claude worker",
+    "shortDescription": "Delegate to Claude with one MCP call that waits for completion.",
+    "developerName": "Kevin Kern",
+    "category": "Productivity",
+    "capabilities": [
+      "Write"
+    ],
+    "longDescription": "Run an authorized Claude CLI task with a single pending MCP call, saved evidence and exact-session resume.",
+    "defaultPrompt": [
+      "Use the Claude worker for this task."
+    ]
+  }
+}

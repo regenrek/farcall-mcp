@@ -1,0 +1,4 @@
+{
+  "categories": { "correctness": "error", "suspicious": "warn" },
+  "ignorePatterns": ["dist/**", "plugins/**/server.mjs"]
+}
