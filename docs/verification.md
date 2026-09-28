@@ -22,6 +22,15 @@ The Codex marketplace is now `farcall`. The build takes all versions from `packa
 
 ## What still needs host acceptance
 
+Version 0.1.1 fixes the shared model-name regex advertised by both workers.
+The original pattern was accepted by JavaScript but rejected by jsonschema-rs
+0.58.2 as an invalid regex. Escaping literal character-class punctuation keeps
+the allowed model names unchanged. Four regressions inspect `tools/list` from
+both plugin bundles and both CLI modes, compile the model pattern with Unicode
+sets syntax, and check accepted and rejected identifiers against the runtime
+contract. They fail on 0.1.0. The corrected schemas also pass the independent
+Rust validator; this does not establish Anthropic API acceptance.
+
 These checks do not measure a parent model's inference or cost. Before using this package for a comparative run, test the actual parent host with `preflight`, then a small real task & a correction using the returned session. Use `trace: true` to retain worker events. Record the parent's response trace & CLI versions separately.
 
 The new package has not been used for a paid Claude → Codex or Codex → Claude run. The earlier benchmark used the previous Claude worker. Neither its model results nor its host behavior are automatically transferred to this implementation. Linux has a CI job but has not been exercised in this local macOS session. Windows is unsupported.

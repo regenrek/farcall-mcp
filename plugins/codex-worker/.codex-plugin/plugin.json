@@ -1,6 +1,6 @@
 {
   "name": "codex-worker",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Delegate to Codex with one MCP call that waits for completion.",
   "author": {
     "name": "Kevin Kern"

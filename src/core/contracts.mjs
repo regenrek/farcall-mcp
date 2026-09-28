@@ -18,7 +18,7 @@ const run = {
     .string()
     .min(1)
     .max(200)
-    .regex(/^[a-zA-Z0-9._:[\]/-]+$/),
+    .regex(/^[a-zA-Z0-9._:\[\]\/\-]+$/v),
   resume_session_id: z.uuid().optional(),
   resume_delegation_id: common.delegation_id.optional(),
 };

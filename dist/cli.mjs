@@ -47,7 +47,7 @@ var init_package = __esm({
   "package.json"() {
     package_default = {
       name: "farcall-mcp",
-      version: "0.1.0",
+      version: "0.1.1",
       description: "Completion-wait MCP workers for Claude Code and Codex CLI",
       type: "module",
       license: "MIT",
@@ -37798,7 +37798,7 @@ var init_contracts = __esm({
       prompt: external_exports.string().min(1).max(1e6).optional(),
       prompt_file: absolutePath.optional(),
       max_result_chars: external_exports.number().int().min(256).max(24e3).default(4e3),
-      model: external_exports.string().min(1).max(200).regex(/^[a-zA-Z0-9._:[\]/-]+$/),
+      model: external_exports.string().min(1).max(200).regex(new RegExp("^[a-zA-Z0-9._:\\[\\]\\/\\-]+$", "v")),
       resume_session_id: external_exports.uuid().optional(),
       resume_delegation_id: common.delegation_id.optional()
     };
