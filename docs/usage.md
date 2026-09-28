@@ -50,6 +50,20 @@ Choose allowed tools for the actual task. The default permission mode does not a
 
 For `codex_worker.run`, use the same common fields, any model your Codex CLI supports (for example `gpt-6-astra`), & `sandbox: "read-only"` for reviews or `"workspace-write"` for implementation. Omit Claude-specific fields. Codex runs with approval requests disabled, so disallowed operations fail instead of waiting for input. No bypass mode is exposed.
 
+For a task outside Git, explicitly set `allow_non_git: true` (default: `false`). The worker passes `--skip-git-repo-check` for that invocation, including resume. It does not initialize Git or edit Claude/Codex configuration. The sandbox and approval policy remain unchanged; `read-only` alone does not enable this option. Set it again when resuming outside Git. Changing the option requires a new delegation ID, including when retrying a failed call with an unknown session ID.
+
+```json
+{
+  "cwd": "/absolute/path/plain-directory",
+  "delegation_id": "review-non-git-001",
+  "prompt": "Review this directory. Do not modify files.",
+  "model": "gpt-6-astra",
+  "effort": "low",
+  "sandbox": "read-only",
+  "allow_non_git": true
+}
+```
+
 For a correction, supply a new prompt & use a new delegation ID. Include the exact returned `session_id` as `resume_session_id` & the previous `delegation_id` as `resume_delegation_id`. Both must belong to the same provider & checkout. There is no implicit “latest session” option.
 
 `completed` means the CLI returned a successful native result, not that every requested action happened. The response includes permission denials & `result_truncated` when the preview was shortened. The default preview limit is 4,000 characters. Set `max_result_chars` between 256 & 24,000 to change it. When truncated, `result_file` points to the full answer. This limits what returns to the parent, not how much the worker generates.

@@ -34,6 +34,12 @@ export const codexInput = z.strictObject({
   ...run,
   effort: z.enum(["minimal", "low", "medium", "high", "xhigh", "max", "ultra"]),
   sandbox: z.enum(["read-only", "workspace-write"]).default("read-only"),
+  allow_non_git: z
+    .boolean()
+    .default(false)
+    .describe(
+      "Allow this invocation outside a Git repository. Also set on resume. Does not change sandbox permissions or edit Git/user configuration.",
+    ),
 });
 export const preflightInput = z.strictObject({
   ...common,

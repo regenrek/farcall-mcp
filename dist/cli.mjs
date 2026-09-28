@@ -47,7 +47,7 @@ var init_package = __esm({
   "package.json"() {
     package_default = {
       name: "farcall-mcp",
-      version: "0.1.1",
+      version: "0.1.2",
       description: "Completion-wait MCP workers for Claude Code and Codex CLI",
       type: "module",
       license: "MIT",
@@ -37812,7 +37812,10 @@ var init_contracts = __esm({
     codexInput = external_exports.strictObject({
       ...run,
       effort: external_exports.enum(["minimal", "low", "medium", "high", "xhigh", "max", "ultra"]),
-      sandbox: external_exports.enum(["read-only", "workspace-write"]).default("read-only")
+      sandbox: external_exports.enum(["read-only", "workspace-write"]).default("read-only"),
+      allow_non_git: external_exports.boolean().default(false).describe(
+        "Allow this invocation outside a Git repository. Also set on resume. Does not change sandbox permissions or edit Git/user configuration."
+      )
     });
     preflightInput = external_exports.strictObject({
       ...common,
@@ -37891,6 +37894,7 @@ var init_codex = __esm({
           `model_reasoning_effort=${JSON.stringify(input2.effort)}`,
           "-c",
           'approval_policy="never"',
+          ...input2.allow_non_git ? ["--skip-git-repo-check"] : [],
           ...input2.resume_session_id ? ["resume", input2.resume_session_id, "-"] : ["-"]
         ];
       },

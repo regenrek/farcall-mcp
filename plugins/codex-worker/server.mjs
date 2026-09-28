@@ -36489,7 +36489,7 @@ import path from "node:path";
 // package.json
 var package_default = {
   name: "farcall-mcp",
-  version: "0.1.1",
+  version: "0.1.2",
   description: "Completion-wait MCP workers for Claude Code and Codex CLI",
   type: "module",
   license: "MIT",
@@ -36563,7 +36563,10 @@ var claudeInput = external_exports.strictObject({
 var codexInput = external_exports.strictObject({
   ...run,
   effort: external_exports.enum(["minimal", "low", "medium", "high", "xhigh", "max", "ultra"]),
-  sandbox: external_exports.enum(["read-only", "workspace-write"]).default("read-only")
+  sandbox: external_exports.enum(["read-only", "workspace-write"]).default("read-only"),
+  allow_non_git: external_exports.boolean().default(false).describe(
+    "Allow this invocation outside a Git repository. Also set on resume. Does not change sandbox permissions or edit Git/user configuration."
+  )
 });
 var preflightInput = external_exports.strictObject({
   ...common,
@@ -36649,6 +36652,7 @@ var codex = {
       `model_reasoning_effort=${JSON.stringify(input2.effort)}`,
       "-c",
       'approval_policy="never"',
+      ...input2.allow_non_git ? ["--skip-git-repo-check"] : [],
       ...input2.resume_session_id ? ["resume", input2.resume_session_id, "-"] : ["-"]
     ];
   },

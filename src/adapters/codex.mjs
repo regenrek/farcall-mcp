@@ -13,6 +13,7 @@ export const codex = {
       `model_reasoning_effort=${JSON.stringify(input.effort)}`,
       "-c",
       'approval_policy="never"',
+      ...(input.allow_non_git ? ["--skip-git-repo-check"] : []),
       ...(input.resume_session_id
         ? ["resume", input.resume_session_id, "-"]
         : ["-"]),

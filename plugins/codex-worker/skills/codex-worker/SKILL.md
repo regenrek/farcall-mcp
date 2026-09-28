@@ -16,4 +16,6 @@ Before claiming a host avoids polling, use the deterministic `preflight` tool wi
 
 Use an exact Codex model identifier and supported effort. Reviews default to read-only; explicitly select workspace-write for implementation. The worker uses codex exec, not the Codex desktop UI. Do not promise browser tools unless they are configured and verified in the child CLI.
 
+For an authorized task in a directory outside Git, set `allow_non_git: true` explicitly, also on resume. Its default is false. This only passes `--skip-git-repo-check` for that invocation; sandbox permissions stay unchanged. Do not initialize Git or edit user configuration to work around this check. Retry a failed call with a new delegation ID; an unknown session ID cannot be resumed.
+
 When Claude Code is the parent, start it with `CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS=0` so it does not background the call after two minutes. The plugin supplies a two-hour per-server timeout. When Codex is the parent, keep the actual worker namespace in `features.code_mode.direct_only_tool_namespaces`. These are parent-host settings, not worker arguments.

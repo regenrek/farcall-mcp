@@ -1,6 +1,6 @@
 # Installation & host setup
 
-Node 24+, macOS or Linux, and an installed, signed-in worker CLI are required. Codex tasks need a Git working tree.
+Node 24+, macOS or Linux, and an installed, signed-in worker CLI are required. Codex tasks need a Git working tree by default. For an authorized task in a plain directory, set `allow_non_git: true` on the worker call (and on resume). This passes `--skip-git-repo-check` for that invocation without initializing Git or changing user configuration; the selected sandbox still applies.
 
 ## Install in Claude Code
 

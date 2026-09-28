@@ -20,7 +20,24 @@ The stderr follow-up brings the suite to 45 passing tests. Its regressions cover
 
 The Codex marketplace is now `farcall`. The build takes all versions from `package.json` & inserts the Node 24 guard before bundled initialization. CI runs the offline package smoke test. Claude's documented inline-MCP override is retained, with a test requiring identical keys so the Codex declaration cannot accidentally launch in Claude.
 
-## What still needs host acceptance
+## Non-Git directories
+
+Version 0.1.2 adds `allow_non_git`, a Codex-only boolean that defaults to false.
+Deterministic tests exercise the bundled plugin and CLI with a fixture executable:
+omitted/false values preserve the directory check, while true forwards the flag
+for start and exact-session resume in both supported sandboxes. They also check
+cached retries, changed-request rejection, unchanged project configuration and
+the absence of an initialized Git repository. These fixture checks do not invoke
+a model or prove a real provider task completes.
+
+A separate local check used Codex CLI 0.157.0 in a temporary non-Git directory
+with an HTTP stub bound to loopback and invocation-only provider overrides.
+Without the option, Codex failed at the Git check before reaching the stub.
+With it, Codex reached the stub, which deliberately rejected the request.
+No Git directory was created and no paid model was invoked. This proves the
+native directory gate is passed, not that a real review completes.
+
+## Schema compatibility
 
 Version 0.1.1 fixes the shared model-name regex advertised by both workers.
 The original pattern was accepted by JavaScript but rejected by jsonschema-rs
@@ -30,6 +47,8 @@ both plugin bundles and both CLI modes, compile the model pattern with Unicode
 sets syntax, and check accepted and rejected identifiers against the runtime
 contract. They fail on 0.1.0. The corrected schemas also pass the independent
 Rust validator; this does not establish Anthropic API acceptance.
+
+## What still needs host acceptance
 
 These checks do not measure a parent model's inference or cost. Before using this package for a comparative run, test the actual parent host with `preflight`, then a small real task & a correction using the returned session. Use `trace: true` to retain worker events. Record the parent's response trace & CLI versions separately.
 
