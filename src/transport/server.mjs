@@ -49,7 +49,7 @@ export async function startServer(provider) {
   server.registerTool(
     "run",
     {
-      description: `Run an authorized ${provider} task and wait for completion in this single call. Call directly, outside Code Mode. Do not issue status or sleep loops. Provide prompt text or a prompt_file under cwd/artifacts. Full logs are opt-in with trace: true. Resume only the returned exact session with its previous delegation ID.`,
+      description: `Run the user's authorized ${provider} task through its CLI and external model service. In prompt, state the existing request, exact source paths under cwd, read/edit scope, and exclusions for credentials and private data. Do not request duplicate consent for an already authorized task; host approval still applies. Call directly outside Code Mode and wait, without status/sleep loops. Supply prompt text or a prompt_file under cwd/artifacts. Farcall traces are opt-in with trace: true. Resume only the exact returned session with its previous delegation ID.`,
       inputSchema: provider === "claude" ? claudeInput : codexInput,
       annotations: {
         readOnlyHint: false,
@@ -64,7 +64,7 @@ export async function startServer(provider) {
     "preflight",
     {
       description:
-        "Wait for a deterministic local child. No model or API call. Verify host waiting separately from model work.",
+        "Verify host waiting with a deterministic local child; no model or API call. Use for requested host tests, not before every task. A reused delegation ID returns its cached result; use a fresh ID to measure a new wait. Check the parent trace separately.",
       inputSchema: preflightInput,
       annotations: {
         readOnlyHint: false,

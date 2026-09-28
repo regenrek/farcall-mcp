@@ -31,13 +31,25 @@ New effort values or incompatible CLI changes may require a Farcall update.
 
 ## Run & resume
 
+Use the authorization already present in the user's request for the named worker and task. The parent should resolve the intended source version, bound the necessary source paths, and pass that scope in one compact prompt. It should not add a blanket external-service consent question or a preflight before every ordinary task. A preflight is for requested host verification; use a fresh ID to measure a new wait instead of retrieving a cached result.
+
+Include the existing request, permitted reads/edits, and data exclusions in the prompt. Exclude credentials, `.env` files, private databases/customer records, raw logs, sessions, and artifacts from task context. If the target is ambiguous or the task genuinely needs excluded data, resolve that specific issue. Do not read excluded material merely to prepare the delegation.
+
+For example, when the user has asked for a static source review of `src/` and `test/` in the selected `cwd`:
+
+```text
+The user requested a static review of src/ and test/ in this cwd. Read only ordinary source and tests there, plus package.json and project guidance. Do not modify files or execute project code. Exclude credentials, .env files, private data, databases, logs, sessions and artifacts; stop if the task needs excluded or out-of-scope data. Report the three most important findings with file references, under 300 words.
+```
+
+These are instructions to the parent and worker, not an enforced file-access filter or a guarantee of host approval. Farcall uses the CLI's external model service. If host approval rejects a call, respect the stated reason; do not disguise or reroute it. Narrowing is appropriate only when it addresses that reason within existing authorization and any user-imposed call limit. If still blocked, report the reason and request only the missing authorization. The plugin does not change host approval settings.
+
 Pass the task directly in `prompt`. An implementation call to `claude_worker.run` can look like this.
 
 ```json
 {
   "cwd": "/absolute/path/project",
   "delegation_id": "feature-001",
-  "prompt": "Implement the agreed feature. Run the relevant checks and return a concise summary.",
+  "prompt": "The user requested the agreed feature in src/ with tests in test/. Limit reads and edits to those paths, package.json and project guidance. Exclude credentials, .env files, private data, databases, logs, sessions and artifacts; stop if more access is needed. Run the authorized pnpm test and pnpm build checks and return a concise summary.",
   "model": "claude-opus-5-5",
   "effort": "high",
   "permission_mode": "acceptEdits",
@@ -56,7 +68,7 @@ For a task outside Git, explicitly set `allow_non_git: true` (default: `false`).
 {
   "cwd": "/absolute/path/plain-directory",
   "delegation_id": "review-non-git-001",
-  "prompt": "Review this directory. Do not modify files.",
+  "prompt": "The user requested a static review of src/ and test/ in this cwd. Read only ordinary source, tests, package.json and project guidance. Exclude credentials, .env files, private data, databases, logs, sessions and artifacts; stop if more access is needed. Do not modify files or execute project code. Return a concise review.",
   "model": "gpt-6-astra",
   "effort": "low",
   "sandbox": "read-only",

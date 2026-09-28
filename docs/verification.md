@@ -50,6 +50,14 @@ Rust validator; this does not establish Anthropic API acceptance.
 
 ## What still needs host acceptance
 
+Version 0.1.3's delegation instructions carry existing task authorization, exact source
+scope and data exclusions in the worker prompt, instead of adding a routine
+consent round or preflight. Host rejections still apply. This is a prompt/skill
+change, not an enforced filesystem filter. Deterministic tests and skill
+validation cannot establish whether a host's approval model will accept the
+bounded call; that behavior still needs a real host trace. No paid model jobs
+were run to validate this instruction change.
+
 These checks do not measure a parent model's inference or cost. Before using this package for a comparative run, test the actual parent host with `preflight`, then a small real task & a correction using the returned session. Use `trace: true` to retain worker events. Record the parent's response trace & CLI versions separately.
 
 The new package has not been used for a paid Claude → Codex or Codex → Claude run. The earlier benchmark used the previous Claude worker. Neither its model results nor its host behavior are automatically transferred to this implementation. Linux has a CI job but has not been exercised in this local macOS session. Windows is unsupported.
