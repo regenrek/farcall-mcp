@@ -7,10 +7,13 @@ const common = {
   cwd: absolutePath,
   delegation_id: z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$/),
   timeout_seconds: z.number().int().min(1).max(7100).default(3600),
+  trace: z.boolean().default(false),
 };
 const run = {
   ...common,
-  prompt_file: absolutePath,
+  prompt: z.string().min(1).max(1_000_000).optional(),
+  prompt_file: absolutePath.optional(),
+  max_result_chars: z.number().int().min(256).max(24000).default(4000),
   model: z
     .string()
     .min(1)
@@ -44,6 +47,12 @@ export function parseInput(provider, value, preflight) {
       ? claudeInput
       : codexInput;
   const input = schema.parse(value);
+  if (
+    !preflight &&
+    (input.prompt !== undefined) === (input.prompt_file !== undefined)
+  ) {
+    throw new Error("Provide exactly one of prompt or prompt_file");
+  }
   if (
     !preflight &&
     Boolean(input.resume_session_id) !== Boolean(input.resume_delegation_id)

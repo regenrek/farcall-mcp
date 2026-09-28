@@ -5,6 +5,7 @@ import {
   mkdir,
   writeFile,
   readFile,
+  readdir,
   symlink,
   rm,
 } from "node:fs/promises";
@@ -42,8 +43,121 @@ const override = (provider, scenario = "success", id = session) => ({
   },
 });
 for (const provider of ["claude", "codex"]) {
+  test(`${provider} accepts inline prompts without trace files and preserves replay/resume`, async (t) => {
+    const input = await setup(t);
+    delete input.prompt_file;
+    input.prompt = "Review the boundary. Keep the answer short.";
+    const first = await delegate(provider, input, override(provider, "echo"));
+    assert.equal(first.result, input.prompt);
+    assert.equal(first.trace, false);
+    assert.deepEqual((await readdir(first.evidence_directory)).toSorted(), [
+      "completion.json",
+      "request.json",
+    ]);
+    const request = await readFile(
+      path.join(first.evidence_directory, "request.json"),
+      "utf8",
+    );
+    assert.ok(!request.includes(input.prompt));
+    assert.deepEqual(
+      await delegate(provider, input, {
+        commandOverride: { command: "/does-not-exist", args: [] },
+      }),
+      first,
+    );
+    await assert.rejects(
+      delegate(
+        provider,
+        { ...input, prompt: "Changed task" },
+        override(provider),
+      ),
+      /different request/,
+    );
+    const resumed = await delegate(
+      provider,
+      {
+        ...input,
+        delegation_id: "correction",
+        prompt: "Check again.",
+        resume_session_id: first.session_id,
+        resume_delegation_id: first.delegation_id,
+      },
+      override(provider, "echo"),
+    );
+    assert.equal(resumed.result, "Check again.");
+    assert.equal(resumed.session_id, first.session_id);
+  });
+}
+
+test("prompt validation rejects ambiguous, missing, blank and oversized UTF-8 input", async (t) => {
+  const input = await setup(t);
+  await assert.rejects(
+    delegate("claude", { ...input, prompt: "two sources" }),
+    /exactly one/,
+  );
+  delete input.prompt_file;
+  await assert.rejects(delegate("claude", input), /exactly one/);
+  await assert.rejects(
+    delegate("claude", { ...input, prompt: "  " }),
+    /Invalid prompt/,
+  );
+  await assert.rejects(
+    delegate("claude", { ...input, prompt: "é".repeat(500001) }),
+    /Invalid prompt/,
+  );
+});
+
+test("trace is opt-in for inline prompts and preflight", async (t) => {
+  const input = await setup(t);
+  delete input.prompt_file;
+  const result = await delegate(
+    "claude",
+    { ...input, prompt: "Trace this task", trace: true },
+    override("claude"),
+  );
+  assert.deepEqual((await readdir(result.evidence_directory)).toSorted(), [
+    "completion.json",
+    "events.jsonl",
+    "lifecycle.jsonl",
+    "native-result.json",
+    "prompt.txt",
+    "request.json",
+    "stderr.log",
+  ]);
+  assert.equal(
+    await readFile(path.join(result.evidence_directory, "prompt.txt"), "utf8"),
+    "Trace this task",
+  );
+  const preflight = await delegate(
+    "codex",
+    { cwd: input.cwd, delegation_id: "plain-preflight", duration_seconds: 0 },
+    { preflight: true },
+  );
+  assert.deepEqual((await readdir(preflight.evidence_directory)).toSorted(), [
+    "completion.json",
+    "request.json",
+  ]);
+});
+
+test("failures without trace retain a bounded CLI diagnostic", async (t) => {
+  const input = await setup(t);
+  const result = await delegate(
+    "claude",
+    input,
+    override("claude", "stderr-failure"),
+  );
+  assert.equal(result.status, "failed");
+  assert.match(result.stderr_tail, /authentication failed/);
+  assert.deepEqual((await readdir(result.evidence_directory)).toSorted(), [
+    "completion.json",
+    "request.json",
+  ]);
+});
+
+for (const provider of ["claude", "codex"]) {
   test(`${provider} preserves evidence, resumes exact sessions, rejects changed retries`, async (t) => {
     const input = await setup(t);
+    input.trace = true;
     const first = await delegate(provider, input, override(provider));
     assert.equal(first.status, "completed");
     assert.equal(first.result, "Reviewed café ✓");
@@ -285,15 +399,13 @@ test("permission denials and result truncation remain visible to the parent", as
     override("claude", "long-result"),
   );
   assert.equal(long.result_truncated, true);
-  assert.equal(long.result.length, 24000);
+  assert.equal(long.result.length, 4000);
   assert.equal(long.result_characters, 25000);
-  const native = JSON.parse(
-    await readFile(
-      path.join(long.evidence_directory, "native-result.json"),
-      "utf8",
-    ),
+  assert.equal((await readFile(long.result_file, "utf8")).length, 25000);
+  await assert.rejects(
+    readFile(path.join(long.evidence_directory, "native-result.json")),
+    { code: "ENOENT" },
   );
-  assert.equal(native.result.length, 25000);
   const invalid = await delegate(
     "claude",
     { ...input, delegation_id: "invalid" },

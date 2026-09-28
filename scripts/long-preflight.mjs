@@ -33,6 +33,7 @@ const results = await Promise.all(
             delegation_id: "long-wait",
             duration_seconds: duration,
             timeout_seconds: duration + 20,
+            trace: true,
           },
         },
         undefined,

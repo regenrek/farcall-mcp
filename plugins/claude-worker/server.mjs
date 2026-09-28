@@ -36541,11 +36541,14 @@ var absolutePath = external_exports.string().refine(path.isAbsolute, "Use an abs
 var common = {
   cwd: absolutePath,
   delegation_id: external_exports.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$/),
-  timeout_seconds: external_exports.number().int().min(1).max(7100).default(3600)
+  timeout_seconds: external_exports.number().int().min(1).max(7100).default(3600),
+  trace: external_exports.boolean().default(false)
 };
 var run = {
   ...common,
-  prompt_file: absolutePath,
+  prompt: external_exports.string().min(1).max(1e6).optional(),
+  prompt_file: absolutePath.optional(),
+  max_result_chars: external_exports.number().int().min(256).max(24e3).default(4e3),
   model: external_exports.string().min(1).max(200).regex(/^[a-zA-Z0-9._:[\]/-]+$/),
   resume_session_id: external_exports.uuid().optional(),
   resume_delegation_id: common.delegation_id.optional()
@@ -36570,6 +36573,9 @@ var preflightInput = external_exports.strictObject({
 function parseInput(provider, value, preflight) {
   const schema = preflight ? preflightInput : provider === "claude" ? claudeInput : codexInput;
   const input2 = schema.parse(value);
+  if (!preflight && input2.prompt !== void 0 === (input2.prompt_file !== void 0)) {
+    throw new Error("Provide exactly one of prompt or prompt_file");
+  }
   if (!preflight && Boolean(input2.resume_session_id) !== Boolean(input2.resume_delegation_id)) {
     throw new Error(
       "Resume requires both the exact session ID and its previous delegation ID"
@@ -36721,21 +36727,25 @@ async function prepare(input2, preflight) {
   const root = await containedDirectory(artifacts, "farcall");
   let prompt = "Deterministic MCP preflight. No model call.";
   if (!preflight) {
-    const file2 = await realpath(input2.prompt_file);
-    if (!file2.startsWith(`${artifacts}${path3.sep}`))
-      throw new Error("prompt_file must be inside cwd/artifacts");
-    const handle = await open2(file2, "r");
-    try {
-      const stat = await handle.stat();
-      if (!stat.isFile() || stat.size > 1e6)
-        throw new Error("Prompt must be a file under 1 MB");
-      prompt = await handle.readFile("utf8");
-    } finally {
-      await handle.close();
+    if (input2.prompt !== void 0) {
+      prompt = input2.prompt;
+    } else {
+      const file2 = await realpath(input2.prompt_file);
+      if (!file2.startsWith(`${artifacts}${path3.sep}`))
+        throw new Error("prompt_file must be inside cwd/artifacts");
+      const handle = await open2(file2, "r");
+      try {
+        const stat = await handle.stat();
+        if (!stat.isFile() || stat.size > 1e6)
+          throw new Error("Prompt must be a file under 1 MB");
+        prompt = await handle.readFile("utf8");
+      } finally {
+        await handle.close();
+      }
     }
-    if (!prompt.trim() || Buffer.byteLength(prompt) > 1e6)
-      throw new Error("Invalid prompt size");
   }
+  if (!prompt.trim() || Buffer.byteLength(prompt) > 1e6)
+    throw new Error("Invalid prompt size");
   const checkout = await checkoutRoot(cwd);
   const lockArtifacts = await containedDirectory(checkout, "artifacts");
   const lockRoot = await containedDirectory(lockArtifacts, "farcall");
@@ -36819,6 +36829,7 @@ async function runProcess({
   signal,
   timeout,
   onEvent,
+  trace = false,
   graceMs = 1e3,
   drainMs = 1e3
 }) {
@@ -36827,6 +36838,7 @@ async function runProcess({
   if (signal?.aborted) return { status: "cancelled" };
   const handles = [];
   const logFile = (name) => {
+    if (!trace) return null;
     const handle = openSync(path4.join(directory, name), "wx", 384);
     handles.push(handle);
     return handle;
@@ -36840,6 +36852,7 @@ async function runProcess({
     const lifecycle = logFile("lifecycle.jsonl");
     let evidenceError = false;
     const record2 = (type, data = {}) => {
+      if (!trace) return;
       try {
         writeSync(
           lifecycle,
@@ -36855,8 +36868,18 @@ async function runProcess({
     child = spawn(command, args, {
       cwd,
       detached: true,
-      stdio: ["pipe", "pipe", stderr]
+      stdio: ["pipe", "pipe", stderr ?? "pipe"]
     });
+    let stderrTail = "";
+    const stderrDecoder = new StringDecoder("utf8");
+    const onStderr = (chunk) => {
+      stderrTail = (stderrTail + stderrDecoder.write(chunk)).slice(-2e3);
+    };
+    if (child.stderr) {
+      child.stderr.on("data", onStderr);
+      child.stderr.on("error", () => {
+      });
+    }
     record2("worker_started", { pid: child.pid });
     let reason;
     const killGroup = (sig) => {
@@ -36894,7 +36917,7 @@ async function runProcess({
     };
     const onData = (chunk) => {
       try {
-        writeSync(stdout, chunk);
+        if (stdout !== null) writeSync(stdout, chunk);
       } catch {
         terminate("evidence_error");
         return;
@@ -36920,10 +36943,14 @@ async function runProcess({
     child.stdin.on("error", (error62) => {
       if (error62.code !== "EPIPE") terminate("stdin_error");
     });
-    const drained = new Promise((resolve) => {
-      child.stdout.once("end", resolve);
-      child.stdout.once("close", resolve);
-    });
+    const drained = Promise.all(
+      [child.stdout, child.stderr].map(
+        (stream) => !stream || stream.readableEnded || stream.destroyed ? Promise.resolve() : new Promise((resolve) => {
+          stream.once("end", resolve);
+          stream.once("close", resolve);
+        })
+      )
+    );
     const exited = new Promise((resolve) => {
       const finish = (outcome2) => {
         clearTimeout(deadline);
@@ -36944,29 +36971,46 @@ async function runProcess({
     const outcome = await exited;
     clearTimeout(killTimer);
     let stdoutTruncated = false;
+    let stderrTruncated = false;
     await Promise.race([
       drained,
       new Promise((resolve) => {
         drainTimer = setTimeout(() => {
-          stdoutTruncated = true;
-          record2("stdout_drain_expired");
+          stdoutTruncated = !child.stdout.readableEnded;
+          stderrTruncated = Boolean(
+            child.stderr && !child.stderr.readableEnded
+          );
+          record2("output_drain_expired", {
+            stdout_truncated: stdoutTruncated,
+            stderr_truncated: stderrTruncated
+          });
           child.stdout.destroy();
+          child.stderr?.destroy();
           resolve();
         }, drainMs);
       })
     ]);
     clearTimeout(drainTimer);
     child.stdout.off("data", onData);
+    child.stderr?.off("data", onStderr);
+    stderrTail = (stderrTail + stderrDecoder.end()).slice(-2e3);
     pending += decoder.end();
     if (pending.trim()) consume(pending);
     let status = (evidenceError ? "evidence_error" : reason) ?? (outcome.error ? "spawn_error" : outcome.exit_code === 0 ? "exited" : "failed");
     record2("finished", {
       status,
       ...outcome,
-      stdout_truncated: stdoutTruncated
+      stdout_truncated: stdoutTruncated,
+      stderr_truncated: stderrTruncated
     });
     if (evidenceError) status = "evidence_error";
-    return { status, ...outcome, stdout_truncated: stdoutTruncated };
+    return {
+      status,
+      ...outcome,
+      stdout_truncated: stdoutTruncated,
+      stderr_truncated: stderrTruncated,
+      ...status !== "exited" && stderrTail ? { stderr_tail: stderrTail } : {}
+    };
   } finally {
     clearTimeout(deadline);
     clearTimeout(killTimer);
@@ -36974,6 +37018,7 @@ async function runProcess({
     if (abort) signal?.removeEventListener("abort", abort);
     child?.stdin.destroy();
     child?.stdout.destroy();
+    child?.stderr?.destroy();
     for (const handle of handles) closeSync(handle);
   }
 }
@@ -36997,8 +37042,10 @@ async function delegate(provider, value, { signal, preflight = false, commandOve
   const adapter = adapters[provider];
   const command = preflight ? process.execPath : adapter.executable();
   const args = preflight ? ["-e", preflightScript, String(input2.duration_seconds), input2.outcome] : adapter.args(input2);
+  const settings = { ...input2 };
+  delete settings.prompt;
   const request = {
-    ...input2,
+    ...settings,
     cwd,
     checkout_root: checkout,
     lock_root: lockRoot,
@@ -37048,18 +37095,30 @@ async function delegate(provider, value, { signal, preflight = false, commandOve
         throw new Error("Resume session does not match its saved completion");
     }
     await mkdir2(directory, { mode: 448 });
-    await atomicJson(path5.join(directory, "request.json"), {
-      ...request,
+    const identity = {
       fingerprint,
-      requested_at: timestamp(),
-      execution_command: commandOverride?.command ?? command,
-      execution_args: commandOverride?.args ?? args,
-      test_command_override: Boolean(commandOverride)
-    });
-    await writeFile2(path5.join(directory, "prompt.txt"), prompt, {
-      flag: "wx",
-      mode: 384
-    });
+      provider,
+      cwd,
+      checkout_root: checkout,
+      preflight,
+      requested_at: timestamp()
+    };
+    await atomicJson(
+      path5.join(directory, "request.json"),
+      input2.trace ? {
+        ...request,
+        ...identity,
+        execution_command: commandOverride?.command ?? command,
+        execution_args: commandOverride?.args ?? args,
+        test_command_override: Boolean(commandOverride)
+      } : identity
+    );
+    if (input2.trace) {
+      await writeFile2(path5.join(directory, "prompt.txt"), prompt, {
+        flag: "wx",
+        mode: 384
+      });
+    }
     const state = {};
     const execution = await runProcess({
       command: commandOverride?.command ?? command,
@@ -37069,6 +37128,7 @@ async function delegate(provider, value, { signal, preflight = false, commandOve
       prompt,
       signal,
       timeout: input2.timeout_seconds,
+      trace: input2.trace,
       onEvent(event) {
         if (!event || typeof event !== "object") return;
         if (preflight) {
@@ -37083,6 +37143,12 @@ async function delegate(provider, value, { signal, preflight = false, commandOve
       }
     });
     const status = execution.status === "exited" ? state.failed ? "failed" : state.native_result ? "completed" : "missing_result" : execution.status;
+    const resultLimit = input2.max_result_chars ?? 4e3;
+    const resultTruncated = typeof state.result === "string" && state.result.length > resultLimit;
+    const resultFile = resultTruncated ? path5.join(directory, "result.txt") : null;
+    if (resultFile) {
+      await writeFile2(resultFile, state.result, { flag: "wx", mode: 384 });
+    }
     const completion = {
       bridge_version: VERSION,
       provider,
@@ -37096,16 +37162,18 @@ async function delegate(provider, value, { signal, preflight = false, commandOve
       requested_effort: input2.effort ?? null,
       permission_denials: state.permission_denials ?? [],
       permission_denials_count: state.permission_denials?.length ?? 0,
-      result_truncated: typeof state.result === "string" && state.result.length > 24e3,
+      result_truncated: resultTruncated,
+      result_file: resultFile,
       result_characters: typeof state.result === "string" ? state.result.length : 0,
-      result: typeof state.result === "string" ? state.result.slice(0, 24e3) : null,
+      result: typeof state.result === "string" ? state.result.slice(0, resultLimit) : null,
       native_usage: state.native_usage ?? null,
       native_model_usage: state.native_model_usage ?? null,
       native_total_cost_usd: state.native_total_cost_usd ?? null,
       usage_note: "Raw provider fields. Missing values are unknown; resumed totals may be cumulative. No API cost estimate is made.",
-      evidence_directory: directory
+      evidence_directory: directory,
+      trace: input2.trace
     };
-    if (state.native_result)
+    if (input2.trace && state.native_result)
       await atomicJson(
         path5.join(directory, "native-result.json"),
         state.native_result
@@ -37159,7 +37227,7 @@ async function startServer(provider) {
   server.registerTool(
     "run",
     {
-      description: `Run an authorized ${provider} task and wait for completion in this single call. Call directly, outside Code Mode. Do not issue status or sleep loops. Save the prompt under cwd/artifacts. Resume only the returned exact session with its previous delegation ID.`,
+      description: `Run an authorized ${provider} task and wait for completion in this single call. Call directly, outside Code Mode. Do not issue status or sleep loops. Provide prompt text or a prompt_file under cwd/artifacts. Full logs are opt-in with trace: true. Resume only the returned exact session with its previous delegation ID.`,
       inputSchema: provider === "claude" ? claudeInput : codexInput,
       annotations: {
         readOnlyHint: false,

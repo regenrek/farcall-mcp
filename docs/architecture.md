@@ -28,6 +28,8 @@ sequenceDiagram
   MCP-->>Parent: completed, failed, or cancelled
 ```
 
-There is no background task API. The only timers are a task deadline, bounded termination escalation & a one-second output drain after process exit. Provider errors remain errors even when a CLI exits with code zero. Raw events remain available if the normalized summary is incomplete.
+There is no background task API. The only timers are a task deadline, bounded termination escalation & a one-second output drain after process exit. Provider errors remain errors even when a CLI exits with code zero. Raw events are retained only with `trace: true`.
+
+Trace policy belongs to `application/delegate.mjs`; `platform/process.mjs` implements optional capture without changing event parsing or process cleanup. Required identity/completion state is separate from optional diagnostics. Inline prompts are hashed for request identity and copied only when tracing is enabled. Result previews are bounded independently of logging; a longer answer is kept in `result.txt`. Neither provider adapters nor skills maintain a second persistence policy.
 
 The runtime supports macOS & Linux process groups. Windows is rejected until process-tree cleanup has its own implementation & tests. Provider CLIs keep their own configuration, authentication, hooks & project instructions. This package does not make those trustworthy or equivalent across hosts.

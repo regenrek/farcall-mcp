@@ -1,7 +1,14 @@
 import { VERSION } from "../src/core/version.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, rm, cp, readFile } from "node:fs/promises";
+import {
+  mkdtemp,
+  rm,
+  cp,
+  readFile,
+  writeFile,
+  readdir,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -17,10 +24,23 @@ for (const provider of ["claude", "codex"]) {
       bundle,
     );
     const client = new Client({ name: "worker-test", version: "1" });
+    const fakeCli = path.join(root, "fixture-cli.mjs");
+    const fixtureUrl = new URL("./fixtures/provider.mjs", import.meta.url).href;
+    await writeFile(
+      fakeCli,
+      `#!${process.execPath}\nprocess.argv = [process.execPath, "fixture", ${JSON.stringify(provider)}, "echo"];\nawait import(${JSON.stringify(fixtureUrl)});\n`,
+      { mode: 0o700 },
+    );
     const transport = new StdioClientTransport({
       command: process.execPath,
       args: [bundle],
       stderr: "pipe",
+      env: {
+        ...process.env,
+        [provider === "claude"
+          ? "CLAUDE_WORKER_BINARY"
+          : "CODEX_WORKER_BINARY"]: fakeCli,
+      },
     });
     t.after(() => client.close());
     await client.connect(transport);
@@ -34,6 +54,24 @@ for (const provider of ["claude", "codex"]) {
     });
     assert.equal(response.isError, false);
     assert.equal(JSON.parse(response.content[0].text).status, "completed");
+    const inline = await client.callTool({
+      name: "run",
+      arguments: {
+        cwd: root,
+        delegation_id: "inline",
+        prompt: "Read-only boundary review.",
+        model: "claude-opus-5-5",
+        effort: "high",
+      },
+    });
+    assert.equal(inline.isError, false);
+    const inlineResult = JSON.parse(inline.content[0].text);
+    assert.equal(inlineResult.result, "Read-only boundary review.");
+    assert.equal(inlineResult.trace, false);
+    assert.deepEqual(
+      (await readdir(inlineResult.evidence_directory)).toSorted(),
+      ["completion.json", "request.json"],
+    );
     const failure = await client.callTool({
       name: "preflight",
       arguments: {

@@ -14,6 +14,7 @@ export async function runProcess({
   signal,
   timeout,
   onEvent,
+  trace = false,
   graceMs = 1000,
   drainMs = 1000,
 }) {
@@ -22,6 +23,7 @@ export async function runProcess({
   if (signal?.aborted) return { status: "cancelled" };
   const handles = [];
   const logFile = (name) => {
+    if (!trace) return null;
     const handle = openSync(path.join(directory, name), "wx", 0o600);
     handles.push(handle);
     return handle;
@@ -35,6 +37,7 @@ export async function runProcess({
     const lifecycle = logFile("lifecycle.jsonl");
     let evidenceError = false;
     const record = (type, data = {}) => {
+      if (!trace) return;
       try {
         writeSync(
           lifecycle,
@@ -49,8 +52,17 @@ export async function runProcess({
     child = spawn(command, args, {
       cwd,
       detached: true,
-      stdio: ["pipe", "pipe", stderr],
+      stdio: ["pipe", "pipe", stderr ?? "pipe"],
     });
+    let stderrTail = "";
+    const stderrDecoder = new StringDecoder("utf8");
+    const onStderr = (chunk) => {
+      stderrTail = (stderrTail + stderrDecoder.write(chunk)).slice(-2000);
+    };
+    if (child.stderr) {
+      child.stderr.on("data", onStderr);
+      child.stderr.on("error", () => {});
+    }
     record("worker_started", { pid: child.pid });
     let reason;
     const killGroup = (sig) => {
@@ -88,7 +100,7 @@ export async function runProcess({
     };
     const onData = (chunk) => {
       try {
-        writeSync(stdout, chunk);
+        if (stdout !== null) writeSync(stdout, chunk);
       } catch {
         terminate("evidence_error");
         return;
@@ -114,10 +126,16 @@ export async function runProcess({
     child.stdin.on("error", (error) => {
       if (error.code !== "EPIPE") terminate("stdin_error");
     });
-    const drained = new Promise((resolve) => {
-      child.stdout.once("end", resolve);
-      child.stdout.once("close", resolve);
-    });
+    const drained = Promise.all(
+      [child.stdout, child.stderr].map((stream) =>
+        !stream || stream.readableEnded || stream.destroyed
+          ? Promise.resolve()
+          : new Promise((resolve) => {
+              stream.once("end", resolve);
+              stream.once("close", resolve);
+            }),
+      ),
+    );
     const exited = new Promise((resolve) => {
       const finish = (outcome) => {
         clearTimeout(deadline);
@@ -137,19 +155,29 @@ export async function runProcess({
     const outcome = await exited;
     clearTimeout(killTimer);
     let stdoutTruncated = false;
+    let stderrTruncated = false;
     await Promise.race([
       drained,
       new Promise((resolve) => {
         drainTimer = setTimeout(() => {
-          stdoutTruncated = true;
-          record("stdout_drain_expired");
+          stdoutTruncated = !child.stdout.readableEnded;
+          stderrTruncated = Boolean(
+            child.stderr && !child.stderr.readableEnded,
+          );
+          record("output_drain_expired", {
+            stdout_truncated: stdoutTruncated,
+            stderr_truncated: stderrTruncated,
+          });
           child.stdout.destroy();
+          child.stderr?.destroy();
           resolve();
         }, drainMs);
       }),
     ]);
     clearTimeout(drainTimer);
     child.stdout.off("data", onData);
+    child.stderr?.off("data", onStderr);
+    stderrTail = (stderrTail + stderrDecoder.end()).slice(-2000);
     pending += decoder.end();
     if (pending.trim()) consume(pending);
     let status =
@@ -163,9 +191,16 @@ export async function runProcess({
       status,
       ...outcome,
       stdout_truncated: stdoutTruncated,
+      stderr_truncated: stderrTruncated,
     });
     if (evidenceError) status = "evidence_error";
-    return { status, ...outcome, stdout_truncated: stdoutTruncated };
+    return {
+      status,
+      ...outcome,
+      stdout_truncated: stdoutTruncated,
+      stderr_truncated: stderrTruncated,
+      ...(status !== "exited" && stderrTail ? { stderr_tail: stderrTail } : {}),
+    };
   } finally {
     clearTimeout(deadline);
     clearTimeout(killTimer);
@@ -173,6 +208,7 @@ export async function runProcess({
     if (abort) signal?.removeEventListener("abort", abort);
     child?.stdin.destroy();
     child?.stdout.destroy();
+    child?.stderr?.destroy();
     for (const handle of handles) closeSync(handle);
   }
 }

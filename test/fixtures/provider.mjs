@@ -6,7 +6,13 @@ const [
   session = "11111111-1111-4111-8111-111111111111",
 ] = process.argv.slice(2);
 const emit = (value) => process.stdout.write(`${JSON.stringify(value)}\n`);
-process.stdin.resume();
+let receivedPrompt = "";
+process.stdin.setEncoding("utf8");
+for await (const chunk of process.stdin) receivedPrompt += chunk;
+if (scenario === "stderr-failure") {
+  process.stderr.write("CLI authentication failed");
+  process.exit(1);
+}
 if (scenario === "tree") {
   const descendant = spawn(
     process.execPath,
@@ -42,7 +48,11 @@ setTimeout(
         session_id: session,
         is_error: scenario === "failure",
         result:
-          scenario === "long-result" ? "x".repeat(25000) : "Reviewed café ✓",
+          scenario === "echo"
+            ? receivedPrompt
+            : scenario === "long-result"
+              ? "x".repeat(25000)
+              : "Reviewed café ✓",
         permission_denials:
           scenario === "denied"
             ? [{ tool_name: "Bash", tool_input: { command: "pnpm test" } }]
@@ -53,7 +63,10 @@ setTimeout(
     else {
       emit({
         type: "item.completed",
-        item: { type: "agent_message", text: "Reviewed café ✓" },
+        item: {
+          type: "agent_message",
+          text: scenario === "echo" ? receivedPrompt : "Reviewed café ✓",
+        },
       });
       emit({
         type: scenario === "failure" ? "turn.failed" : "turn.completed",

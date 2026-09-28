@@ -49,7 +49,7 @@ export async function startServer(provider) {
   server.registerTool(
     "run",
     {
-      description: `Run an authorized ${provider} task and wait for completion in this single call. Call directly, outside Code Mode. Do not issue status or sleep loops. Save the prompt under cwd/artifacts. Resume only the returned exact session with its previous delegation ID.`,
+      description: `Run an authorized ${provider} task and wait for completion in this single call. Call directly, outside Code Mode. Do not issue status or sleep loops. Provide prompt text or a prompt_file under cwd/artifacts. Full logs are opt-in with trace: true. Resume only the returned exact session with its previous delegation ID.`,
       inputSchema: provider === "claude" ? claudeInput : codexInput,
       annotations: {
         readOnlyHint: false,

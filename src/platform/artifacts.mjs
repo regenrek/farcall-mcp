@@ -42,21 +42,25 @@ export async function prepare(input, preflight) {
   const root = await containedDirectory(artifacts, "farcall");
   let prompt = "Deterministic MCP preflight. No model call.";
   if (!preflight) {
-    const file = await realpath(input.prompt_file);
-    if (!file.startsWith(`${artifacts}${path.sep}`))
-      throw new Error("prompt_file must be inside cwd/artifacts");
-    const handle = await open(file, "r");
-    try {
-      const stat = await handle.stat();
-      if (!stat.isFile() || stat.size > 1_000_000)
-        throw new Error("Prompt must be a file under 1 MB");
-      prompt = await handle.readFile("utf8");
-    } finally {
-      await handle.close();
+    if (input.prompt !== undefined) {
+      prompt = input.prompt;
+    } else {
+      const file = await realpath(input.prompt_file);
+      if (!file.startsWith(`${artifacts}${path.sep}`))
+        throw new Error("prompt_file must be inside cwd/artifacts");
+      const handle = await open(file, "r");
+      try {
+        const stat = await handle.stat();
+        if (!stat.isFile() || stat.size > 1_000_000)
+          throw new Error("Prompt must be a file under 1 MB");
+        prompt = await handle.readFile("utf8");
+      } finally {
+        await handle.close();
+      }
     }
-    if (!prompt.trim() || Buffer.byteLength(prompt) > 1_000_000)
-      throw new Error("Invalid prompt size");
   }
+  if (!prompt.trim() || Buffer.byteLength(prompt) > 1_000_000)
+    throw new Error("Invalid prompt size");
   const checkout = await checkoutRoot(cwd);
   const lockArtifacts = await containedDirectory(checkout, "artifacts");
   const lockRoot = await containedDirectory(lockArtifacts, "farcall");

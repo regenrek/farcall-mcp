@@ -5,3 +5,5 @@ artifacts/
 .env
 .env.*
 !.env.example
+.npmrc
+*.log

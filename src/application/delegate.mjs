@@ -38,8 +38,11 @@ export async function delegate(
   const args = preflight
     ? ["-e", preflightScript, String(input.duration_seconds), input.outcome]
     : adapter.args(input);
+  const settings = { ...input };
+  // Only the hash participates in identity; inline prompt text is not state.
+  delete settings.prompt;
   const request = {
-    ...input,
+    ...settings,
     cwd,
     checkout_root: checkout,
     lock_root: lockRoot,
@@ -94,18 +97,32 @@ export async function delegate(
         throw new Error("Resume session does not match its saved completion");
     }
     await mkdir(directory, { mode: 0o700 });
-    await atomicJson(path.join(directory, "request.json"), {
-      ...request,
+    const identity = {
       fingerprint,
+      provider,
+      cwd,
+      checkout_root: checkout,
+      preflight,
       requested_at: timestamp(),
-      execution_command: commandOverride?.command ?? command,
-      execution_args: commandOverride?.args ?? args,
-      test_command_override: Boolean(commandOverride),
-    });
-    await writeFile(path.join(directory, "prompt.txt"), prompt, {
-      flag: "wx",
-      mode: 0o600,
-    });
+    };
+    await atomicJson(
+      path.join(directory, "request.json"),
+      input.trace
+        ? {
+            ...request,
+            ...identity,
+            execution_command: commandOverride?.command ?? command,
+            execution_args: commandOverride?.args ?? args,
+            test_command_override: Boolean(commandOverride),
+          }
+        : identity,
+    );
+    if (input.trace) {
+      await writeFile(path.join(directory, "prompt.txt"), prompt, {
+        flag: "wx",
+        mode: 0o600,
+      });
+    }
     const state = {};
     const execution = await runProcess({
       command: commandOverride?.command ?? command,
@@ -115,6 +132,7 @@ export async function delegate(
       prompt,
       signal,
       timeout: input.timeout_seconds,
+      trace: input.trace,
       onEvent(event) {
         if (!event || typeof event !== "object") return;
         if (preflight) {
@@ -143,6 +161,15 @@ export async function delegate(
             ? "completed"
             : "missing_result"
         : execution.status;
+    const resultLimit = input.max_result_chars ?? 4000;
+    const resultTruncated =
+      typeof state.result === "string" && state.result.length > resultLimit;
+    const resultFile = resultTruncated
+      ? path.join(directory, "result.txt")
+      : null;
+    if (resultFile) {
+      await writeFile(resultFile, state.result, { flag: "wx", mode: 0o600 });
+    }
     const completion = {
       bridge_version: VERSION,
       provider,
@@ -156,20 +183,23 @@ export async function delegate(
       requested_effort: input.effort ?? null,
       permission_denials: state.permission_denials ?? [],
       permission_denials_count: state.permission_denials?.length ?? 0,
-      result_truncated:
-        typeof state.result === "string" && state.result.length > 24000,
+      result_truncated: resultTruncated,
+      result_file: resultFile,
       result_characters:
         typeof state.result === "string" ? state.result.length : 0,
       result:
-        typeof state.result === "string" ? state.result.slice(0, 24000) : null,
+        typeof state.result === "string"
+          ? state.result.slice(0, resultLimit)
+          : null,
       native_usage: state.native_usage ?? null,
       native_model_usage: state.native_model_usage ?? null,
       native_total_cost_usd: state.native_total_cost_usd ?? null,
       usage_note:
         "Raw provider fields. Missing values are unknown; resumed totals may be cumulative. No API cost estimate is made.",
       evidence_directory: directory,
+      trace: input.trace,
     };
-    if (state.native_result)
+    if (input.trace && state.native_result)
       await atomicJson(
         path.join(directory, "native-result.json"),
         state.native_result,

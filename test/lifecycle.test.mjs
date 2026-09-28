@@ -193,6 +193,7 @@ for (const provider of ["claude", "codex"]) {
             cwd: input.cwd,
             delegation_id: "long",
             duration_seconds: 60,
+            trace: true,
           },
         },
       });
@@ -236,9 +237,57 @@ test("evidence and adapter failures have different outcomes", async (t) => {
       ...fixture("provider.mjs", "claude"),
       cwd: input.cwd,
       directory: broken,
+      trace: true,
       prompt: "test",
       timeout: 2,
       onEvent() {},
     }),
   );
 });
+
+for (const mode of ["split", "late", "held"]) {
+  test(
+    `stderr drain preserves diagnostics: ${mode}`,
+    { timeout: 5000 },
+    async (t) => {
+      const input = await setup(t);
+      let holderPid;
+      if (mode !== "split") {
+        t.after(() => {
+          if (!holderPid) return;
+          try {
+            process.kill(holderPid, "SIGKILL");
+          } catch (error) {
+            if (error.code !== "ESRCH") throw error;
+          }
+        });
+      }
+      const started = performance.now();
+      const pending = runProcess({
+        ...fixture("stderr-drain.mjs", mode),
+        cwd: input.cwd,
+        directory: path.join(input.cwd, "unused-without-tracing"),
+        prompt: "test",
+        timeout: 2,
+        drainMs: 500,
+        onEvent() {},
+      });
+      if (mode !== "split") {
+        holderPid = Number(await waitForFile(input.cwd, "stderr-holder.pid"));
+      }
+      const result = await pending;
+      assert.equal(result.status, "failed");
+      assert.equal(result.stdout_truncated, false);
+      assert.equal(result.stderr_truncated, mode === "held");
+      assert.equal(
+        result.stderr_tail,
+        {
+          split: "Fehler café ✓ 😀",
+          late: "late diagnostic ✓",
+          held: "held diagnostic",
+        }[mode],
+      );
+      assert.ok(performance.now() - started < 2000);
+    },
+  );
+}

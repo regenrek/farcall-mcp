@@ -12,13 +12,17 @@ The suite covers native success & failure, missing final results, oversized even
 
 ## Fixes after independent review
 
-The initial 24-test suite missed inherited output pipes, stdin EOF & overlapping subdirectory jobs. The expanded suite passes 37 tests. These cases now have deterministic regressions, including detached pipe holders during success, timeout & cancellation. Git-root locking records the requested working directory separately from the lock scope. Permission denials & shortened result previews are explicit in the completion.
+The initial 24-test suite missed inherited output pipes, stdin EOF & overlapping subdirectory jobs. The first expanded suite passed 37 tests. These cases now have deterministic regressions, including detached pipe holders during success, timeout & cancellation. Git-root locking records the requested working directory separately from the lock scope. Permission denials & shortened result previews are explicit in the completion.
+
+The optional-trace update passes 42 tests. Both providers accept inline prompts through detached MCP bundles. Tests verify that default runs omit raw logs & prompt copies while preserving cached retries, changed-request rejection & exact-session resume. Traced runs retain their evidence. Longer answers remain available when the preview is truncated, and failed processes return a bounded stderr diagnostic without tracing.
+
+The stderr follow-up brings the suite to 45 passing tests. Its regressions cover UTF-8 characters split across chunks, stderr arriving after the worker exits & a detached child holding only stderr open. Both captured pipes share the bounded drain window; truncation is reported separately for each.
 
 The Codex marketplace is now `farcall`. The build takes all versions from `package.json` & inserts the Node 24 guard before bundled initialization. CI runs the offline package smoke test. Claude's documented inline-MCP override is retained, with a test requiring identical keys so the Codex declaration cannot accidentally launch in Claude.
 
 ## What still needs host acceptance
 
-These checks do not measure a parent model's inference or cost. Before using this package for a comparative run, test the actual parent host with `preflight`, then a small real task & a correction using the returned session. Record the parent's response trace, worker events & CLI versions.
+These checks do not measure a parent model's inference or cost. Before using this package for a comparative run, test the actual parent host with `preflight`, then a small real task & a correction using the returned session. Use `trace: true` to retain worker events. Record the parent's response trace & CLI versions separately.
 
 The new package has not been used for a paid Claude → Codex or Codex → Claude run. The earlier benchmark used the previous Claude worker. Neither its model results nor its host behavior are automatically transferred to this implementation. Linux has a CI job but has not been exercised in this local macOS session. Windows is unsupported.
 
