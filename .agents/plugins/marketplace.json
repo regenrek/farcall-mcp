@@ -1,7 +1,7 @@
 {
-  "name": "agent-workers",
+  "name": "farcall",
   "interface": {
-    "displayName": "Agent workers"
+    "displayName": "Farcall"
   },
   "plugins": [
     {

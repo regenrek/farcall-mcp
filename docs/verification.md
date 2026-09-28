@@ -14,7 +14,7 @@ The suite covers native success & failure, missing final results, oversized even
 
 The initial 24-test suite missed inherited output pipes, stdin EOF & overlapping subdirectory jobs. The expanded suite passes 37 tests. These cases now have deterministic regressions, including detached pipe holders during success, timeout & cancellation. Git-root locking records the requested working directory separately from the lock scope. Permission denials & shortened result previews are explicit in the completion.
 
-The Codex marketplace is now `agent-workers`. The build takes all versions from `package.json` & inserts the Node 24 guard before bundled initialization. CI runs the offline package smoke test. Claude's documented inline-MCP override is retained, with a test requiring identical keys so the Codex declaration cannot accidentally launch in Claude.
+The Codex marketplace is now `farcall`. The build takes all versions from `package.json` & inserts the Node 24 guard before bundled initialization. CI runs the offline package smoke test. Claude's documented inline-MCP override is retained, with a test requiring identical keys so the Codex declaration cannot accidentally launch in Claude.
 
 ## What still needs host acceptance
 

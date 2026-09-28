@@ -10,8 +10,8 @@ import {
   access,
   realpath,
 } from "node:fs/promises";
-import { watch } from "node:fs";
 import { once } from "node:events";
+import { setTimeout as delay } from "node:timers/promises";
 import os from "node:os";
 import path from "node:path";
 import { delegate } from "../src/application/delegate.mjs";
@@ -36,21 +36,22 @@ const fixture = (name, ...args) => ({
   command: process.execPath,
   args: [path.join(import.meta.dirname, "fixtures", name), ...args],
 });
-async function waitForFile(directory, name) {
-  const watcher = watch(directory);
-  try {
-    for (;;) {
-      try {
-        return await readFile(path.join(directory, name), "utf8");
-      } catch (error) {
-        if (error.code !== "ENOENT") throw error;
-      }
-      await once(watcher, "change", { signal: AbortSignal.timeout(5000) });
+// Poll instead of fs.watch: macOS FSEvents can drop events between checks.
+async function waitForText(file, ready = (text) => text !== "") {
+  const deadline = performance.now() + 5000;
+  for (;;) {
+    try {
+      const text = await readFile(file, "utf8");
+      if (ready(text)) return text;
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
     }
-  } finally {
-    watcher.close();
+    if (performance.now() > deadline) throw new Error(`Timed out: ${file}`);
+    await delay(20);
   }
 }
+const waitForFile = (directory, name) =>
+  waitForText(path.join(directory, name));
 
 for (const mode of ["group", "session"]) {
   for (const task of ["success", "timeout", "cancel"]) {
@@ -91,7 +92,7 @@ for (const mode of ["group", "session"]) {
         assert.equal(result.stdout_truncated, mode === "session");
         if (task === "success") assert.equal(result.result, "done");
         await assert.rejects(
-          access(path.join(input.cwd, "artifacts/agent-workers/.active")),
+          access(path.join(input.cwd, "artifacts/farcall/.active")),
           { code: "ENOENT" },
         );
       },
@@ -180,24 +181,8 @@ for (const provider of ["claude", "codex"]) {
         },
       });
       // A completed first request is the readiness handshake for the long request.
-      const dir = path.join(input.cwd, "artifacts/agent-workers/eof");
-      // Watch the stable artifacts directory recursively for the completed handshake.
-      const watcher = watch(path.join(input.cwd, "artifacts"), {
-        recursive: true,
-      });
-      try {
-        for (;;) {
-          try {
-            await access(path.join(dir, "completion.json"));
-            break;
-          } catch (error) {
-            if (error.code !== "ENOENT") throw error;
-          }
-          await once(watcher, "change", { signal: AbortSignal.timeout(5000) });
-        }
-      } finally {
-        watcher.close();
-      }
+      const root = path.join(input.cwd, "artifacts/farcall");
+      await waitForText(path.join(root, "eof/completion.json"));
       send({
         jsonrpc: "2.0",
         id: 3,
@@ -211,24 +196,9 @@ for (const provider of ["claude", "codex"]) {
           },
         },
       });
-      const root = path.join(input.cwd, "artifacts/agent-workers");
-      const ready = watch(root, { recursive: true });
-      try {
-        for (;;) {
-          try {
-            const log = await readFile(
-              path.join(root, "long/lifecycle.jsonl"),
-              "utf8",
-            );
-            if (log.includes("worker_started")) break;
-          } catch (error) {
-            if (error.code !== "ENOENT") throw error;
-          }
-          await once(ready, "change", { signal: AbortSignal.timeout(5000) });
-        }
-      } finally {
-        ready.close();
-      }
+      await waitForText(path.join(root, "long/lifecycle.jsonl"), (log) =>
+        log.includes("worker_started"),
+      );
       child.stdin.end();
       const [code] = await exited;
       assert.equal(code, 0);

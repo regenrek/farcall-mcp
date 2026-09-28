@@ -39,7 +39,7 @@ export async function containedDirectory(parent, name) {
 export async function prepare(input, preflight) {
   const cwd = await realpath(input.cwd);
   const artifacts = await containedDirectory(cwd, "artifacts");
-  const root = await containedDirectory(artifacts, "agent-workers");
+  const root = await containedDirectory(artifacts, "farcall");
   let prompt = "Deterministic MCP preflight. No model call.";
   if (!preflight) {
     const file = await realpath(input.prompt_file);
@@ -59,7 +59,7 @@ export async function prepare(input, preflight) {
   }
   const checkout = await checkoutRoot(cwd);
   const lockArtifacts = await containedDirectory(checkout, "artifacts");
-  const lockRoot = await containedDirectory(lockArtifacts, "agent-workers");
+  const lockRoot = await containedDirectory(lockArtifacts, "farcall");
   return { cwd, root, prompt, checkout, lockRoot };
 }
 export async function acquireLock(root, info) {

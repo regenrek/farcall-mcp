@@ -9,7 +9,7 @@ if (provider === "--version") {
   await startServer(provider);
 } else {
   console.error(
-    "Usage: agent-worker-mcp <claude|codex>\n       agent-worker-mcp --version",
+    "Usage: farcall-mcp <claude|codex>\n       farcall-mcp --version",
   );
   process.exitCode = provider === "--help" ? 0 : 1;
 }

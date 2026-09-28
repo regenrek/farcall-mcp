@@ -1,6 +1,12 @@
-# Agent worker MCP
+# farcall-mcp
 
 Let Claude Code call Codex, or Codex call Claude Code, through one pending MCP call.
+
+![Bar chart of estimated API-equivalent cost for the same task. Run I, where Astra polled for status, cost $43.22, with Claude at $21.10 and Astra at $22.12 including $9.75 of identified polling. Run J, with a direct MCP wait, cost $31.10, with Claude at $22.99 and Astra at $8.11. Claude rose by $1.89 & Astra dropped by $14.01.](docs/images/polling-cost.png)
+
+Estimated API-equivalent costs from two runs of the same task, not subscription spend. Implementation & review also differed, so polling does not explain the whole difference. Run J tested an earlier MCP implementation, not this package.
+
+[See the full experiment, results & cost breakdown](https://kevinkern.dev/benchmarks/marlies-workflows/).
 
 The parent makes one MCP call. The server starts the other CLI & keeps that call open until the task finishes. Corrections resume the same session. Prompts, native events, usage & failures stay in the checkout.
 
@@ -8,10 +14,12 @@ I built this after [trying different Astra & Opus workflows on the same feature]
 
 ## What you get
 
-| Plugin          | Typical parent     | Worker      |
-| --------------- | ------------------ | ----------- |
-| `claude-worker` | Codex / Astra      | Claude Code |
-| `codex-worker`  | Claude Code / Opus | Codex CLI   |
+| Plugin          | Typical parent | Worker      |
+| --------------- | -------------- | ----------- |
+| `claude-worker` | Codex          | Claude Code |
+| `codex-worker`  | Claude Code    | Codex CLI   |
+
+Both workers accept any model their CLI supports. Pick it per call.
 
 Both plugins provide `run` & `preflight`. There is no status endpoint. Each plugin includes its own built server, so marketplace users do not need to install this repository's dependencies.
 
@@ -19,14 +27,14 @@ You need Node 24+, macOS or Linux, & the worker CLI installed & signed in. Codex
 
 ## Install in Claude Code
 
-From a local clone of this repository, run the following in Claude Code. Replace the example path with your checkout.
+Run the following in Claude Code. Start a new session after installation.
 
 ```text
-/plugin marketplace add /absolute/path/agent-worker-mcp
-/plugin install codex-worker@agent-workers
+/plugin marketplace add regenrek/farcall-mcp
+/plugin install codex-worker@farcall
 ```
 
-After this repository is on GitHub, the marketplace add command can take `OWNER/REPOSITORY` instead of a local path. Start a new session after installation.
+From a local clone, pass its absolute path instead of `regenrek/farcall-mcp`.
 
 For long tasks, disable automatic MCP backgrounding in the parent. The plugin sets a two-hour server timeout.
 
@@ -47,11 +55,11 @@ file references, then let me decide which changes to make.
 
 ## Install in Codex
 
-From a local clone, register this repository's Codex marketplace & install the Claude worker.
+Register this repository's Codex marketplace & install the Claude worker. From a local clone, pass its absolute path instead.
 
 ```sh
-codex plugin marketplace add /absolute/path/agent-worker-mcp
-codex plugin add claude-worker@agent-workers
+codex plugin marketplace add regenrek/farcall-mcp
+codex plugin add claude-worker@farcall
 ```
 
 Start a new Codex session, then invoke `$claude-worker` with your task. The plugin sets a two-hour tool timeout. Keep the worker tool outside Code Mode. Plugin tool namespaces depend on the host version; check the actual namespace before adding it to `features.code_mode.direct_only_tool_namespaces`.
@@ -61,7 +69,7 @@ For explicit control over the server name & timeout, use a direct MCP entry inst
 ```toml
 [mcp_servers.claude_worker]
 command = "node"
-args = ["/absolute/path/agent-worker-mcp/dist/cli.mjs", "claude"]
+args = ["/absolute/path/farcall-mcp/dist/cli.mjs", "claude"]
 startup_timeout_sec = 20
 tool_timeout_sec = 7200
 
@@ -113,7 +121,7 @@ Save the task in `artifacts/task.md`. An implementation call to `claude_worker.r
 
 Choose allowed tools for the actual task. The default permission mode does not approve shell commands automatically. `acceptEdits` allows file edits; shell operations still need existing CLI permissions or explicit allowed tool patterns. Chrome is opt-in through `chrome: true` & needs a working Claude Chrome setup.
 
-For `codex_worker.run`, use the same common fields, a Codex model such as `gpt-6-astra`, & `sandbox: "read-only"` for reviews or `"workspace-write"` for implementation. Omit Claude-specific fields. Codex runs with approval requests disabled, so disallowed operations fail instead of waiting for input. No bypass mode is exposed.
+For `codex_worker.run`, use the same common fields, any model your Codex CLI supports (for example `gpt-6-astra`), & `sandbox: "read-only"` for reviews or `"workspace-write"` for implementation. Omit Claude-specific fields. Codex runs with approval requests disabled, so disallowed operations fail instead of waiting for input. No bypass mode is exposed.
 
 For a correction, save a new prompt & use a new delegation ID. Include the exact returned `session_id` as `resume_session_id` & the previous `delegation_id` as `resume_delegation_id`. Both must belong to the same provider & checkout. There is no implicit “latest session” option.
 
@@ -123,7 +131,7 @@ An identical request with the same ID returns the saved result. A changed reques
 
 ## Evidence & limits
 
-Each call writes under `artifacts/agent-workers/<delegation_id>/`.
+Each call writes under `artifacts/farcall/<delegation_id>/`.
 
 - `request.json` & `prompt.txt` preserve the requested settings & exact task.
 - `events.jsonl`, `stderr.log` & `lifecycle.jsonl` preserve the CLI output & process timing.
@@ -132,7 +140,7 @@ Each call writes under `artifacts/agent-workers/<delegation_id>/`.
 
 Codex exec does not provide a verified model ID or price in its standard JSONL result. Those fields remain unknown. Claude's init-reported model is checked against the requested identifier; this does not detect later provider fallbacks. Native usage is kept as reported; resumed totals may be cumulative. A missing cost is not zero.
 
-A shared lock at the nearest Git root prevents these two workers from starting overlapping jobs, including calls from different subdirectories. Linked Git worktrees have separate locks. Outside Git, the lock covers only the supplied `cwd`. It cannot stop another editor or unrelated process from changing files. Use separate checkouts for parallel implementation. On cancellation or timeout, the server terminates the child's process group. A child that deliberately detaches into another group is outside that cleanup boundary. It cannot keep the call open indefinitely. After the CLI exits, output drains for at most one second; forced pipe closure is reported as `stdout_truncated`. After a hard server crash, inspect the lock & processes before removing `artifacts/agent-workers/.active`.
+A shared lock at the nearest Git root prevents these two workers from starting overlapping jobs, including calls from different subdirectories. Linked Git worktrees have separate locks. Outside Git, the lock covers only the supplied `cwd`. It cannot stop another editor or unrelated process from changing files. Use separate checkouts for parallel implementation. On cancellation or timeout, the server terminates the child's process group. A child that deliberately detaches into another group is outside that cleanup boundary. It cannot keep the call open indefinitely. After the CLI exits, output drains for at most one second; forced pipe closure is reported as `stdout_truncated`. After a hard server crash, inspect the lock & processes before removing `artifacts/farcall/.active`.
 
 Prompts & tool output can contain private data. Add `artifacts/` to the target project's ignore rules. These files are local evidence, not material to publish. This is a trusted local CLI bridge, not an isolation boundary for untrusted agents.
 

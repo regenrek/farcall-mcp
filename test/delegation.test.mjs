@@ -189,7 +189,7 @@ test("reject path escapes, symlinks and incomplete records", async (t) => {
     }),
     /inside cwd/,
   );
-  const root = path.join(input.cwd, "artifacts/agent-workers");
+  const root = path.join(input.cwd, "artifacts/farcall");
   await mkdir(path.join(root, "build"));
   await assert.rejects(
     delegate("claude", input, override("claude")),
@@ -264,7 +264,7 @@ test("resume rejects a different provider and a CLI returning the wrong session"
 
 test("symlinked delegation directories cannot redirect evidence writes", async (t) => {
   const input = await setup(t);
-  const root = path.join(input.cwd, "artifacts/agent-workers");
+  const root = path.join(input.cwd, "artifacts/farcall");
   await mkdir(root);
   await symlink(input.cwd, path.join(root, "build"));
   await assert.rejects(

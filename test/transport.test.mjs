@@ -58,7 +58,7 @@ for (const provider of ["claude", "codex"]) {
     await new Promise((resolve) => setTimeout(resolve, 200));
     const completion = JSON.parse(
       await readFile(
-        path.join(root, "artifacts/agent-workers/cancel/completion.json"),
+        path.join(root, "artifacts/farcall/cancel/completion.json"),
         "utf8",
       ),
     );

@@ -9,7 +9,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 
 const root = await mkdtemp(path.join(os.tmpdir(), "worker-package-"));
 const archive = path.resolve(
-  process.argv[2] ?? `artifacts/agent-worker-mcp-${VERSION}.tgz`,
+  process.argv[2] ?? `artifacts/farcall-mcp-${VERSION}.tgz`,
 );
 try {
   execFileSync(
@@ -28,7 +28,7 @@ try {
     ],
     { stdio: "pipe" },
   );
-  const executable = path.join(root, "node_modules/.bin/agent-worker-mcp");
+  const executable = path.join(root, "node_modules/.bin/farcall-mcp");
   assert.equal(
     execFileSync(executable, ["--version"], {
       encoding: "utf8",

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="772" viewBox="0 0 720 772" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' role="img" aria-labelledby="title desc">
+  <title id="title">Estimated cost of the same task with polling and with a direct MCP call</title>
+  <desc id="desc">Run I with polling cost $43.22. Claude $21.10, Astra $22.12 including $9.75 identified polling. Run J with a direct MCP wait cost $31.10. Claude $22.99, Astra $8.11, no identified polling.</desc>
+  <defs>
+    <pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="10" height="10" fill="#4a3aa7"/>
+      <rect width="3" height="10" fill="#ffffff" fill-opacity="0.22"/>
+    </pattern>
+  </defs>
+  <rect width="720" height="772" rx="16" fill="#fcfcfb"/>
+  <text x="40" y="58" font-size="30" font-weight="700" fill="#0b0b0b" text-anchor="start">Same task, polling vs. a direct MCP call</text>
+  <text x="40" y="92" font-size="19" font-weight="400" fill="#52514e" text-anchor="start">Astra → Opus 5.5 → Astra review · estimated API-equivalent USD</text>
+  <rect x="40" y="124" width="18" height="18" rx="4" fill="#eb6834"/><text x="68" y="140" font-size="20" font-weight="400" fill="#0b0b0b" text-anchor="start">Claude (Opus 5.5)</text>
+  <rect x="260" y="124" width="18" height="18" rx="4" fill="#2a78d6"/><text x="288" y="140" font-size="20" font-weight="400" fill="#0b0b0b" text-anchor="start">Astra, excluding identified polling</text>
+  <rect x="40" y="156" width="18" height="18" rx="4" fill="url(#hatch)"/><text x="68" y="172" font-size="20" font-weight="400" fill="#0b0b0b" text-anchor="start">Identified Astra polling</text>
+  <text x="40" y="222" font-size="22" font-weight="700" fill="#0b0b0b" text-anchor="start">Run I · Astra polled for status</text>
+  <rect x="40" y="240" width="237.1722268471358" height="52" fill="#eb6834"/>
+  <rect x="279.1722268471358" y="240" width="138.34167589570944" height="52" fill="#2a78d6"/>
+  <text x="546" y="280" font-size="40" font-weight="700" fill="#0b0b0b" text-anchor="start">$43.22</text>
+  <path d="M41 298V306H276.1722268471358V298" fill="none" stroke="#c3c2b7" stroke-width="2"/>
+  <path d="M280.1722268471358 298V306H529V298" fill="none" stroke="#c3c2b7" stroke-width="2"/>
+  <text x="40" y="334" font-size="22" font-weight="400" fill="#0b0b0b" text-anchor="start">Claude <tspan font-weight="700">$21.10</tspan></text>
+  <text x="279.1722268471358" y="334" font-size="22" font-weight="400" fill="#0b0b0b" text-anchor="start">Astra <tspan font-weight="700">$22.12</tspan></text>
+  <text x="279.1722268471358" y="360" font-size="18" font-weight="400" fill="#52514e" text-anchor="start">incl. $9.75 identified polling</text>
+  <path d="M419.51390274284523 240H526Q530 240 530 244V288Q530 292 526 292H419.51390274284523Z" fill="url(#hatch)"/>
+  <text x="474.7569513714226" y="274" font-size="22" font-weight="700" fill="#ffffff" text-anchor="middle">$9.75</text>
+  <text x="40" y="420" font-size="22" font-weight="700" fill="#0b0b0b" text-anchor="start">Run J · MCP waited for completion</text>
+  <rect x="40" y="438" width="258.62903866785126" height="52" fill="#eb6834"/>
+  <path d="M300.62903866785126 438H388.58792758600015Q392.58792758600015 438 392.58792758600015 442V486Q392.58792758600015 490 388.58792758600015 490H300.62903866785126Z" fill="#2a78d6"/>
+  <text x="408.58792758600015" y="478" font-size="40" font-weight="700" fill="#0b0b0b" text-anchor="start">$31.10</text>
+  <path d="M41 496V504H297.62903866785126V496" fill="none" stroke="#c3c2b7" stroke-width="2"/>
+  <path d="M301.62903866785126 496V504H391.58792758600015V496" fill="none" stroke="#c3c2b7" stroke-width="2"/>
+  <text x="40" y="532" font-size="22" font-weight="400" fill="#0b0b0b" text-anchor="start">Claude <tspan font-weight="700">$22.99</tspan></text>
+  <text x="300.62903866785126" y="532" font-size="22" font-weight="400" fill="#0b0b0b" text-anchor="start">Astra <tspan font-weight="700">$8.11</tspan></text>
+  <text x="300.62903866785126" y="558" font-size="18" font-weight="400" fill="#52514e" text-anchor="start">no identified polling</text>
+  <line x1="40" y1="580" x2="680" y2="580" stroke="#e1e0d9" stroke-width="1"/>
+  <rect x="40" y="602" width="18" height="18" rx="4" fill="#eb6834"/><text x="68" y="618" font-size="19" font-weight="400" fill="#52514e" text-anchor="start">Claude, I → J</text><text x="40" y="662" font-size="36" font-weight="700" fill="#0b0b0b" text-anchor="start">+$1.89</text>
+  <rect x="253.33333333333334" y="602" width="18" height="18" rx="4" fill="#2a78d6"/><text x="281.33333333333337" y="618" font-size="19" font-weight="400" fill="#52514e" text-anchor="start">Astra, I → J</text><text x="253.33333333333334" y="662" font-size="36" font-weight="700" fill="#0b0b0b" text-anchor="start">−$14.01</text>
+  <text x="466.6666666666667" y="618" font-size="19" font-weight="400" fill="#52514e" text-anchor="start">Total, I → J</text><text x="466.6666666666667" y="662" font-size="36" font-weight="700" fill="#0b0b0b" text-anchor="start">−$12.12</text>
+  <text x="40" y="712" font-size="18" font-weight="400" fill="#52514e" text-anchor="start">Two runs of the same task. Implementation &amp; review also differed, so polling</text>
+  <text x="40" y="736" font-size="18" font-weight="400" fill="#52514e" text-anchor="start">does not explain the whole difference. Estimates, not subscription spend.</text>
+</svg>

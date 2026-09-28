@@ -2,7 +2,7 @@
 (function requireNode24(version = process.versions.node) {
   if (Number(version.split(".")[0]) < 24) {
     throw new Error(
-      "Agent worker MCP requires Node 24 or newer. Check the parent host's PATH.",
+      "farcall-mcp requires Node 24 or newer. Check the parent host's PATH.",
     );
   }
 })();
@@ -36488,18 +36488,24 @@ import path from "node:path";
 
 // package.json
 var package_default = {
-  name: "agent-worker-mcp",
+  name: "farcall-mcp",
   version: "0.1.0",
   description: "Completion-wait MCP workers for Claude Code and Codex CLI",
   type: "module",
   license: "MIT",
   author: "Kevin Kern",
+  repository: {
+    type: "git",
+    url: "git+https://github.com/regenrek/farcall-mcp.git"
+  },
+  homepage: "https://github.com/regenrek/farcall-mcp#readme",
+  bugs: "https://github.com/regenrek/farcall-mcp/issues",
   engines: {
     node: ">=24"
   },
   packageManager: "pnpm@10.32.1",
   bin: {
-    "agent-worker-mcp": "dist/cli.mjs"
+    "farcall-mcp": "dist/cli.mjs"
   },
   files: [
     "dist",
@@ -36712,7 +36718,7 @@ async function containedDirectory(parent, name) {
 async function prepare(input2, preflight) {
   const cwd = await realpath(input2.cwd);
   const artifacts = await containedDirectory(cwd, "artifacts");
-  const root = await containedDirectory(artifacts, "agent-workers");
+  const root = await containedDirectory(artifacts, "farcall");
   let prompt = "Deterministic MCP preflight. No model call.";
   if (!preflight) {
     const file2 = await realpath(input2.prompt_file);
@@ -36732,7 +36738,7 @@ async function prepare(input2, preflight) {
   }
   const checkout = await checkoutRoot(cwd);
   const lockArtifacts = await containedDirectory(checkout, "artifacts");
-  const lockRoot = await containedDirectory(lockArtifacts, "agent-workers");
+  const lockRoot = await containedDirectory(lockArtifacts, "farcall");
   return { cwd, root, prompt, checkout, lockRoot };
 }
 async function acquireLock(root, info) {
