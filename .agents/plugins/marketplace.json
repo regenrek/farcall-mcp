@@ -1,7 +1,7 @@
 {
-  "name": "personal",
+  "name": "agent-workers",
   "interface": {
-    "displayName": "Personal"
+    "displayName": "Agent workers"
   },
   "plugins": [
     {

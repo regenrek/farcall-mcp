@@ -81,7 +81,16 @@ export async function startServer(provider) {
     for (const controller of active.keys()) controller.abort();
     await Promise.allSettled(active.values());
     await server.close();
+    process.off("SIGTERM", shutdown);
+    process.off("SIGINT", shutdown);
+    process.stdin.off("end", shutdown);
+    process.stdin.off("close", shutdown);
+    process.stdin.pause();
   };
+  process.stdin.once("end", shutdown);
+  process.stdin.once("close", shutdown);
+  // Keep the error listener through shutdown: a late tool response may hit EPIPE.
+  process.stdout.on("error", shutdown);
   process.once("SIGTERM", shutdown);
   process.once("SIGINT", shutdown);
   // The MCP SDK exposes this callback property, not an EventTarget.

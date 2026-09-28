@@ -272,3 +272,32 @@ test("symlinked delegation directories cannot redirect evidence writes", async (
     /real directory/,
   );
 });
+
+test("permission denials and result truncation remain visible to the parent", async (t) => {
+  const input = await setup(t);
+  const denied = await delegate("claude", input, override("claude", "denied"));
+  assert.equal(denied.status, "completed");
+  assert.equal(denied.permission_denials_count, 1);
+  assert.equal(denied.permission_denials[0].tool_name, "Bash");
+  const long = await delegate(
+    "claude",
+    { ...input, delegation_id: "long" },
+    override("claude", "long-result"),
+  );
+  assert.equal(long.result_truncated, true);
+  assert.equal(long.result.length, 24000);
+  assert.equal(long.result_characters, 25000);
+  const native = JSON.parse(
+    await readFile(
+      path.join(long.evidence_directory, "native-result.json"),
+      "utf8",
+    ),
+  );
+  assert.equal(native.result.length, 25000);
+  const invalid = await delegate(
+    "claude",
+    { ...input, delegation_id: "invalid" },
+    override("claude", "invalid-model"),
+  );
+  assert.equal(invalid.status, "invalid_event");
+});

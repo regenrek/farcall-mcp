@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+(function requireNode24(version = process.versions.node) {
+  if (Number(version.split(".")[0]) < 24) {
+    throw new Error(
+      "Agent worker MCP requires Node 24 or newer. Check the parent host's PATH.",
+    );
+  }
+})();
 import { createRequire as __createRequire } from 'node:module';
 const require = __createRequire(import.meta.url);
 var __create = Object.create;
@@ -3260,8 +3267,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path5) {
-      let input2 = path5;
+    function removeDotSegments(path6) {
+      let input2 = path6;
       const output2 = [];
       let nextSlash = -1;
       let len = 0;
@@ -3670,8 +3677,8 @@ var require_schemes = __commonJS({
       }
       if (wsComponent.resourceName) {
         const queryIndex = wsComponent.resourceName.indexOf("?");
-        const path5 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
-        wsComponent.path = path5 && path5 !== "/" ? path5 : void 0;
+        const path6 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path6 && path6 !== "/" ? path6 : void 0;
         wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
@@ -7571,8 +7578,8 @@ function getErrorMap() {
 
 // node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path5, errorMaps, issueData } = params;
-  const fullPath = [...path5, ...issueData.path || []];
+  const { data, path: path6, errorMaps, issueData } = params;
+  const fullPath = [...path6, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -7687,11 +7694,11 @@ var errorUtil;
 
 // node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path5, key) {
+  constructor(parent, value, path6, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path5;
+    this._path = path6;
     this._key = key;
   }
   get path() {
@@ -11646,10 +11653,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path5) {
-  if (!path5)
+function getElementAtPath(obj, path6) {
+  if (!path6)
     return obj;
-  return path5.reduce((acc, key) => acc?.[key], obj);
+  return path6.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -11989,11 +11996,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path5, issues) {
+function prefixIssues(path6, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path5);
+    iss.path.unshift(path6);
     return iss;
   });
 }
@@ -12443,16 +12450,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path5 = []) => {
+  const processError = (error63, path6 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path5, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path6, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path5, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path6, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path5, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path6, ...issue2.path]);
       } else {
-        const fullpath = [...path5, ...issue2.path];
+        const fullpath = [...path6, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -12491,17 +12498,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path5 = []) => {
+  const processError = (error63, path6 = []) => {
     var _a3;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path5, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path6, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path5, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path6, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path5, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path6, ...issue2.path]);
       } else {
-        const fullpath = [...path5, ...issue2.path];
+        const fullpath = [...path6, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -12540,8 +12547,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path5 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path5) {
+  const path6 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path6) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -13643,9 +13650,9 @@ var asciiTabOrNewline = /[\t\n\r]/g;
 function stripTabAndNewline(value) {
   return value.replace(asciiTabOrNewline, "");
 }
-function urlHostnameOk(url2, hostname3) {
-  hostname3.lastIndex = 0;
-  return hostname3.test(url2.hostname);
+function urlHostnameOk(url2, hostname4) {
+  hostname4.lastIndex = 0;
+  return hostname4.test(url2.hostname);
 }
 function urlProtocolOk(url2, protocol) {
   protocol.lastIndex = 0;
@@ -28056,11 +28063,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path5) {
-  if (path5.length === 0) {
+function getDotPath(path6) {
+  if (path6.length === 0) {
     return "object root";
   }
-  return path5.reduce((acc, seg, index) => {
+  return path6.reduce((acc, seg, index) => {
     if (index === 0) {
       return String(seg);
     }
@@ -30287,13 +30294,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path5 = ref.slice(1).split("/").filter(Boolean);
-  if (path5.length === 0) {
+  const path6 = ref.slice(1).split("/").filter(Boolean);
+  if (path6.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path5[0] === defsKey) {
-    const key = path5[1] === void 0 ? void 0 : decodeJSONPointerSegment(path5[1]);
+  if (path6[0] === defsKey) {
+    const key = path6[1] === void 0 ? void 0 : decodeJSONPointerSegment(path6[1]);
     if (!key || !ctx.defs[key]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -36478,7 +36485,52 @@ var StdioServerTransport = class {
 
 // src/core/contracts.mjs
 import path from "node:path";
-var VERSION = "0.1.0";
+
+// package.json
+var package_default = {
+  name: "agent-worker-mcp",
+  version: "0.1.0",
+  description: "Completion-wait MCP workers for Claude Code and Codex CLI",
+  type: "module",
+  license: "MIT",
+  author: "Kevin Kern",
+  engines: {
+    node: ">=24"
+  },
+  packageManager: "pnpm@10.32.1",
+  bin: {
+    "agent-worker-mcp": "dist/cli.mjs"
+  },
+  files: [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "docs"
+  ],
+  scripts: {
+    build: "node scripts/build.mjs",
+    test: "node --test test/*.test.mjs",
+    lint: "oxlint --deny-warnings src scripts test",
+    format: "prettier --write src scripts test docs README.md package.json plugins/*/skills .github .oxlintrc.json",
+    "format:check": "prettier --check src scripts test docs README.md package.json plugins/*/skills .github .oxlintrc.json",
+    check: "pnpm lint && pnpm format:check && pnpm build && pnpm test",
+    prepack: "pnpm build",
+    "test:long": "node scripts/long-preflight.mjs",
+    "test:pack": "pnpm pack --pack-destination artifacts && node scripts/pack-smoke.mjs"
+  },
+  devDependencies: {
+    esbuild: "0.25.12",
+    oxlint: "1.56.0",
+    prettier: "3.8.2",
+    "@modelcontextprotocol/sdk": "1.30.1",
+    zod: "4.6.5"
+  }
+};
+
+// src/core/version.mjs
+var VERSION = package_default.version;
+
+// src/core/contracts.mjs
 var absolutePath = external_exports.string().refine(path.isAbsolute, "Use an absolute path");
 var common = {
   cwd: absolutePath,
@@ -36523,7 +36575,7 @@ var timestamp = () => (/* @__PURE__ */ new Date()).toISOString();
 
 // src/application/delegate.mjs
 import { mkdir as mkdir2, writeFile as writeFile2 } from "node:fs/promises";
-import path4 from "node:path";
+import path5 from "node:path";
 
 // src/adapters/claude.mjs
 var claude = {
@@ -36547,12 +36599,17 @@ var claude = {
   },
   consume(state, event) {
     if (event.type === "system" && event.subtype === "init") {
+      if (event.model !== void 0 && typeof event.model !== "string")
+        throw new Error("Claude init model must be a string");
       state.session_id = event.session_id;
       state.reported_model = event.model;
     }
     if (event.type === "result") {
       state.session_id ??= event.session_id;
       state.native_result = event;
+      if (event.permission_denials !== void 0 && !Array.isArray(event.permission_denials))
+        throw new Error("Claude permission_denials must be an array");
+      state.permission_denials = event.permission_denials ?? [];
       state.result = event.result ?? null;
       state.failed ||= event.is_error === true;
       state.native_usage = event.usage ?? null;
@@ -36609,9 +36666,30 @@ import {
   rename,
   open as open2,
   unlink,
-  lstat
+  lstat as lstat2
 } from "node:fs/promises";
+import path3 from "node:path";
+import { hostname as hostname3 } from "node:os";
+
+// src/platform/checkout.mjs
+import { lstat } from "node:fs/promises";
 import path2 from "node:path";
+async function checkoutRoot(cwd) {
+  let directory = cwd;
+  for (; ; ) {
+    try {
+      const marker = await lstat(path2.join(directory, ".git"));
+      if (marker.isDirectory() || marker.isFile()) return directory;
+    } catch (error62) {
+      if (error62.code !== "ENOENT") throw error62;
+    }
+    const parent = path2.dirname(directory);
+    if (parent === directory) return cwd;
+    directory = parent;
+  }
+}
+
+// src/platform/artifacts.mjs
 var sha256 = (value) => createHash("sha256").update(value).digest("hex");
 async function atomicJson(file2, value) {
   const temporary = `${file2}.${randomUUID()}.tmp`;
@@ -36624,9 +36702,9 @@ async function atomicJson(file2, value) {
 }
 var readJson = async (file2) => JSON.parse(await readFile(file2, "utf8"));
 async function containedDirectory(parent, name) {
-  const directory = path2.join(parent, name);
+  const directory = path3.join(parent, name);
   await mkdir(directory, { recursive: true, mode: 448 });
-  if ((await lstat(directory)).isSymbolicLink() || await realpath(directory) !== directory) {
+  if ((await lstat2(directory)).isSymbolicLink() || await realpath(directory) !== directory) {
     throw new Error(`Artifact directory must not be a symlink: ${directory}`);
   }
   return directory;
@@ -36638,7 +36716,7 @@ async function prepare(input2, preflight) {
   let prompt = "Deterministic MCP preflight. No model call.";
   if (!preflight) {
     const file2 = await realpath(input2.prompt_file);
-    if (!file2.startsWith(`${artifacts}${path2.sep}`))
+    if (!file2.startsWith(`${artifacts}${path3.sep}`))
       throw new Error("prompt_file must be inside cwd/artifacts");
     const handle = await open2(file2, "r");
     try {
@@ -36652,23 +36730,42 @@ async function prepare(input2, preflight) {
     if (!prompt.trim() || Buffer.byteLength(prompt) > 1e6)
       throw new Error("Invalid prompt size");
   }
-  return { cwd, root, prompt };
+  const checkout = await checkoutRoot(cwd);
+  const lockArtifacts = await containedDirectory(checkout, "artifacts");
+  const lockRoot = await containedDirectory(lockArtifacts, "agent-workers");
+  return { cwd, root, prompt, checkout, lockRoot };
 }
 async function acquireLock(root, info) {
-  const file2 = path2.join(root, ".active");
+  const file2 = path3.join(root, ".active");
   let handle;
   try {
     handle = await open2(file2, "wx", 384);
   } catch (error62) {
-    if (error62.code === "EEXIST")
+    if (error62.code === "EEXIST") {
+      let owner = "unknown";
+      try {
+        const lock = await readJson(file2);
+        let alive = "unknown";
+        if (lock.hostname === hostname3() && Number.isSafeInteger(lock.server_pid) && lock.server_pid > 0) {
+          try {
+            process.kill(lock.server_pid, 0);
+            alive = "yes";
+          } catch (probe) {
+            if (probe.code === "ESRCH") alive = "no";
+          }
+        }
+        owner = `PID ${lock.server_pid ?? "unknown"}, host ${lock.hostname ?? "unknown"}, server alive ${alive}`;
+      } catch {
+      }
       throw new Error(
-        "Checkout already has an active or stale worker lock. Inspect artifacts/agent-workers/.active before retrying.",
+        `Checkout already has an active or stale worker lock (${owner}). Inspect ${file2} and its worker processes before removing it.`,
         { cause: error62 }
       );
+    }
     throw error62;
   }
   try {
-    await handle.writeFile(JSON.stringify(info));
+    await handle.writeFile(JSON.stringify({ ...info, hostname: hostname3() }));
   } catch (error62) {
     await handle.close();
     await unlink(file2);
@@ -36681,14 +36778,14 @@ async function acquireLock(root, info) {
 }
 async function existingRecord(directory) {
   try {
-    const stat = await lstat(directory);
+    const stat = await lstat2(directory);
     if (!stat.isDirectory() || stat.isSymbolicLink())
       throw new Error("Delegation directory must be a real directory");
-    return await readJson(path2.join(directory, "request.json"));
+    return await readJson(path3.join(directory, "request.json"));
   } catch (error62) {
     if (error62.code === "ENOENT") {
       try {
-        await lstat(directory);
+        await lstat2(directory);
       } catch (missing) {
         if (missing.code === "ENOENT") return null;
         throw missing;
@@ -36706,7 +36803,7 @@ async function existingRecord(directory) {
 import { spawn } from "node:child_process";
 import { openSync, closeSync, writeSync } from "node:fs";
 import { StringDecoder } from "node:string_decoder";
-import path3 from "node:path";
+import path4 from "node:path";
 async function runProcess({
   command,
   args,
@@ -36716,18 +36813,21 @@ async function runProcess({
   signal,
   timeout,
   onEvent,
-  graceMs = 1e3
+  graceMs = 1e3,
+  drainMs = 1e3
 }) {
   if (process.platform === "win32")
     throw new Error("Windows process-tree cancellation is not supported yet");
   if (signal?.aborted) return { status: "cancelled" };
   const handles = [];
   const logFile = (name) => {
-    const handle = openSync(path3.join(directory, name), "wx", 384);
+    const handle = openSync(path4.join(directory, name), "wx", 384);
     handles.push(handle);
     return handle;
   };
   let child;
+  let deadline, killTimer, drainTimer;
+  let abort;
   try {
     const stdout = logFile("events.jsonl");
     const stderr = logFile("stderr.log");
@@ -36751,8 +36851,8 @@ async function runProcess({
       detached: true,
       stdio: ["pipe", "pipe", stderr]
     });
+    record2("worker_started", { pid: child.pid });
     let reason;
-    let killTimer;
     const killGroup = (sig) => {
       if (!child.pid) return;
       try {
@@ -36778,70 +36878,96 @@ async function runProcess({
       } catch {
         return;
       }
-      const violation = onEvent(event);
-      if (violation) terminate(violation);
+      try {
+        const violation = onEvent(event);
+        if (violation) terminate(violation);
+      } catch (error62) {
+        record2("invalid_event", { message: error62.message });
+        terminate("invalid_event");
+      }
     };
-    child.stdout.on("data", (chunk) => {
+    const onData = (chunk) => {
       try {
         writeSync(stdout, chunk);
-        pending += decoder.write(chunk);
-        let newline;
-        while ((newline = pending.indexOf("\n")) !== -1) {
-          if (newline > 1e7) {
-            terminate("oversize_event");
-            pending = "";
-            return;
-          }
-          consume(pending.slice(0, newline));
-          pending = pending.slice(newline + 1);
-        }
-        if (pending.length > 1e7) {
-          terminate("oversize_event");
-          pending = "";
-        }
       } catch {
         terminate("evidence_error");
+        return;
       }
-    });
+      pending += decoder.write(chunk);
+      let newline;
+      while ((newline = pending.indexOf("\n")) !== -1) {
+        if (newline > 1e7) {
+          terminate("oversize_event");
+          pending = "";
+          return;
+        }
+        consume(pending.slice(0, newline));
+        pending = pending.slice(newline + 1);
+      }
+      if (pending.length > 1e7) {
+        terminate("oversize_event");
+        pending = "";
+      }
+    };
+    child.stdout.on("data", onData);
+    child.stdout.on("error", () => terminate("stdout_error"));
     child.stdin.on("error", (error62) => {
       if (error62.code !== "EPIPE") terminate("stdin_error");
     });
-    const abort = () => terminate("cancelled");
-    signal?.addEventListener("abort", abort, { once: true });
-    if (signal?.aborted) abort();
-    const deadline = setTimeout(() => terminate("timeout"), timeout * 1e3);
-    child.stdin.end(prompt);
-    const outcome = await new Promise((resolve) => {
-      let spawnError;
-      child.once("error", (error62) => {
-        spawnError = error62.message;
-      });
+    const drained = new Promise((resolve) => {
+      child.stdout.once("end", resolve);
+      child.stdout.once("close", resolve);
+    });
+    const exited = new Promise((resolve) => {
+      const finish = (outcome2) => {
+        clearTimeout(deadline);
+        killGroup("SIGKILL");
+        resolve(outcome2);
+      };
+      child.once("error", (error62) => finish({ error: error62.message }));
       child.once(
-        "close",
-        (exit_code, exit_signal) => resolve({
-          exit_code,
-          exit_signal,
-          ...spawnError ? { error: spawnError } : {}
-        })
+        "exit",
+        (exit_code, exit_signal) => finish({ exit_code, exit_signal })
       );
     });
+    abort = () => terminate("cancelled");
+    signal?.addEventListener("abort", abort, { once: true });
+    if (signal?.aborted) abort();
+    deadline = setTimeout(() => terminate("timeout"), timeout * 1e3);
+    child.stdin.end(prompt);
+    const outcome = await exited;
+    clearTimeout(killTimer);
+    let stdoutTruncated = false;
+    await Promise.race([
+      drained,
+      new Promise((resolve) => {
+        drainTimer = setTimeout(() => {
+          stdoutTruncated = true;
+          record2("stdout_drain_expired");
+          child.stdout.destroy();
+          resolve();
+        }, drainMs);
+      })
+    ]);
+    clearTimeout(drainTimer);
+    child.stdout.off("data", onData);
+    pending += decoder.end();
+    if (pending.trim()) consume(pending);
+    let status = (evidenceError ? "evidence_error" : reason) ?? (outcome.error ? "spawn_error" : outcome.exit_code === 0 ? "exited" : "failed");
+    record2("finished", {
+      status,
+      ...outcome,
+      stdout_truncated: stdoutTruncated
+    });
+    if (evidenceError) status = "evidence_error";
+    return { status, ...outcome, stdout_truncated: stdoutTruncated };
+  } finally {
     clearTimeout(deadline);
     clearTimeout(killTimer);
-    signal?.removeEventListener("abort", abort);
-    killGroup("SIGKILL");
-    pending += decoder.end();
-    if (pending.trim()) {
-      try {
-        consume(pending);
-      } catch {
-        reason ??= "invalid_event";
-      }
-    }
-    clearTimeout(killTimer);
-    const status = (evidenceError ? "evidence_error" : reason) ?? (outcome.error ? "spawn_error" : outcome.exit_code === 0 ? "exited" : "failed");
-    record2("finished", { status, ...outcome });
-    return { status, ...outcome };
-  } finally {
+    clearTimeout(drainTimer);
+    if (abort) signal?.removeEventListener("abort", abort);
+    child?.stdin.destroy();
+    child?.stdout.destroy();
     for (const handle of handles) closeSync(handle);
   }
 }
@@ -36858,13 +36984,18 @@ var preflightScript = `
 async function delegate(provider, value, { signal, preflight = false, commandOverride } = {}) {
   if (!adapters[provider]) throw new Error("Unknown provider");
   const input2 = parseInput(provider, value, preflight);
-  const { cwd, root, prompt } = await prepare(input2, preflight);
+  const { cwd, root, prompt, checkout, lockRoot } = await prepare(
+    input2,
+    preflight
+  );
   const adapter = adapters[provider];
   const command = preflight ? process.execPath : adapter.executable();
   const args = preflight ? ["-e", preflightScript, String(input2.duration_seconds), input2.outcome] : adapter.args(input2);
   const request = {
     ...input2,
     cwd,
+    checkout_root: checkout,
+    lock_root: lockRoot,
     provider,
     preflight,
     bridge_version: VERSION,
@@ -36873,8 +37004,8 @@ async function delegate(provider, value, { signal, preflight = false, commandOve
     prompt_sha256: sha256(prompt)
   };
   const fingerprint = sha256(JSON.stringify(request));
-  const directory = path4.join(root, input2.delegation_id);
-  const release = await acquireLock(root, {
+  const directory = path5.join(root, input2.delegation_id);
+  const release = await acquireLock(lockRoot, {
     delegation_id: input2.delegation_id,
     provider,
     server_pid: process.pid,
@@ -36886,7 +37017,7 @@ async function delegate(provider, value, { signal, preflight = false, commandOve
       if (previous.fingerprint !== fingerprint)
         throw new Error("Delegation ID already used for a different request");
       try {
-        return await readJson(path4.join(directory, "completion.json"));
+        return await readJson(path5.join(directory, "completion.json"));
       } catch (error62) {
         if (error62.code === "ENOENT")
           throw new Error(
@@ -36897,7 +37028,7 @@ async function delegate(provider, value, { signal, preflight = false, commandOve
       }
     }
     if (input2.resume_session_id) {
-      const oldDirectory = path4.join(root, input2.resume_delegation_id);
+      const oldDirectory = path5.join(root, input2.resume_delegation_id);
       const oldRequest = await existingRecord(oldDirectory);
       if (!oldRequest || oldRequest.provider !== provider || oldRequest.cwd !== cwd || oldRequest.preflight) {
         throw new Error(
@@ -36905,18 +37036,21 @@ async function delegate(provider, value, { signal, preflight = false, commandOve
         );
       }
       const oldCompletion = await readJson(
-        path4.join(oldDirectory, "completion.json")
+        path5.join(oldDirectory, "completion.json")
       );
       if (oldCompletion.session_id !== input2.resume_session_id)
         throw new Error("Resume session does not match its saved completion");
     }
     await mkdir2(directory, { mode: 448 });
-    await atomicJson(path4.join(directory, "request.json"), {
+    await atomicJson(path5.join(directory, "request.json"), {
       ...request,
       fingerprint,
-      requested_at: timestamp()
+      requested_at: timestamp(),
+      execution_command: commandOverride?.command ?? command,
+      execution_args: commandOverride?.args ?? args,
+      test_command_override: Boolean(commandOverride)
     });
-    await writeFile2(path4.join(directory, "prompt.txt"), prompt, {
+    await writeFile2(path5.join(directory, "prompt.txt"), prompt, {
       flag: "wx",
       mode: 384
     });
@@ -36954,6 +37088,10 @@ async function delegate(provider, value, { signal, preflight = false, commandOve
       requested_model: input2.model ?? null,
       reported_model: state.reported_model ?? "unknown",
       requested_effort: input2.effort ?? null,
+      permission_denials: state.permission_denials ?? [],
+      permission_denials_count: state.permission_denials?.length ?? 0,
+      result_truncated: typeof state.result === "string" && state.result.length > 24e3,
+      result_characters: typeof state.result === "string" ? state.result.length : 0,
       result: typeof state.result === "string" ? state.result.slice(0, 24e3) : null,
       native_usage: state.native_usage ?? null,
       native_model_usage: state.native_model_usage ?? null,
@@ -36963,10 +37101,10 @@ async function delegate(provider, value, { signal, preflight = false, commandOve
     };
     if (state.native_result)
       await atomicJson(
-        path4.join(directory, "native-result.json"),
+        path5.join(directory, "native-result.json"),
         state.native_result
       );
-    await atomicJson(path4.join(directory, "completion.json"), completion);
+    await atomicJson(path5.join(directory, "completion.json"), completion);
     return completion;
   } finally {
     await release();
@@ -37046,7 +37184,15 @@ async function startServer(provider) {
     for (const controller of active.keys()) controller.abort();
     await Promise.allSettled(active.values());
     await server.close();
+    process.off("SIGTERM", shutdown);
+    process.off("SIGINT", shutdown);
+    process.stdin.off("end", shutdown);
+    process.stdin.off("close", shutdown);
+    process.stdin.pause();
   };
+  process.stdin.once("end", shutdown);
+  process.stdin.once("close", shutdown);
+  process.stdout.on("error", shutdown);
   process.once("SIGTERM", shutdown);
   process.once("SIGINT", shutdown);
   server.server.onclose = shutdown;

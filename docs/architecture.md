@@ -10,7 +10,7 @@ The prototype mixed provider arguments, artifact policy & process lifetime in on
 | Competing owners that are wrong | Skills must not implement process loops. Provider adapters must not invent separate locks or retry policy. The MCP transport must not decide model pricing or task quality. |
 | Cleanup direction               | Keep `src/` canonical. Generate distributable bundles. Retire the earlier worker only after host acceptance, then remove its duplicate configuration.                       |
 
-`core/contracts.mjs` validates public inputs. `adapters/claude.mjs` & `adapters/codex.mjs` own CLI arguments & native event interpretation. `platform/artifacts.mjs` owns filesystem operations. `transport/server.mjs` translates MCP cancellation & results without reimplementing the workflow.
+`core/contracts.mjs` validates public inputs. `adapters/claude.mjs` & `adapters/codex.mjs` own CLI arguments & native event interpretation. `platform/artifacts.mjs` owns filesystem operations, while `platform/checkout.mjs` finds the Git root used for locking. `transport/server.mjs` translates MCP cancellation & results without reimplementing the workflow.
 
 ```mermaid
 sequenceDiagram
@@ -28,6 +28,6 @@ sequenceDiagram
   MCP-->>Parent: completed, failed, or cancelled
 ```
 
-There is no background task API. The only timers are a task deadline & bounded termination escalation. Provider errors remain errors even when a CLI exits with code zero. Raw events remain available if the normalized summary is incomplete.
+There is no background task API. The only timers are a task deadline, bounded termination escalation & a one-second output drain after process exit. Provider errors remain errors even when a CLI exits with code zero. Raw events remain available if the normalized summary is incomplete.
 
 The runtime supports macOS & Linux process groups. Windows is rejected until process-tree cleanup has its own implementation & tests. Provider CLIs keep their own configuration, authentication, hooks & project instructions. This package does not make those trustworthy or equivalent across hosts.

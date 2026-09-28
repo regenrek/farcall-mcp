@@ -1,7 +1,7 @@
 import path from "node:path";
 import { z } from "zod";
 
-export const VERSION = "0.1.0";
+export { VERSION } from "./version.mjs";
 const absolutePath = z.string().refine(path.isAbsolute, "Use an absolute path");
 const common = {
   cwd: absolutePath,

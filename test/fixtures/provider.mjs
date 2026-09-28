@@ -21,7 +21,12 @@ if (provider === "claude")
     type: "system",
     subtype: "init",
     session_id: session,
-    model: scenario === "mismatch" ? "wrong-model" : "claude-opus-5-5",
+    model:
+      scenario === "invalid-model"
+        ? { name: "unexpected" }
+        : scenario === "mismatch"
+          ? "wrong-model"
+          : "claude-opus-5-5",
   });
 else emit({ type: "thread.started", thread_id: session });
 if (scenario === "missing") process.exit(0);
@@ -36,7 +41,12 @@ setTimeout(
         type: "result",
         session_id: session,
         is_error: scenario === "failure",
-        result: "Reviewed café ✓",
+        result:
+          scenario === "long-result" ? "x".repeat(25000) : "Reviewed café ✓",
+        permission_denials:
+          scenario === "denied"
+            ? [{ tool_name: "Bash", tool_input: { command: "pnpm test" } }]
+            : [],
         usage: { input_tokens: 12 },
         total_cost_usd: 0.002,
       });

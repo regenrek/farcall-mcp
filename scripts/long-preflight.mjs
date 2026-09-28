@@ -1,5 +1,6 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, writeFile, mkdtemp, cp, rm } from "node:fs/promises";
 import path from "node:path";
+import os from "node:os";
 import assert from "node:assert/strict";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
@@ -11,8 +12,9 @@ const root = path.resolve("artifacts", `preflight-${runId}`);
 await mkdir(root, { recursive: true });
 const results = await Promise.all(
   ["claude", "codex"].map(async (provider) => {
-    const cwd = path.join(root, provider);
-    await mkdir(cwd);
+    const cwd = await mkdtemp(
+      path.join(os.tmpdir(), `worker-preflight-${provider}-`),
+    );
     const client = new Client({ name: "long-preflight", version: "1" });
     await client.connect(
       new StdioClientTransport({
@@ -39,7 +41,10 @@ const results = await Promise.all(
       const elapsed_ms = performance.now() - start;
       assert.equal(response.isError, false);
       assert.ok(elapsed_ms >= duration * 1000);
+      const saved = path.join(root, provider);
+      await cp(path.join(cwd, "artifacts"), saved, { recursive: true });
       return {
+        archived_artifacts: saved,
         provider,
         elapsed_ms,
         calls: 1,
@@ -47,6 +52,7 @@ const results = await Promise.all(
       };
     } finally {
       await client.close();
+      await rm(cwd, { recursive: true, force: true });
     }
   }),
 );

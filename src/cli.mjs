@@ -1,12 +1,11 @@
-import { startServer } from "./transport/server.mjs";
-import { VERSION } from "./core/contracts.mjs";
-
+import { requireNode24 } from "./core/runtime.mjs";
+requireNode24();
 const [provider] = process.argv.slice(2);
 if (provider === "--version") {
+  const { VERSION } = await import("./core/version.mjs");
   console.log(VERSION);
 } else if (provider === "claude" || provider === "codex") {
-  if (Number(process.versions.node.split(".")[0]) < 24)
-    throw new Error("Node 24 or newer is required");
+  const { startServer } = await import("./transport/server.mjs");
   await startServer(provider);
 } else {
   console.error(

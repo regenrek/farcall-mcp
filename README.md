@@ -1,6 +1,6 @@
 # Agent worker MCP
 
-Let Claude Code call Codex, or Codex call Claude Code, without a status loop.
+Let Claude Code call Codex, or Codex call Claude Code, through one pending MCP call.
 
 The parent makes one MCP call. The server starts the other CLI & keeps that call open until the task finishes. Corrections resume the same session. Prompts, native events, usage & failures stay in the checkout.
 
@@ -15,7 +15,7 @@ I built this after [trying different Astra & Opus workflows on the same feature]
 
 Both plugins provide `run` & `preflight`. There is no status endpoint. Each plugin includes its own built server, so marketplace users do not need to install this repository's dependencies.
 
-You need Node 24+, macOS or Linux, & the worker CLI installed & signed in. The model name & effort are explicit inputs. Your existing CLI account pays for the model work. This package neither supplies credentials nor estimates subscription costs.
+You need Node 24+, macOS or Linux, & the worker CLI installed & signed in. Codex tasks require a Git working tree; the deterministic preflight also works outside Git. The model name & effort are explicit inputs. Your existing CLI account pays for the model work. This package neither supplies credentials nor estimates subscription costs.
 
 ## Install in Claude Code
 
@@ -51,10 +51,8 @@ From a local clone, register this repository's Codex marketplace & install the C
 
 ```sh
 codex plugin marketplace add /absolute/path/agent-worker-mcp
-codex plugin add claude-worker@personal
+codex plugin add claude-worker@agent-workers
 ```
-
-The Codex scaffold currently names its marketplace `personal`; the Claude marketplace is `agent-workers`. They are separate manifests. If you already registered another marketplace named `personal`, rename this repository's marketplace before registering it.
 
 Start a new Codex session, then invoke `$claude-worker` with your task. The plugin sets a two-hour tool timeout. Keep the worker tool outside Code Mode. Plugin tool namespaces depend on the host version; check the actual namespace before adding it to `features.code_mode.direct_only_tool_namespaces`.
 
@@ -119,6 +117,8 @@ For `codex_worker.run`, use the same common fields, a Codex model such as `gpt-6
 
 For a correction, save a new prompt & use a new delegation ID. Include the exact returned `session_id` as `resume_session_id` & the previous `delegation_id` as `resume_delegation_id`. Both must belong to the same provider & checkout. There is no implicit “latest session” option.
 
+`completed` means the CLI returned a successful native result, not that every requested action happened. The response includes `permission_denials`, their count, & `result_truncated` when the 24,000-character preview was shortened. Read `native-result.json` for the full result.
+
 An identical request with the same ID returns the saved result. A changed request with that ID fails. A crash leaves evidence to inspect rather than silently starting paid work again.
 
 ## Evidence & limits
@@ -130,9 +130,9 @@ Each call writes under `artifacts/agent-workers/<delegation_id>/`.
 - `native-result.json` preserves the provider's final event.
 - `completion.json` records the outcome, session, available usage & evidence path.
 
-Codex exec does not provide a verified model ID or price in its standard JSONL result. Those fields remain unknown. Claude's reported model is checked against the requested identifier. Native usage is kept as reported; resumed totals may be cumulative. A missing cost is not zero.
+Codex exec does not provide a verified model ID or price in its standard JSONL result. Those fields remain unknown. Claude's init-reported model is checked against the requested identifier; this does not detect later provider fallbacks. Native usage is kept as reported; resumed totals may be cumulative. A missing cost is not zero.
 
-A shared checkout lock prevents these two workers from starting overlapping jobs. It cannot stop another editor or unrelated process from changing files. Use separate checkouts for parallel implementation. On cancellation or timeout, the server terminates the child's process group. A child that deliberately detaches into another group is outside that cleanup boundary. After a hard server crash, inspect the lock & processes before removing `artifacts/agent-workers/.active`.
+A shared lock at the nearest Git root prevents these two workers from starting overlapping jobs, including calls from different subdirectories. Linked Git worktrees have separate locks. Outside Git, the lock covers only the supplied `cwd`. It cannot stop another editor or unrelated process from changing files. Use separate checkouts for parallel implementation. On cancellation or timeout, the server terminates the child's process group. A child that deliberately detaches into another group is outside that cleanup boundary. It cannot keep the call open indefinitely. After the CLI exits, output drains for at most one second; forced pipe closure is reported as `stdout_truncated`. After a hard server crash, inspect the lock & processes before removing `artifacts/agent-workers/.active`.
 
 Prompts & tool output can contain private data. Add `artifacts/` to the target project's ignore rules. These files are local evidence, not material to publish. This is a trusted local CLI bridge, not an isolation boundary for untrusted agents.
 

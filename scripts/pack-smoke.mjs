@@ -1,3 +1,4 @@
+import { VERSION } from "../src/core/version.mjs";
 import { execFileSync } from "node:child_process";
 import { mkdtemp, rm, mkdir } from "node:fs/promises";
 import os from "node:os";
@@ -8,7 +9,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 
 const root = await mkdtemp(path.join(os.tmpdir(), "worker-package-"));
 const archive = path.resolve(
-  process.argv[2] ?? "artifacts/agent-worker-mcp-0.1.0.tgz",
+  process.argv[2] ?? `artifacts/agent-worker-mcp-${VERSION}.tgz`,
 );
 try {
   execFileSync(
@@ -33,7 +34,7 @@ try {
       encoding: "utf8",
       cwd: root,
     }).trim(),
-    "0.1.0",
+    VERSION,
   );
   for (const provider of ["claude", "codex"]) {
     const cwd = path.join(root, provider);

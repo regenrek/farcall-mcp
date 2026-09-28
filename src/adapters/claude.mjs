@@ -21,12 +21,20 @@ export const claude = {
   },
   consume(state, event) {
     if (event.type === "system" && event.subtype === "init") {
+      if (event.model !== undefined && typeof event.model !== "string")
+        throw new Error("Claude init model must be a string");
       state.session_id = event.session_id;
       state.reported_model = event.model;
     }
     if (event.type === "result") {
       state.session_id ??= event.session_id;
       state.native_result = event;
+      if (
+        event.permission_denials !== undefined &&
+        !Array.isArray(event.permission_denials)
+      )
+        throw new Error("Claude permission_denials must be an array");
+      state.permission_denials = event.permission_denials ?? [];
       state.result = event.result ?? null;
       state.failed ||= event.is_error === true;
       state.native_usage = event.usage ?? null;

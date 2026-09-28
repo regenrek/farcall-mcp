@@ -1,3 +1,4 @@
+import { VERSION } from "../src/core/version.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdtemp, rm, cp, readFile } from "node:fs/promises";
@@ -76,7 +77,7 @@ test("npm CLI bundle starts outside the repository", async (t) => {
       encoding: "utf8",
       cwd: root,
     }).trim(),
-    "0.1.0",
+    VERSION,
   );
   const client = new Client({ name: "cli-smoke", version: "1" });
   t.after(() => client.close());

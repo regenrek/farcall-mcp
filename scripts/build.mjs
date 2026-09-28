@@ -1,9 +1,23 @@
 import { build } from "esbuild";
-import { chmod, mkdir, writeFile, copyFile } from "node:fs/promises";
+import { chmod, mkdir, writeFile, copyFile, readFile } from "node:fs/promises";
 import path from "node:path";
+import { requireNode24 } from "../src/core/runtime.mjs";
+import { VERSION } from "../src/core/version.mjs";
 import { dependencyNotices } from "./notices.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
+requireNode24();
+for (const provider of ["claude", "codex"]) {
+  for (const host of ["claude", "codex"]) {
+    const file = path.join(
+      root,
+      `plugins/${provider}-worker/.${host}-plugin/plugin.json`,
+    );
+    const manifest = JSON.parse(await readFile(file, "utf8"));
+    manifest.version = VERSION;
+    await writeFile(file, JSON.stringify(manifest, null, 2) + "\n");
+  }
+}
 const options = {
   absWorkingDir: root,
   metafile: true,
@@ -14,7 +28,9 @@ const options = {
   minify: false,
   legalComments: "eof",
   banner: {
-    js: "#!/usr/bin/env node\nimport { createRequire as __createRequire } from 'node:module';\nconst require = __createRequire(import.meta.url);",
+    js: `#!/usr/bin/env node
+(${requireNode24.toString()})();
+import { createRequire as __createRequire } from 'node:module';\nconst require = __createRequire(import.meta.url);`,
   },
 };
 const result = await build({

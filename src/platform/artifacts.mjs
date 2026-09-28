@@ -10,6 +10,8 @@ import {
   lstat,
 } from "node:fs/promises";
 import path from "node:path";
+import { hostname } from "node:os";
+import { checkoutRoot } from "./checkout.mjs";
 
 export const sha256 = (value) =>
   createHash("sha256").update(value).digest("hex");
@@ -55,7 +57,10 @@ export async function prepare(input, preflight) {
     if (!prompt.trim() || Buffer.byteLength(prompt) > 1_000_000)
       throw new Error("Invalid prompt size");
   }
-  return { cwd, root, prompt };
+  const checkout = await checkoutRoot(cwd);
+  const lockArtifacts = await containedDirectory(checkout, "artifacts");
+  const lockRoot = await containedDirectory(lockArtifacts, "agent-workers");
+  return { cwd, root, prompt, checkout, lockRoot };
 }
 export async function acquireLock(root, info) {
   const file = path.join(root, ".active");
@@ -63,15 +68,36 @@ export async function acquireLock(root, info) {
   try {
     handle = await open(file, "wx", 0o600);
   } catch (error) {
-    if (error.code === "EEXIST")
+    if (error.code === "EEXIST") {
+      let owner = "unknown";
+      try {
+        const lock = await readJson(file);
+        let alive = "unknown";
+        if (
+          lock.hostname === hostname() &&
+          Number.isSafeInteger(lock.server_pid) &&
+          lock.server_pid > 0
+        ) {
+          try {
+            process.kill(lock.server_pid, 0);
+            alive = "yes";
+          } catch (probe) {
+            if (probe.code === "ESRCH") alive = "no";
+          }
+        }
+        owner = `PID ${lock.server_pid ?? "unknown"}, host ${lock.hostname ?? "unknown"}, server alive ${alive}`;
+      } catch {
+        /* A partially written lock still excludes a second job. */
+      }
       throw new Error(
-        "Checkout already has an active or stale worker lock. Inspect artifacts/agent-workers/.active before retrying.",
+        `Checkout already has an active or stale worker lock (${owner}). Inspect ${file} and its worker processes before removing it.`,
         { cause: error },
       );
+    }
     throw error;
   }
   try {
-    await handle.writeFile(JSON.stringify(info));
+    await handle.writeFile(JSON.stringify({ ...info, hostname: hostname() }));
   } catch (error) {
     await handle.close();
     await unlink(file);

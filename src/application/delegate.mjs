@@ -29,7 +29,10 @@ export async function delegate(
 ) {
   if (!adapters[provider]) throw new Error("Unknown provider");
   const input = parseInput(provider, value, preflight);
-  const { cwd, root, prompt } = await prepare(input, preflight);
+  const { cwd, root, prompt, checkout, lockRoot } = await prepare(
+    input,
+    preflight,
+  );
   const adapter = adapters[provider];
   const command = preflight ? process.execPath : adapter.executable();
   const args = preflight
@@ -38,6 +41,8 @@ export async function delegate(
   const request = {
     ...input,
     cwd,
+    checkout_root: checkout,
+    lock_root: lockRoot,
     provider,
     preflight,
     bridge_version: VERSION,
@@ -47,7 +52,7 @@ export async function delegate(
   };
   const fingerprint = sha256(JSON.stringify(request));
   const directory = path.join(root, input.delegation_id);
-  const release = await acquireLock(root, {
+  const release = await acquireLock(lockRoot, {
     delegation_id: input.delegation_id,
     provider,
     server_pid: process.pid,
@@ -93,6 +98,9 @@ export async function delegate(
       ...request,
       fingerprint,
       requested_at: timestamp(),
+      execution_command: commandOverride?.command ?? command,
+      execution_args: commandOverride?.args ?? args,
+      test_command_override: Boolean(commandOverride),
     });
     await writeFile(path.join(directory, "prompt.txt"), prompt, {
       flag: "wx",
@@ -146,6 +154,12 @@ export async function delegate(
       requested_model: input.model ?? null,
       reported_model: state.reported_model ?? "unknown",
       requested_effort: input.effort ?? null,
+      permission_denials: state.permission_denials ?? [],
+      permission_denials_count: state.permission_denials?.length ?? 0,
+      result_truncated:
+        typeof state.result === "string" && state.result.length > 24000,
+      result_characters:
+        typeof state.result === "string" ? state.result.length : 0,
       result:
         typeof state.result === "string" ? state.result.slice(0, 24000) : null,
       native_usage: state.native_usage ?? null,
