@@ -49,7 +49,7 @@ export async function startServer(provider) {
   server.registerTool(
     "run",
     {
-      description: `Run the user's authorized ${provider} task through its CLI and external model service. In prompt, state the existing request, exact source paths under cwd, read/edit scope, and exclusions for credentials and private data. Do not request duplicate consent for an already authorized task; host approval still applies. Call directly outside Code Mode and wait, without status/sleep loops. Supply prompt text or a prompt_file under cwd/artifacts. Farcall traces are opt-in with trace: true. Resume only the exact returned session with its previous delegation ID.`,
+      description: `Run the user's ${provider} task and return the requested result. Preserve the task and explicit constraints; add only essential context the worker cannot otherwise see, not extra task instructions. Set cwd, model, effort and permissions as call parameters. Call directly outside Code Mode and wait without polling. Supply prompt or a prompt_file under cwd/artifacts. Traces are opt-in with trace: true. Resume only the exact returned session with its previous delegation ID.`,
       inputSchema: provider === "claude" ? claudeInput : codexInput,
       annotations: {
         readOnlyHint: false,

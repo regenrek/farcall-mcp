@@ -35,9 +35,8 @@ Start a new session after installation. In Codex, keep the worker tool outside C
 Ask Claude Code to use `/codex-worker:codex-worker`, or Codex to use `$claude-worker`, with your task. For example,
 
 ```text
-Use the Claude worker to implement this feature with claude-opus-5-5 at high
-effort. Let it implement and verify the changes, then review the result.
-Call it directly and wait without polling. Keep its final summary short.
+Use Claude worker with this task: "Add CSV export to the reports page and run the tests."
+Give me the changes and test results back.
 ```
 
 The `run` tool accepts the task directly.

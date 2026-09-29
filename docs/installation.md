@@ -24,9 +24,8 @@ To keep that setting across sessions, put `CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS` w
 Use `/codex-worker:codex-worker` with a task, or ask Claude to use the Codex worker. For example,
 
 ```text
-Use the Codex worker to review my current changes with gpt-6-astra at high effort.
-Keep it read-only. Pass the review as the prompt argument and call the MCP tool once. Wait for its result without checking status. Return concrete findings with
-file references, then let me decide which changes to make.
+Use Codex worker with this task: "Review my current changes for bugs."
+Give me concrete findings with file references back.
 ```
 
 ## Install in Codex
@@ -56,11 +55,8 @@ direct_only_tool_namespaces = ["mcp__claude_worker", "claude_worker"]
 Merge these values with your existing configuration. Do not register the same server twice. This package does not edit your host settings.
 
 ```text
-Use the Claude worker to implement this feature with claude-opus-5-5 at high
-effort. Follow the repository's architecture and design system. Give Claude
-ownership of implementation and verification, then independently review the
-returned changes. Pass the task in the prompt argument. Call the worker directly
-and wait for completion. Resume the same session for corrections.
+Use Claude worker with this task: "Add CSV export to the reports page and run the tests."
+Give me the changes and test results back.
 ```
 
 ## Verify waiting before spending tokens
