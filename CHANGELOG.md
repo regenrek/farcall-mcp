@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.7] - 2026-10-01
+
+### Added
+
+- Explicit Codex `danger-full-access` mode for single runs and batch tasks, including exact-session corrections. Defaults remain read-only; failures never escalate automatically.
+- Additional roots retain coordination locks in full-access mode without implying filesystem restrictions. Unsupported network overrides are rejected.
+- Browser capability guidance distinguishes permission selection from tool installation and actual browser acceptance.
+
 ## [0.1.6] - 2026-10-01
 
 ### Added

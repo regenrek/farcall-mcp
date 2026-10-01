@@ -1,5 +1,22 @@
 # Verification
 
+## Explicit full access (0.1.7)
+
+On 1 October 2026, a model-free macOS check used Codex CLI 0.159.2's sandbox
+command with the adapter's generated options and Playwright 1.63.0. Chromium
+failed under workspace-write with a Mach bootstrap permission denial. With
+explicit full access, Chromium 153.0.8010.12 launched, loaded a local fixture,
+clicked a button, verified the resulting value, saved a screenshot and closed.
+Evidence is local under `artifacts/full-access/`. This does not establish that a
+model discovers browser tools or that desktop Browser Use is configured.
+
+Deterministic MCP regressions cover explicit selection, unchanged read-only
+defaults, no automatic escalation after failure, exact-session permission changes,
+mixed-mode batches, overlapping coordination roots and cached/changed retries.
+Emitted schemas expose the native mode on both Codex entrypoints.
+All 107 tests, lint, formatting, bundle generation, offline package smoke tests
+and strict validation of all 12 emitted MCP schemas passed locally.
+
 ## Explicit Codex permissions (0.1.6)
 
 On 1 October 2026, the local macOS check passed all 104 deterministic tests,

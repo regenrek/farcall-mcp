@@ -19,6 +19,8 @@ Use an exact Codex model identifier and supported effort. Reviews default to rea
 
 For authorized workspace-write tasks that need extra directories or network access, pass `writable_roots` (existing absolute directories) and `network_access` explicitly, including on resume. These are per-call permissions, not prompt additions or project trust changes. Omitted fields retain Codex configuration. Extra roots are included in batch isolation and shared worker locks.
 
+When the user explicitly authorizes full access, select `sandbox: "danger-full-access"` for that run or batch task, also on resume. Never escalate automatically after a failure. In this mode, optional `writable_roots` reserve work areas for coordination only; they do not restrict access. Omit `network_access`, which is unsupported in full-access mode. Full access does not configure browser tools; the child CLI still needs a verified browser capability.
+
 For an authorized task in a directory outside Git, set `allow_non_git: true` explicitly, also on resume. Its default is false. This only passes `--skip-git-repo-check` for that invocation; sandbox permissions stay unchanged. Do not initialize Git or edit user configuration to work around this check. Retry a failed call with a new delegation ID; an unknown session ID cannot be resumed.
 
 When Claude Code is the parent, start it with `CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS=0` so it does not background the call after two minutes. The plugin supplies a two-hour per-server timeout. When Codex is the parent, keep the actual worker namespace in `features.code_mode.direct_only_tool_namespaces`. These are parent-host settings, not worker arguments.

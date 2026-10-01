@@ -21,6 +21,14 @@ for (const provider of ["claude", "codex"]) {
       const { tools } = await client.listTools();
       const batch = tools.find((tool) => tool.name === "run_batch");
       const run = tools.find((tool) => tool.name === "run");
+      if (provider === "codex") {
+        assert.deepEqual(run.inputSchema.properties.sandbox.enum, [
+          "read-only",
+          "workspace-write",
+          "danger-full-access",
+        ]);
+        assert.equal(run.inputSchema.properties.sandbox.default, "read-only");
+      }
       assert.deepEqual(batch.annotations, run.annotations);
       assert.equal(batch.annotations.readOnlyHint, false);
       assert.equal(batch.inputSchema.additionalProperties, false);

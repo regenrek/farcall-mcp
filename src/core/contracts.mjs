@@ -33,13 +33,18 @@ export const claudeInput = z.strictObject({
 export const codexInput = z.strictObject({
   ...run,
   effort: z.enum(["minimal", "low", "medium", "high", "xhigh", "max", "ultra"]),
-  sandbox: z.enum(["read-only", "workspace-write"]).default("read-only"),
+  sandbox: z
+    .enum(["read-only", "workspace-write", "danger-full-access"])
+    .default("read-only")
+    .describe(
+      "Codex execution policy. Full access must be explicitly authorized; it removes the Codex sandbox, not OS restrictions, and does not configure browser tools.",
+    ),
   writable_roots: z
     .array(absolutePath)
     .max(16)
     .optional()
     .describe(
-      "Additional existing writable directories for this workspace-write invocation. Canonicalized and locked; also supply on resume.",
+      "Additional existing directories, canonicalized and locked. Grants writes in workspace-write; coordination only in danger-full-access, never an access boundary. Also supply on resume.",
     ),
   network_access: z
     .boolean()
@@ -92,11 +97,18 @@ export function parseInput(provider, value, preflight) {
     !preflight &&
     provider === "codex" &&
     input.sandbox !== "workspace-write" &&
-    (input.writable_roots !== undefined || input.network_access !== undefined)
+    input.network_access !== undefined
   )
     throw new Error(
-      "writable_roots and network_access require sandbox workspace-write",
+      "network_access requires sandbox workspace-write; full access does not restrict network access",
     );
+  if (
+    !preflight &&
+    provider === "codex" &&
+    input.sandbox === "read-only" &&
+    input.writable_roots !== undefined
+  )
+    throw new Error("writable_roots requires a writable sandbox mode");
   if (
     !preflight &&
     (input.prompt !== undefined) === (input.prompt_file !== undefined)

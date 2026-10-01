@@ -13,7 +13,8 @@ export const codex = {
       `model_reasoning_effort=${JSON.stringify(input.effort)}`,
       "-c",
       'approval_policy="never"',
-      ...(input.writable_roots !== undefined
+      ...(input.sandbox === "workspace-write" &&
+      input.writable_roots !== undefined
         ? [
             "-c",
             `sandbox_workspace_write.writable_roots=${JSON.stringify(input.writable_roots)}`,

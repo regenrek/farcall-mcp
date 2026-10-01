@@ -60,7 +60,7 @@ Pass the task directly in `prompt`. An implementation call to `claude_worker.run
 
 Choose allowed tools for the actual task. The default permission mode does not approve shell commands automatically. `acceptEdits` allows file edits; shell operations still need existing CLI permissions or explicit allowed tool patterns. Chrome is opt-in through `chrome: true` & needs a working Claude Chrome setup.
 
-For `codex_worker.run`, use the same common fields, any model your Codex CLI supports (for example `gpt-6-astra`), & `sandbox: "read-only"` for reviews or `"workspace-write"` for implementation. Omit Claude-specific fields. Codex runs with approval requests disabled, so disallowed operations fail instead of waiting for input. No bypass mode is exposed.
+For `codex_worker.run`, use the same common fields, any model your Codex CLI supports (for example `gpt-6-astra`), & `sandbox: "read-only"` for reviews or `"workspace-write"` for implementation. Omit Claude-specific fields. Codex runs with approval requests disabled, so disallowed operations fail instead of waiting for input.
 
 For a workspace-write task that needs sibling directories or network access, pass
 explicit per-call permissions. Both fields also work on each `run_batch` task:
@@ -77,8 +77,9 @@ explicit per-call permissions. Both fields also work on each `run_batch` task:
 symlinks, removes duplicates and locks the corresponding checkout roots; it does
 not create missing directories. `network_access: false` explicitly disables network
 access. An explicit empty roots list overrides Codex's configured extra roots.
-Omitting either field preserves Codex's existing configuration. These fields require
-`sandbox: "workspace-write"`; they do not grant broader access in read-only mode.
+Omitting either field preserves Codex's existing configuration. `network_access`
+requires `sandbox: "workspace-write"`. Extra roots are rejected in read-only mode;
+their full-access behavior is described below.
 Repeat the intended permissions on exact-session resume. Changed permissions need
 a new delegation ID, and a new batch ID when applicable.
 
@@ -89,6 +90,31 @@ config loads only for trusted projects, so do not rely on it to convey a worker'
 required permissions. Admin policy and Codex's protected paths still apply;
 adding a checkout does not make its `.git` or `.codex` metadata writable. Network
 access alone does not guarantee that browser automation or dependencies work.
+
+### Explicit full access
+
+When the user authorizes execution without the Codex sandbox, set
+`sandbox: "danger-full-access"` on the run or individual batch task. Farcall passes
+that native mode for this invocation only. The default remains `read-only`; a
+failure never triggers an automatic permission upgrade. No user configuration is
+edited, and operating-system or administrator restrictions still apply.
+
+Full access permits commands with the OS user's permissions. Checkout locks are
+coordination, not filesystem isolation. Use an external container or VM when an
+enforced boundary is required. Optional `writable_roots` still reserve additional
+work areas through Farcall's shared locks, but do not limit full-access commands
+and are not forwarded as workspace sandbox settings. `network_access` is rejected
+in this mode, including `false`, because it cannot impose a network restriction.
+
+For a correction, use a new delegation ID (and batch ID) and the exact previous
+session/delegation pair. Supply the chosen sandbox mode and coordination roots
+again. Changing permissions under an existing ID is rejected.
+
+Full access does not install or enable Browser Use, Playwright, or a desktop
+browser connection. The child Codex CLI must already have a usable browser tool
+or automation library. Verify an actual launch, navigation, interaction, artifact
+capture and shutdown before relying on browser acceptance. `preflight` tests only
+the completion wait and does not establish browser capability.
 
 For a task outside Git, explicitly set `allow_non_git: true` (default: `false`). The worker passes `--skip-git-repo-check` for that invocation, including resume. It does not initialize Git or edit Claude/Codex configuration. The sandbox and approval policy remain unchanged; `read-only` alone does not enable this option. Set it again when resuming outside Git. Changing the option requires a new delegation ID, including when retrying a failed call with an unknown session ID.
 

@@ -63,3 +63,23 @@ test("control characters in writable paths and symlink targets are rejected befo
   await assert.rejects(canonicalWritableRoots([invalid]), /control characters/);
   await assert.rejects(canonicalWritableRoots([alias]), /control characters/);
 });
+
+test("full access is explicit and never presents workspace-only overrides as restrictions", () => {
+  const { sandbox: ignored, ...defaults } = input;
+  assert.equal(ignored, "workspace-write");
+  assert.equal(parseInput("codex", defaults).sandbox, "read-only");
+  const full = parseInput("codex", {
+    ...input,
+    sandbox: "danger-full-access",
+    writable_roots: ["/coordination-only"],
+  });
+  const args = codex.args(full);
+  assert.equal(args[args.indexOf("--sandbox") + 1], "danger-full-access");
+  assert.ok(!args.some((arg) => arg.includes("sandbox_workspace_write")));
+  assert.ok(args.includes('approval_policy="never"'));
+  for (const network_access of [false, true])
+    assert.throws(
+      () => parseInput("codex", { ...full, network_access }),
+      /network_access requires sandbox workspace-write/,
+    );
+});

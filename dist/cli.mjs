@@ -47,7 +47,7 @@ var init_package = __esm({
   "package.json"() {
     package_default = {
       name: "farcall-mcp",
-      version: "0.1.6",
+      version: "0.1.7",
       description: "Completion-wait MCP workers for Claude Code and Codex CLI",
       type: "module",
       license: "MIT",
@@ -37779,10 +37779,12 @@ function parseBatch(provider2, value) {
 function parseInput(provider2, value, preflight) {
   const schema = preflight ? preflightInput : provider2 === "claude" ? claudeInput : codexInput;
   const input2 = schema.parse(value);
-  if (!preflight && provider2 === "codex" && input2.sandbox !== "workspace-write" && (input2.writable_roots !== void 0 || input2.network_access !== void 0))
+  if (!preflight && provider2 === "codex" && input2.sandbox !== "workspace-write" && input2.network_access !== void 0)
     throw new Error(
-      "writable_roots and network_access require sandbox workspace-write"
+      "network_access requires sandbox workspace-write; full access does not restrict network access"
     );
+  if (!preflight && provider2 === "codex" && input2.sandbox === "read-only" && input2.writable_roots !== void 0)
+    throw new Error("writable_roots requires a writable sandbox mode");
   if (!preflight && input2.prompt !== void 0 === (input2.prompt_file !== void 0)) {
     throw new Error("Provide exactly one of prompt or prompt_file");
   }
@@ -37824,9 +37826,11 @@ var init_contracts = __esm({
     codexInput = external_exports.strictObject({
       ...run,
       effort: external_exports.enum(["minimal", "low", "medium", "high", "xhigh", "max", "ultra"]),
-      sandbox: external_exports.enum(["read-only", "workspace-write"]).default("read-only"),
+      sandbox: external_exports.enum(["read-only", "workspace-write", "danger-full-access"]).default("read-only").describe(
+        "Codex execution policy. Full access must be explicitly authorized; it removes the Codex sandbox, not OS restrictions, and does not configure browser tools."
+      ),
       writable_roots: external_exports.array(absolutePath).max(16).optional().describe(
-        "Additional existing writable directories for this workspace-write invocation. Canonicalized and locked; also supply on resume."
+        "Additional existing directories, canonicalized and locked. Grants writes in workspace-write; coordination only in danger-full-access, never an access boundary. Also supply on resume."
       ),
       network_access: external_exports.boolean().optional().describe(
         "Explicit workspace-write network policy for this invocation. Omit to retain Codex configuration; false disables, true enables. Also supply on resume."
@@ -37918,7 +37922,7 @@ var init_codex = __esm({
           `model_reasoning_effort=${JSON.stringify(input2.effort)}`,
           "-c",
           'approval_policy="never"',
-          ...input2.writable_roots !== void 0 ? [
+          ...input2.sandbox === "workspace-write" && input2.writable_roots !== void 0 ? [
             "-c",
             `sandbox_workspace_write.writable_roots=${JSON.stringify(input2.writable_roots)}`
           ] : [],

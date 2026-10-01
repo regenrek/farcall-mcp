@@ -92,6 +92,13 @@ write access inherited from provider configuration, custom tools or an external
 service. Use explicit roots for reproducible worker permissions. Directory admission
 remains a coordination mechanism, not an OS sandbox.
 
+Codex tasks can explicitly select `sandbox: "danger-full-access"` when authorized.
+Modes may differ within a batch; they are never upgraded automatically. Additional
+`writable_roots` still participate in admission, but in full-access mode they are
+coordination claims only. Full-access workers can access other paths with the OS
+user's permissions. `network_access` is rejected for full-access tasks. See
+[full-access usage and browser requirements](usage.md#explicit-full-access).
+
 ## Completion, cancellation and timeouts
 
 The first invocation stays pending until every admitted task reaches an outcome.

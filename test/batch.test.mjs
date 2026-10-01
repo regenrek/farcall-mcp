@@ -1044,3 +1044,84 @@ test("simultaneous admissions from separate servers dispatch only one writer to 
   await absent(path.join(shared, "artifacts/farcall/.active"));
   assert.deepEqual(await readdir(path.join(root, "state/write-scopes")), []);
 });
+
+test("single full-access run preserves explicit permission, task and exact resume without automatic escalation", async (t) => {
+  const { root, tasks, client } = await setup(t, "codex", 1, [{ fail: true }]);
+  const { task_id: ignored, ...task } = tasks[0];
+  assert.equal(ignored, "w0");
+  const single = (input) => client.callTool({ name: "run", arguments: input });
+  // A failed default run is not silently relaunched with broader permissions.
+  const failed = JSON.parse((await single(task)).content[0].text);
+  assert.equal(failed.status, "failed");
+  let args = (await json(path.join(task.cwd, "started.json"))).args;
+  assert.equal(args[args.indexOf("--sandbox") + 1], "read-only");
+  assert.equal(
+    (await single({ ...task, sandbox: "danger-full-access" })).isError,
+    true,
+  );
+  await configure(task, { fail: false });
+  const extra = path.join(root, "extra");
+  await mkdir(extra);
+  const resumed = {
+    ...task,
+    sandbox: "danger-full-access",
+    writable_roots: [extra],
+    delegation_id: "explicit-correction",
+    resume_delegation_id: task.delegation_id,
+    resume_session_id: failed.session_id,
+  };
+  const result = JSON.parse((await single(resumed)).content[0].text);
+  assert.equal(result.status, "completed");
+  assert.equal(result.session_id, failed.session_id);
+  assert.equal(result.result, task.prompt);
+  args = (await json(path.join(task.cwd, "started.json"))).args;
+  assert.equal(args[args.indexOf("--sandbox") + 1], "danger-full-access");
+  assert.ok(args.indexOf("--sandbox") < args.indexOf("resume"));
+  assert.equal(args[args.indexOf("resume") + 1], failed.session_id);
+  assert.ok(!args.some((arg) => arg.includes("sandbox_workspace_write")));
+  await rm(path.join(task.cwd, "started.json"));
+  assert.deepEqual(JSON.parse((await single(resumed)).content[0].text), result);
+  await noStarts(tasks);
+  await absent(path.join(extra, "artifacts/farcall/.active"));
+});
+
+test("mixed-permission batches preserve each mode and full-access roots still exclude overlapping tasks", async (t) => {
+  const { root, tasks, batch, call } = await setup(t, "codex", 3);
+  const extra = path.join(root, "extra");
+  await mkdir(extra);
+  Object.assign(tasks[0], {
+    sandbox: "danger-full-access",
+    writable_roots: [extra],
+  });
+  tasks[1].sandbox = "workspace-write";
+  tasks[2].sandbox = "read-only";
+  const invalid = await call({
+    ...batch,
+    tasks: tasks.map((task, i) =>
+      i === 1 ? { ...task, writable_roots: [extra] } : task,
+    ),
+  });
+  assert.equal(invalid.isError, true);
+  await noStarts(tasks);
+  const result = (await call()).structuredContent;
+  assert.equal(result.status, "completed");
+  for (const [i, task] of tasks.entries()) {
+    const args = (await json(path.join(task.cwd, "started.json"))).args;
+    assert.equal(args[args.indexOf("--sandbox") + 1], task.sandbox);
+    assert.equal(result.tasks[i].worker_result.result, task.prompt);
+    await rm(path.join(task.cwd, "started.json"));
+  }
+  assert.deepEqual((await call()).structuredContent, result);
+  await noStarts(tasks);
+  assert.equal(
+    (
+      await call({
+        ...batch,
+        tasks: tasks.map((task) => ({ ...task, sandbox: "workspace-write" })),
+      })
+    ).isError,
+    true,
+  );
+  await unlocked(tasks);
+  await absent(path.join(extra, "artifacts/farcall/.active"));
+});
