@@ -83,3 +83,40 @@ Claude Code currently backgrounds a pending MCP call after two minutes by defaul
 Codex plugins use a relative `cwd` rooted at the installed plugin & a `tool_timeout_sec` of 7200. The direct-only Code Mode namespace setting belongs to the parent configuration. Keep the actual exposed namespace outside Code Mode, then verify it with the parent trace. Native plugin config & Agent Plugins v1 config are different formats; these packages use native `.codex-plugin` manifests.
 
 The CLI/API boundaries were checked against the local Codex source at `88235f881d`, including `codex-rs/exec/src/exec_events.rs`, `codex-rs/codex-mcp/src/plugin_config.rs` & `codex-rs/core/src/config/config_tests.rs`. Claude packaging follows the [plugin reference](https://code.claude.com/docs/en/plugins-reference). Source inspection verifies argument & config assumptions; it does not replace the host acceptance above.
+
+## Parallel batch verification (0.1.5)
+
+The deterministic batch suite uses real MCP stdio connections to both plugin
+bundles copied outside the repository. It checks five simultaneous processes by
+comparing `worker_started` and `finished` lifecycle events, one ordered terminal
+response, sibling independence after failure/timeout, cancellation, shutdown/EOF,
+all-or-nothing admission, symlink/checkout isolation, shared single-run locks,
+active/completed/interrupted retries, exact-session corrections, trace privacy and
+aggregate result bounds. Hard-interruption tests never redispatch a worker.
+Fixtures also cover Git worktrees and symlinked Git metadata. No paid models are
+invoked, and no benchmark or active installation is changed.
+
+Run `pnpm check` for lint, formatting, generated bundles and the full test suite. For the
+isolated offline npm package check, run:
+
+```sh
+pnpm pack --pack-destination artifacts/run-batch/package
+node scripts/pack-smoke.mjs artifacts/run-batch/package/farcall-mcp-0.1.5.tgz
+```
+
+The 12 emitted tool schemas (three tools, two providers, plugin and CLI entrypoints)
+were also checked against the Draft 2020-12 meta-schema and compiled with the
+Rust-backed `jsonschema-rs` 0.58.2 validator. The checked schema snapshot is local
+under `artifacts/run-batch/schemas.json`. Automated schema tests preserve provider
+contract parity and portable regexes. These checks establish server behavior, not
+host scheduling or model adherence to a task. Model-assisted host acceptance and
+installation remain separate from the deterministic suite.
+
+An isolated Claude Code 2.1.284 acceptance run used Opus 5.5 high as the parent
+and five deterministic Codex fixtures. The unchanged worker skill selected one
+`run_batch` call. The parent trace showed a 150.615-second completion wait with
+no intervening assistant messages or status calls; all five processes overlapped
+for 150.510 seconds and returned completed results. Worker processes exited and
+checkout locks were released. This used print mode with auto-backgrounding
+disabled. It does not establish interactive-host behavior or real Codex model
+execution. Raw session evidence remains local and is not shipped.

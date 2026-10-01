@@ -51,6 +51,8 @@ The `run` tool accepts the task directly.
 }
 ```
 
+For 1–5 parallel workers in separate checkouts, use one `run_batch` call. [Batch usage, corrections & recovery](docs/batches.md).
+
 Change `model` to an identifier supported by the worker CLI. [Models, permissions & session resume](docs/usage.md).
 
 Full logs are opt-in with `trace: true`. Normal runs keep only the state needed for retries & resume, plus the full answer if the returned preview is shortened. [Local state & tracing](docs/usage.md#optional-traces).

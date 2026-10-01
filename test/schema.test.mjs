@@ -19,6 +19,18 @@ for (const provider of ["claude", "codex"]) {
         }),
       );
       const { tools } = await client.listTools();
+      const batch = tools.find((tool) => tool.name === "run_batch");
+      const run = tools.find((tool) => tool.name === "run");
+      assert.deepEqual(batch.annotations, run.annotations);
+      assert.equal(batch.annotations.readOnlyHint, false);
+      assert.equal(batch.inputSchema.additionalProperties, false);
+      assert.equal(batch.inputSchema.properties.tasks.minItems, 1);
+      assert.equal(batch.inputSchema.properties.tasks.maxItems, 5);
+      const task = batch.inputSchema.properties.tasks.items;
+      assert.equal(task.additionalProperties, false);
+      assert.ok(task.required.includes("task_id"));
+      for (const [key, value] of Object.entries(run.inputSchema.properties))
+        assert.deepEqual(task.properties[key], value, key);
       const model = tools.find((tool) => tool.name === "run").inputSchema
         .properties.model;
       // Unicode sets reject the unescaped nested '[' that JS's legacy regex

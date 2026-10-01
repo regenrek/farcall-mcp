@@ -46,6 +46,28 @@ export const preflightInput = z.strictObject({
   duration_seconds: z.number().min(0).max(300).default(10),
   outcome: z.enum(["success", "failure"]).default("success"),
 });
+const batchSchema = (task) =>
+  z.strictObject({
+    batch_id: common.delegation_id,
+    tasks: z
+      .array(task.extend({ task_id: common.delegation_id }))
+      .min(1)
+      .max(5),
+  });
+export const claudeBatchInput = batchSchema(claudeInput);
+export const codexBatchInput = batchSchema(codexInput);
+export function parseBatch(provider, value) {
+  const input = (
+    provider === "claude" ? claudeBatchInput : codexBatchInput
+  ).parse(value);
+  for (const key of ["task_id", "delegation_id"]) {
+    if (
+      new Set(input.tasks.map((task) => task[key])).size !== input.tasks.length
+    )
+      throw new Error(`Batch tasks must have distinct ${key} values`);
+  }
+  return input;
+}
 export function parseInput(provider, value, preflight) {
   const schema = preflight
     ? preflightInput

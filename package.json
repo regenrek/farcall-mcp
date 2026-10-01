@@ -1,6 +1,6 @@
 {
   "name": "farcall-mcp",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Completion-wait MCP workers for Claude Code and Codex CLI",
   "type": "module",
   "license": "MIT",

@@ -46,7 +46,7 @@ for (const provider of ["claude", "codex"]) {
     await client.connect(transport);
     assert.deepEqual(
       (await client.listTools()).tools.map((tool) => tool.name).toSorted(),
-      ["preflight", "run"],
+      ["preflight", "run", "run_batch"],
     );
     const response = await client.callTool({
       name: "preflight",

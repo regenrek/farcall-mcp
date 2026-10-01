@@ -20,7 +20,6 @@ export async function runProcess({
 }) {
   if (process.platform === "win32")
     throw new Error("Windows process-tree cancellation is not supported yet");
-  if (signal?.aborted) return { status: "cancelled" };
   const handles = [];
   const logFile = (name) => {
     if (!trace) return null;
@@ -47,6 +46,13 @@ export async function runProcess({
         evidenceError = true;
       }
     };
+    if (signal?.aborted) {
+      record("finished", {
+        status: "cancelled",
+        dispatch_state: "not_started",
+      });
+      return { status: "cancelled" };
+    }
     record("dispatch", { command, args, cwd });
     if (evidenceError) throw new Error("Cannot record dispatch evidence");
     child = spawn(command, args, {

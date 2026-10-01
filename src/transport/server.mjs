@@ -3,10 +3,13 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   claudeInput,
   codexInput,
+  claudeBatchInput,
+  codexBatchInput,
   preflightInput,
   VERSION,
 } from "../core/contracts.mjs";
 import { delegate } from "../application/delegate.mjs";
+import { runBatch } from "../application/batch.mjs";
 
 export async function startServer(provider) {
   const server = new McpServer({
@@ -15,7 +18,7 @@ export async function startServer(provider) {
   });
   const active = new Map();
   let closing = false;
-  async function handle(input, context, preflight) {
+  async function handle(input, context, preflight, batch = false) {
     if (closing)
       return {
         isError: true,
@@ -25,7 +28,7 @@ export async function startServer(provider) {
     const cancel = () => controller.abort();
     context.signal.addEventListener("abort", cancel, { once: true });
     if (context.signal.aborted) cancel();
-    const pending = delegate(provider, input, {
+    const pending = (batch ? runBatch : delegate)(provider, input, {
       signal: controller.signal,
       preflight,
     });
@@ -34,7 +37,13 @@ export async function startServer(provider) {
       const result = await pending;
       return {
         isError: result.status !== "completed",
-        content: [{ type: "text", text: JSON.stringify(result) }],
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result),
+          },
+        ],
+        ...(batch ? { structuredContent: result } : {}),
       };
     } catch (error) {
       return {
@@ -59,6 +68,20 @@ export async function startServer(provider) {
       },
     },
     (input, context) => handle(input, context, false),
+  );
+  server.registerTool(
+    "run_batch",
+    {
+      description: `Run 1–5 ${provider} tasks concurrently in distinct, non-overlapping checkouts. One call waits for all outcomes; no status polling. Each task follows run's contract unchanged. Supply a stable batch_id and task_id per task. Identical retries never redispatch; corrections use new batch and delegation IDs with exact previous sessions. Use a client timeout of at least 7200 seconds. Filesystem isolation beyond checkout admission is the caller's responsibility.`,
+      inputSchema: provider === "claude" ? claudeBatchInput : codexBatchInput,
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: true,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    (input, context) => handle(input, context, false, true),
   );
   server.registerTool(
     "preflight",

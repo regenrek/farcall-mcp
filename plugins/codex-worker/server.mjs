@@ -3267,8 +3267,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path6) {
-      let input2 = path6;
+    function removeDotSegments(path8) {
+      let input2 = path8;
       const output2 = [];
       let nextSlash = -1;
       let len = 0;
@@ -3677,8 +3677,8 @@ var require_schemes = __commonJS({
       }
       if (wsComponent.resourceName) {
         const queryIndex = wsComponent.resourceName.indexOf("?");
-        const path6 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
-        wsComponent.path = path6 && path6 !== "/" ? path6 : void 0;
+        const path8 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path8 && path8 !== "/" ? path8 : void 0;
         wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
@@ -7578,8 +7578,8 @@ function getErrorMap() {
 
 // node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path6, errorMaps, issueData } = params;
-  const fullPath = [...path6, ...issueData.path || []];
+  const { data, path: path8, errorMaps, issueData } = params;
+  const fullPath = [...path8, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -7694,11 +7694,11 @@ var errorUtil;
 
 // node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path6, key) {
+  constructor(parent, value, path8, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path6;
+    this._path = path8;
     this._key = key;
   }
   get path() {
@@ -11653,10 +11653,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path6) {
-  if (!path6)
+function getElementAtPath(obj, path8) {
+  if (!path8)
     return obj;
-  return path6.reduce((acc, key) => acc?.[key], obj);
+  return path8.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -11996,11 +11996,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path6, issues) {
+function prefixIssues(path8, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path6);
+    iss.path.unshift(path8);
     return iss;
   });
 }
@@ -12450,16 +12450,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path6 = []) => {
+  const processError = (error63, path8 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path6, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path8, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path6, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path8, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path6, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path8, ...issue2.path]);
       } else {
-        const fullpath = [...path6, ...issue2.path];
+        const fullpath = [...path8, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -12498,17 +12498,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path6 = []) => {
+  const processError = (error63, path8 = []) => {
     var _a3;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path6, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path8, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path6, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path8, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path6, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path8, ...issue2.path]);
       } else {
-        const fullpath = [...path6, ...issue2.path];
+        const fullpath = [...path8, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -12547,8 +12547,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path6 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path6) {
+  const path8 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path8) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -13650,9 +13650,9 @@ var asciiTabOrNewline = /[\t\n\r]/g;
 function stripTabAndNewline(value) {
   return value.replace(asciiTabOrNewline, "");
 }
-function urlHostnameOk(url2, hostname4) {
-  hostname4.lastIndex = 0;
-  return hostname4.test(url2.hostname);
+function urlHostnameOk(url2, hostname6) {
+  hostname6.lastIndex = 0;
+  return hostname6.test(url2.hostname);
 }
 function urlProtocolOk(url2, protocol) {
   protocol.lastIndex = 0;
@@ -28063,11 +28063,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path6) {
-  if (path6.length === 0) {
+function getDotPath(path8) {
+  if (path8.length === 0) {
     return "object root";
   }
-  return path6.reduce((acc, seg, index) => {
+  return path8.reduce((acc, seg, index) => {
     if (index === 0) {
       return String(seg);
     }
@@ -30294,13 +30294,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path6 = ref.slice(1).split("/").filter(Boolean);
-  if (path6.length === 0) {
+  const path8 = ref.slice(1).split("/").filter(Boolean);
+  if (path8.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path6[0] === defsKey) {
-    const key = path6[1] === void 0 ? void 0 : decodeJSONPointerSegment(path6[1]);
+  if (path8[0] === defsKey) {
+    const key = path8[1] === void 0 ? void 0 : decodeJSONPointerSegment(path8[1]);
     if (!key || !ctx.defs[key]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -36489,7 +36489,7 @@ import path from "node:path";
 // package.json
 var package_default = {
   name: "farcall-mcp",
-  version: "0.1.4",
+  version: "0.1.5",
   description: "Completion-wait MCP workers for Claude Code and Codex CLI",
   type: "module",
   license: "MIT",
@@ -36573,6 +36573,20 @@ var preflightInput = external_exports.strictObject({
   duration_seconds: external_exports.number().min(0).max(300).default(10),
   outcome: external_exports.enum(["success", "failure"]).default("success")
 });
+var batchSchema = (task) => external_exports.strictObject({
+  batch_id: common.delegation_id,
+  tasks: external_exports.array(task.extend({ task_id: common.delegation_id })).min(1).max(5)
+});
+var claudeBatchInput = batchSchema(claudeInput);
+var codexBatchInput = batchSchema(codexInput);
+function parseBatch(provider, value) {
+  const input2 = (provider === "claude" ? claudeBatchInput : codexBatchInput).parse(value);
+  for (const key of ["task_id", "delegation_id"]) {
+    if (new Set(input2.tasks.map((task) => task[key])).size !== input2.tasks.length)
+      throw new Error(`Batch tasks must have distinct ${key} values`);
+  }
+  return input2;
+}
 function parseInput(provider, value, preflight) {
   const schema = preflight ? preflightInput : provider === "claude" ? claudeInput : codexInput;
   const input2 = schema.parse(value);
@@ -36676,25 +36690,25 @@ var codex = {
 import { createHash, randomUUID } from "node:crypto";
 import {
   mkdir,
-  readFile,
-  realpath,
+  readFile as readFile2,
+  realpath as realpath2,
   writeFile,
   rename,
   open as open2,
   unlink,
-  lstat as lstat2
+  lstat
 } from "node:fs/promises";
 import path3 from "node:path";
 import { hostname as hostname3 } from "node:os";
 
 // src/platform/checkout.mjs
-import { lstat } from "node:fs/promises";
+import { stat, readFile, realpath } from "node:fs/promises";
 import path2 from "node:path";
 async function checkoutRoot(cwd) {
   let directory = cwd;
   for (; ; ) {
     try {
-      const marker = await lstat(path2.join(directory, ".git"));
+      const marker = await stat(path2.join(directory, ".git"));
       if (marker.isDirectory() || marker.isFile()) return directory;
     } catch (error62) {
       if (error62.code !== "ENOENT") throw error62;
@@ -36703,6 +36717,24 @@ async function checkoutRoot(cwd) {
     if (parent === directory) return cwd;
     directory = parent;
   }
+}
+async function gitDirectory(checkout) {
+  const marker = path2.join(checkout, ".git");
+  let entry;
+  try {
+    entry = await stat(marker);
+  } catch (error62) {
+    if (error62.code === "ENOENT") return null;
+    throw error62;
+  }
+  if (entry.isDirectory()) return realpath(marker);
+  const text = await readFile(marker, "utf8");
+  const match = /^gitdir: (.+?)[\r\n]*$/.exec(text);
+  if (!match) throw new Error("Invalid Git directory reference");
+  const directory = await realpath(path2.resolve(checkout, match[1]));
+  if (!(await stat(directory)).isDirectory())
+    throw new Error("Git directory reference must target a directory");
+  return directory;
 }
 
 // src/platform/artifacts.mjs
@@ -36716,17 +36748,17 @@ async function atomicJson(file2, value) {
   });
   await rename(temporary, file2);
 }
-var readJson = async (file2) => JSON.parse(await readFile(file2, "utf8"));
+var readJson = async (file2) => JSON.parse(await readFile2(file2, "utf8"));
 async function containedDirectory(parent, name) {
   const directory = path3.join(parent, name);
   await mkdir(directory, { recursive: true, mode: 448 });
-  if ((await lstat2(directory)).isSymbolicLink() || await realpath(directory) !== directory) {
+  if ((await lstat(directory)).isSymbolicLink() || await realpath2(directory) !== directory) {
     throw new Error(`Artifact directory must not be a symlink: ${directory}`);
   }
   return directory;
 }
 async function prepare(input2, preflight) {
-  const cwd = await realpath(input2.cwd);
+  const cwd = await realpath2(input2.cwd);
   const artifacts = await containedDirectory(cwd, "artifacts");
   const root = await containedDirectory(artifacts, "farcall");
   let prompt = "Deterministic MCP preflight. No model call.";
@@ -36734,13 +36766,13 @@ async function prepare(input2, preflight) {
     if (input2.prompt !== void 0) {
       prompt = input2.prompt;
     } else {
-      const file2 = await realpath(input2.prompt_file);
+      const file2 = await realpath2(input2.prompt_file);
       if (!file2.startsWith(`${artifacts}${path3.sep}`))
         throw new Error("prompt_file must be inside cwd/artifacts");
       const handle = await open2(file2, "r");
       try {
-        const stat = await handle.stat();
-        if (!stat.isFile() || stat.size > 1e6)
+        const stat2 = await handle.stat();
+        if (!stat2.isFile() || stat2.size > 1e6)
           throw new Error("Prompt must be a file under 1 MB");
         prompt = await handle.readFile("utf8");
       } finally {
@@ -36798,14 +36830,14 @@ async function acquireLock(root, info) {
 }
 async function existingRecord(directory) {
   try {
-    const stat = await lstat2(directory);
-    if (!stat.isDirectory() || stat.isSymbolicLink())
+    const stat2 = await lstat(directory);
+    if (!stat2.isDirectory() || stat2.isSymbolicLink())
       throw new Error("Delegation directory must be a real directory");
     return await readJson(path3.join(directory, "request.json"));
   } catch (error62) {
     if (error62.code === "ENOENT") {
       try {
-        await lstat2(directory);
+        await lstat(directory);
       } catch (missing) {
         if (missing.code === "ENOENT") return null;
         throw missing;
@@ -36839,7 +36871,6 @@ async function runProcess({
 }) {
   if (process.platform === "win32")
     throw new Error("Windows process-tree cancellation is not supported yet");
-  if (signal?.aborted) return { status: "cancelled" };
   const handles = [];
   const logFile = (name) => {
     if (!trace) return null;
@@ -36867,6 +36898,13 @@ async function runProcess({
         evidenceError = true;
       }
     };
+    if (signal?.aborted) {
+      record2("finished", {
+        status: "cancelled",
+        dispatch_state: "not_started"
+      });
+      return { status: "cancelled" };
+    }
     record2("dispatch", { command, args, cwd });
     if (evidenceError) throw new Error("Cannot record dispatch evidence");
     child = spawn(command, args, {
@@ -37036,7 +37074,7 @@ var preflightScript = `
     process.exit(process.argv[2] === 'failure' ? 1 : 0);
   }, Number(process.argv[1]) * 1000);
 `;
-async function delegate(provider, value, { signal, preflight = false, commandOverride } = {}) {
+async function prepareDelegation(provider, value, { preflight = false } = {}) {
   if (!adapters[provider]) throw new Error("Unknown provider");
   const input2 = parseInput(provider, value, preflight);
   const { cwd, root, prompt, checkout, lockRoot } = await prepare(
@@ -37062,131 +37100,502 @@ async function delegate(provider, value, { signal, preflight = false, commandOve
   };
   const fingerprint = sha256(JSON.stringify(request));
   const directory = path5.join(root, input2.delegation_id);
-  const release = await acquireLock(lockRoot, {
+  return {
+    input: input2,
+    cwd,
+    root,
+    prompt,
+    checkout,
+    lockRoot,
+    adapter,
+    command,
+    args,
+    request,
+    fingerprint,
+    directory,
+    provider,
+    preflight
+  };
+}
+async function inspectDelegation(plan) {
+  const { directory, fingerprint, input: input2, root, provider, cwd } = plan;
+  const previous = await existingRecord(directory);
+  if (previous) {
+    if (previous.fingerprint !== fingerprint)
+      throw new Error("Delegation ID already used for a different request");
+    try {
+      return await readJson(path5.join(directory, "completion.json"));
+    } catch (error62) {
+      if (error62.code === "ENOENT")
+        throw new Error(
+          "Delegation was dispatched without a completion record. Inspect it before using a new ID.",
+          { cause: error62 }
+        );
+      throw error62;
+    }
+  }
+  if (input2.resume_session_id) {
+    const oldDirectory = path5.join(root, input2.resume_delegation_id);
+    const oldRequest = await existingRecord(oldDirectory);
+    if (!oldRequest || oldRequest.provider !== provider || oldRequest.cwd !== cwd || oldRequest.preflight) {
+      throw new Error(
+        "Resume must refer to a previous real delegation from this provider and checkout"
+      );
+    }
+    const oldCompletion = await readJson(
+      path5.join(oldDirectory, "completion.json")
+    );
+    if (oldCompletion.session_id !== input2.resume_session_id)
+      throw new Error("Resume session does not match its saved completion");
+  }
+  return null;
+}
+async function reserveDelegation(plan, { commandOverride, onReserved } = {}) {
+  const {
+    directory,
+    fingerprint,
+    provider,
+    cwd,
+    checkout,
+    preflight,
+    input: input2,
+    request,
+    command,
+    args,
+    prompt
+  } = plan;
+  await mkdir2(directory, { mode: 448 });
+  onReserved?.(directory);
+  const identity = {
+    fingerprint,
+    provider,
+    cwd,
+    checkout_root: checkout,
+    preflight,
+    requested_at: timestamp()
+  };
+  await atomicJson(
+    path5.join(directory, "request.json"),
+    input2.trace ? {
+      ...request,
+      ...identity,
+      execution_command: commandOverride?.command ?? command,
+      execution_args: commandOverride?.args ?? args,
+      test_command_override: Boolean(commandOverride)
+    } : identity
+  );
+  if (input2.trace) {
+    await writeFile2(path5.join(directory, "prompt.txt"), prompt, {
+      flag: "wx",
+      mode: 384
+    });
+  }
+}
+async function executeDelegation(plan, { signal, commandOverride } = {}) {
+  const {
+    input: input2,
+    directory,
+    command,
+    args,
+    cwd,
+    prompt,
+    adapter,
+    preflight,
+    provider
+  } = plan;
+  const state = {};
+  const execution = await runProcess({
+    command: commandOverride?.command ?? command,
+    args: commandOverride?.args ?? args,
+    cwd,
+    directory,
+    prompt,
+    signal,
+    timeout: input2.timeout_seconds,
+    trace: input2.trace,
+    onEvent(event) {
+      if (!event || typeof event !== "object") return;
+      if (preflight) {
+        if (event.type === "preflight.completed") state.native_result = event;
+        return;
+      }
+      adapter.consume(state, event);
+      if (state.reported_model && !adapter.modelMatches(input2.model, state.reported_model))
+        return "model_mismatch";
+      if (input2.resume_session_id && state.session_id && state.session_id !== input2.resume_session_id)
+        return "session_mismatch";
+    }
+  });
+  const status = execution.status === "exited" ? state.failed ? "failed" : state.native_result ? "completed" : "missing_result" : execution.status;
+  const resultLimit = input2.max_result_chars ?? 4e3;
+  const resultTruncated = typeof state.result === "string" && state.result.length > resultLimit;
+  const resultFile = resultTruncated ? path5.join(directory, "result.txt") : null;
+  if (resultFile) {
+    await writeFile2(resultFile, state.result, { flag: "wx", mode: 384 });
+  }
+  const completion = {
+    bridge_version: VERSION,
+    provider,
     delegation_id: input2.delegation_id,
+    ...execution,
+    status,
+    completed_at: timestamp(),
+    session_id: state.session_id ?? "unknown",
+    requested_model: input2.model ?? null,
+    reported_model: state.reported_model ?? "unknown",
+    requested_effort: input2.effort ?? null,
+    permission_denials: state.permission_denials ?? [],
+    permission_denials_count: state.permission_denials?.length ?? 0,
+    result_truncated: resultTruncated,
+    result_file: resultFile,
+    result_characters: typeof state.result === "string" ? state.result.length : 0,
+    result: typeof state.result === "string" ? state.result.slice(0, resultLimit) : null,
+    native_usage: state.native_usage ?? null,
+    native_model_usage: state.native_model_usage ?? null,
+    native_total_cost_usd: state.native_total_cost_usd ?? null,
+    usage_note: "Raw provider fields. Missing values are unknown; resumed totals may be cumulative. No API cost estimate is made.",
+    evidence_directory: directory,
+    trace: input2.trace
+  };
+  if (input2.trace && state.native_result)
+    await atomicJson(
+      path5.join(directory, "native-result.json"),
+      state.native_result
+    );
+  await atomicJson(path5.join(directory, "completion.json"), completion);
+  return completion;
+}
+async function delegate(provider, value, options = {}) {
+  const plan = await prepareDelegation(provider, value, options);
+  const release = await acquireLock(plan.lockRoot, {
+    delegation_id: plan.input.delegation_id,
     provider,
     server_pid: process.pid,
     started_at: timestamp()
   });
   try {
-    const previous = await existingRecord(directory);
-    if (previous) {
-      if (previous.fingerprint !== fingerprint)
-        throw new Error("Delegation ID already used for a different request");
-      try {
-        return await readJson(path5.join(directory, "completion.json"));
-      } catch (error62) {
-        if (error62.code === "ENOENT")
-          throw new Error(
-            "Delegation was dispatched without a completion record. Inspect it before using a new ID.",
-            { cause: error62 }
-          );
-        throw error62;
-      }
-    }
-    if (input2.resume_session_id) {
-      const oldDirectory = path5.join(root, input2.resume_delegation_id);
-      const oldRequest = await existingRecord(oldDirectory);
-      if (!oldRequest || oldRequest.provider !== provider || oldRequest.cwd !== cwd || oldRequest.preflight) {
-        throw new Error(
-          "Resume must refer to a previous real delegation from this provider and checkout"
-        );
-      }
-      const oldCompletion = await readJson(
-        path5.join(oldDirectory, "completion.json")
-      );
-      if (oldCompletion.session_id !== input2.resume_session_id)
-        throw new Error("Resume session does not match its saved completion");
-    }
-    await mkdir2(directory, { mode: 448 });
-    const identity = {
-      fingerprint,
-      provider,
-      cwd,
-      checkout_root: checkout,
-      preflight,
-      requested_at: timestamp()
-    };
-    await atomicJson(
-      path5.join(directory, "request.json"),
-      input2.trace ? {
-        ...request,
-        ...identity,
-        execution_command: commandOverride?.command ?? command,
-        execution_args: commandOverride?.args ?? args,
-        test_command_override: Boolean(commandOverride)
-      } : identity
-    );
-    if (input2.trace) {
-      await writeFile2(path5.join(directory, "prompt.txt"), prompt, {
-        flag: "wx",
-        mode: 384
-      });
-    }
-    const state = {};
-    const execution = await runProcess({
-      command: commandOverride?.command ?? command,
-      args: commandOverride?.args ?? args,
-      cwd,
-      directory,
-      prompt,
-      signal,
-      timeout: input2.timeout_seconds,
-      trace: input2.trace,
-      onEvent(event) {
-        if (!event || typeof event !== "object") return;
-        if (preflight) {
-          if (event.type === "preflight.completed") state.native_result = event;
-          return;
-        }
-        adapter.consume(state, event);
-        if (state.reported_model && !adapter.modelMatches(input2.model, state.reported_model))
-          return "model_mismatch";
-        if (input2.resume_session_id && state.session_id && state.session_id !== input2.resume_session_id)
-          return "session_mismatch";
-      }
-    });
-    const status = execution.status === "exited" ? state.failed ? "failed" : state.native_result ? "completed" : "missing_result" : execution.status;
-    const resultLimit = input2.max_result_chars ?? 4e3;
-    const resultTruncated = typeof state.result === "string" && state.result.length > resultLimit;
-    const resultFile = resultTruncated ? path5.join(directory, "result.txt") : null;
-    if (resultFile) {
-      await writeFile2(resultFile, state.result, { flag: "wx", mode: 384 });
-    }
-    const completion = {
-      bridge_version: VERSION,
-      provider,
-      delegation_id: input2.delegation_id,
-      ...execution,
-      status,
-      completed_at: timestamp(),
-      session_id: state.session_id ?? "unknown",
-      requested_model: input2.model ?? null,
-      reported_model: state.reported_model ?? "unknown",
-      requested_effort: input2.effort ?? null,
-      permission_denials: state.permission_denials ?? [],
-      permission_denials_count: state.permission_denials?.length ?? 0,
-      result_truncated: resultTruncated,
-      result_file: resultFile,
-      result_characters: typeof state.result === "string" ? state.result.length : 0,
-      result: typeof state.result === "string" ? state.result.slice(0, resultLimit) : null,
-      native_usage: state.native_usage ?? null,
-      native_model_usage: state.native_model_usage ?? null,
-      native_total_cost_usd: state.native_total_cost_usd ?? null,
-      usage_note: "Raw provider fields. Missing values are unknown; resumed totals may be cumulative. No API cost estimate is made.",
-      evidence_directory: directory,
-      trace: input2.trace
-    };
-    if (input2.trace && state.native_result)
-      await atomicJson(
-        path5.join(directory, "native-result.json"),
-        state.native_result
-      );
-    await atomicJson(path5.join(directory, "completion.json"), completion);
-    return completion;
+    const cached2 = await inspectDelegation(plan);
+    if (cached2) return cached2;
+    await reserveDelegation(plan, options);
+    return await executeDelegation(plan, options);
   } finally {
     await release();
   }
+}
+
+// src/application/batch.mjs
+import { mkdir as mkdir4, lstat as lstat2, rm } from "node:fs/promises";
+import { hostname as hostname5 } from "node:os";
+import path7 from "node:path";
+
+// src/platform/batches.mjs
+import { mkdir as mkdir3, realpath as realpath3 } from "node:fs/promises";
+import { homedir, hostname as hostname4 } from "node:os";
+import path6 from "node:path";
+var MAX_BATCH_RESULT_BYTES = 256 * 1024;
+async function batchDirectory(provider, id) {
+  const base = process.env.FARCALL_STATE_DIR ?? path6.join(
+    process.env.XDG_STATE_HOME ?? path6.join(homedir(), ".local/state"),
+    "farcall"
+  );
+  if (!path6.isAbsolute(base))
+    throw new Error("FARCALL_STATE_DIR must be absolute");
+  await mkdir3(base, { recursive: true, mode: 448 });
+  const root = await containedDirectory(await realpath3(base), "batches");
+  const providers = await containedDirectory(root, provider);
+  return path6.join(providers, id);
+}
+var taskStateFile = (directory, index) => path6.join(directory, `task-${index}.json`);
+function taskResult(task, worker = null, status = "not_started") {
+  return {
+    task_id: task.task_id,
+    delegation_id: task.delegation_id,
+    status: worker?.status ?? status,
+    session_id: worker?.session_id ?? "unknown",
+    evidence_directory: task.evidence_directory,
+    worker_result_file: worker ? path6.join(task.evidence_directory, "completion.json") : null,
+    worker_result: worker
+  };
+}
+function boundBatchResult(result) {
+  const bounded = {
+    ...result,
+    tasks: result.tasks.map((task) => ({ ...task }))
+  };
+  const bytes = () => Buffer.byteLength(JSON.stringify(bounded));
+  const bySize = bounded.tasks.toSorted(
+    (a, b) => JSON.stringify(b.worker_result).length - JSON.stringify(a.worker_result).length
+  );
+  for (const task of bySize) {
+    if (bytes() <= MAX_BATCH_RESULT_BYTES) break;
+    if (task.worker_result) {
+      task.worker_result = null;
+      task.result_externalized = true;
+    }
+  }
+  if (bytes() > MAX_BATCH_RESULT_BYTES)
+    throw new Error("Batch metadata exceeds result limit");
+  return bounded;
+}
+async function saveBatchResult(directory, result) {
+  const bounded = boundBatchResult(result);
+  await atomicJson(path6.join(directory, "completion.json"), bounded);
+  return bounded;
+}
+async function readOptional(file2) {
+  try {
+    return await readJson(file2);
+  } catch (error62) {
+    if (error62.code === "ENOENT") return null;
+    throw error62;
+  }
+}
+async function recoverBatch(directory, request) {
+  const completed = await readOptional(path6.join(directory, "completion.json"));
+  if (completed) return completed;
+  let active = false;
+  if (request.hostname === hostname4() && request.server_pid !== process.pid) {
+    try {
+      process.kill(request.server_pid, 0);
+      active = true;
+    } catch (error62) {
+      if (error62.code !== "ESRCH") active = true;
+    }
+  }
+  const tasks = await Promise.all(
+    request.tasks.map(async (task, index) => {
+      const state = await readOptional(taskStateFile(directory, index));
+      if (state?.phase === "terminal") return state.result;
+      const identity = await readOptional(
+        path6.join(task.evidence_directory, "request.json")
+      );
+      const worker = identity?.fingerprint === task.fingerprint ? await readOptional(
+        path6.join(task.evidence_directory, "completion.json")
+      ) : null;
+      if (worker) return taskResult(task, worker);
+      return taskResult(
+        task,
+        null,
+        state?.phase === "started" ? "unknown" : "not_started"
+      );
+    })
+  );
+  return boundBatchResult({
+    batch_id: request.batch_id,
+    provider: request.provider,
+    status: active ? "active" : "interrupted",
+    evidence_directory: directory,
+    tasks,
+    recovery_note: "No tasks were redispatched. Unknown includes dispatch intent without a recorded outcome. Inspect existing evidence and worker processes before recovery; never substitute a new session."
+  });
+}
+
+// src/application/batch.mjs
+var activeBatches = /* @__PURE__ */ new Map();
+var contains = (a, b) => {
+  const relative = path7.relative(a, b);
+  return relative === "" || !relative.startsWith(`..${path7.sep}`) && relative !== ".." && !path7.isAbsolute(relative);
+};
+function validateIsolation(plans) {
+  for (let i = 0; i < plans.length; i++) {
+    for (const other of plans.slice(i + 1)) {
+      if (plans[i].gitDirectory && plans[i].gitDirectory === other.gitDirectory)
+        throw new Error("Batch tasks must not share a Git directory");
+      for (const key of ["cwd", "checkout"]) {
+        if (contains(plans[i][key], other[key]) || contains(other[key], plans[i][key]))
+          throw new Error(
+            "Batch requires distinct, non-overlapping working directories and checkout roots"
+          );
+      }
+    }
+  }
+}
+async function runBatch(provider, value, options = {}) {
+  const input2 = parseBatch(provider, value);
+  const plans = [];
+  for (const { task_id, ...task } of input2.tasks) {
+    const plan = await prepareDelegation(provider, task);
+    plans.push({
+      ...plan,
+      task_id,
+      gitDirectory: await gitDirectory(plan.checkout)
+    });
+  }
+  validateIsolation(plans);
+  const tasks = plans.map((plan) => ({
+    task_id: plan.task_id,
+    delegation_id: plan.input.delegation_id,
+    fingerprint: plan.fingerprint,
+    evidence_directory: plan.directory
+  }));
+  const fingerprint = sha256(JSON.stringify({ provider, tasks }));
+  const directory = await batchDirectory(provider, input2.batch_id);
+  const existing = activeBatches.get(directory);
+  if (existing) {
+    if (existing.fingerprint !== fingerprint)
+      throw new Error("Batch ID already used for a different request");
+    return existing.pending;
+  }
+  const pending = admitBatch(
+    provider,
+    input2,
+    plans,
+    tasks,
+    fingerprint,
+    directory,
+    options
+  );
+  activeBatches.set(directory, { fingerprint, pending });
+  try {
+    return await pending;
+  } finally {
+    activeBatches.delete(directory);
+  }
+}
+async function admitBatch(provider, input2, plans, tasks, fingerprint, directory, options) {
+  try {
+    await mkdir4(directory, { mode: 448 });
+  } catch (error62) {
+    if (error62.code !== "EEXIST") throw error62;
+    const stat2 = await lstat2(directory);
+    if (!stat2.isDirectory() || stat2.isSymbolicLink())
+      throw new Error("Batch directory must be a real directory", {
+        cause: error62
+      });
+    const previous = await readOptional(path7.join(directory, "request.json"));
+    if (!previous)
+      throw new Error(
+        "Incomplete batch identity; no workers redispatched. Inspect batch evidence.",
+        { cause: error62 }
+      );
+    if (previous.fingerprint !== fingerprint)
+      throw new Error("Batch ID already used for a different request", {
+        cause: error62
+      });
+    return recoverBatch(directory, previous);
+  }
+  const request = {
+    batch_id: input2.batch_id,
+    provider,
+    fingerprint,
+    bridge_version: VERSION,
+    server_pid: process.pid,
+    hostname: hostname5(),
+    requested_at: timestamp(),
+    tasks
+  };
+  await atomicJson(path7.join(directory, "request.json"), request);
+  const result = (status, results, extra = {}) => ({
+    batch_id: input2.batch_id,
+    provider,
+    status,
+    tasks: results,
+    evidence_directory: directory,
+    ...extra
+  });
+  const releases = [];
+  const reserved = [];
+  let admitted = false;
+  try {
+    for (const plan of plans.toSorted(
+      (a, b) => a.lockRoot.localeCompare(b.lockRoot)
+    )) {
+      releases.push(
+        await acquireLock(plan.lockRoot, {
+          batch_id: input2.batch_id,
+          delegation_id: plan.input.delegation_id,
+          provider,
+          server_pid: process.pid,
+          started_at: timestamp()
+        })
+      );
+    }
+    const cached2 = [];
+    for (const plan of plans) cached2.push(await inspectDelegation(plan));
+    for (let i = 0; i < plans.length; i++) {
+      if (!cached2[i]) {
+        await reserveDelegation(plans[i], {
+          ...options,
+          onReserved: (folder) => reserved.push(folder)
+        });
+      }
+      await atomicJson(
+        taskStateFile(directory, i),
+        cached2[i] ? { phase: "terminal", result: taskResult(tasks[i], cached2[i]) } : { phase: "not_started" }
+      );
+    }
+    admitted = true;
+    const results = await Promise.all(
+      plans.map(async (plan, index) => {
+        if (cached2[index]) return taskResult(tasks[index], cached2[index]);
+        let started = false;
+        let terminal;
+        try {
+          if (!options.signal?.aborted) {
+            await atomicJson(taskStateFile(directory, index), {
+              phase: "started",
+              dispatched_at: timestamp()
+            });
+            started = true;
+          }
+          terminal = taskResult(
+            tasks[index],
+            await executeDelegation(plan, options)
+          );
+          if (!started) terminal.dispatch_state = "not_started";
+        } catch (error62) {
+          terminal = taskResult(
+            tasks[index],
+            null,
+            started ? "unknown" : "not_started"
+          );
+          terminal.error = String(error62?.message ?? error62).slice(0, 2e3);
+        }
+        try {
+          await atomicJson(taskStateFile(directory, index), {
+            phase: "terminal",
+            result: terminal
+          });
+        } catch (error62) {
+          terminal.persistence_error = String(error62?.message ?? error62).slice(
+            0,
+            2e3
+          );
+        }
+        return terminal;
+      })
+    );
+    const status = results.every((task) => task.status === "completed") ? "completed" : results.some((task) => task.status === "cancelled") ? "cancelled" : results.some((task) => task.status === "unknown") ? "interrupted" : "partial_failure";
+    return await saveBatchResult(directory, result(status, results));
+  } catch (error62) {
+    if (admitted) throw error62;
+    await Promise.all(
+      reserved.map((folder) => rm(folder, { recursive: true, force: true }))
+    );
+    return await saveBatchResult(
+      directory,
+      result(
+        "rejected",
+        tasks.map((task) => taskResult(task)),
+        {
+          error: String(error62?.message ?? error62).slice(0, 2e3)
+        }
+      )
+    );
+  } finally {
+    await releaseLocks(releases);
+  }
+}
+async function releaseLocks(releases) {
+  const cleanup = await Promise.allSettled(
+    releases.map((release) => release())
+  );
+  const errors = cleanup.filter((entry) => entry.status === "rejected").map((entry) => entry.reason);
+  if (errors.length)
+    throw new AggregateError(
+      errors,
+      "Failed to release batch locks; inspect evidence"
+    );
 }
 
 // src/transport/server.mjs
@@ -37197,7 +37606,7 @@ async function startServer(provider) {
   });
   const active = /* @__PURE__ */ new Map();
   let closing = false;
-  async function handle(input2, context, preflight) {
+  async function handle(input2, context, preflight, batch = false) {
     if (closing)
       return {
         isError: true,
@@ -37207,7 +37616,7 @@ async function startServer(provider) {
     const cancel = () => controller.abort();
     context.signal.addEventListener("abort", cancel, { once: true });
     if (context.signal.aborted) cancel();
-    const pending = delegate(provider, input2, {
+    const pending = (batch ? runBatch : delegate)(provider, input2, {
       signal: controller.signal,
       preflight
     });
@@ -37216,7 +37625,13 @@ async function startServer(provider) {
       const result = await pending;
       return {
         isError: result.status !== "completed",
-        content: [{ type: "text", text: JSON.stringify(result) }]
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result)
+          }
+        ],
+        ...batch ? { structuredContent: result } : {}
       };
     } catch (error62) {
       return {
@@ -37241,6 +37656,20 @@ async function startServer(provider) {
       }
     },
     (input2, context) => handle(input2, context, false)
+  );
+  server.registerTool(
+    "run_batch",
+    {
+      description: `Run 1\u20135 ${provider} tasks concurrently in distinct, non-overlapping checkouts. One call waits for all outcomes; no status polling. Each task follows run's contract unchanged. Supply a stable batch_id and task_id per task. Identical retries never redispatch; corrections use new batch and delegation IDs with exact previous sessions. Use a client timeout of at least 7200 seconds. Filesystem isolation beyond checkout admission is the caller's responsibility.`,
+      inputSchema: provider === "claude" ? claudeBatchInput : codexBatchInput,
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: true,
+        idempotentHint: true,
+        openWorldHint: true
+      }
+    },
+    (input2, context) => handle(input2, context, false, true)
   );
   server.registerTool(
     "preflight",

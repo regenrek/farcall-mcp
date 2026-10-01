@@ -110,3 +110,5 @@ A shared lock at the nearest Git root prevents overlapping Farcall workers, incl
 Cancellation & timeout terminate the child's process group. A child that deliberately detaches into another group is outside that boundary. Captured stdout & stderr share a drain window of at most one second after process exit; forced pipe closure is reported as `stdout_truncated` or `stderr_truncated`. With tracing enabled, stderr goes directly to its log file. After a hard server crash, inspect `artifacts/farcall/.active` & its processes before removing the lock.
 
 Farcall is a trusted local CLI bridge, not an isolation boundary for untrusted agents.
+
+For multiple concurrent tasks through one pending call, see [parallel batches](batches.md). Each task keeps the `run` contract above.
