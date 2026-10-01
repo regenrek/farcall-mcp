@@ -13,6 +13,18 @@ export const codex = {
       `model_reasoning_effort=${JSON.stringify(input.effort)}`,
       "-c",
       'approval_policy="never"',
+      ...(input.writable_roots !== undefined
+        ? [
+            "-c",
+            `sandbox_workspace_write.writable_roots=${JSON.stringify(input.writable_roots)}`,
+          ]
+        : []),
+      ...(input.network_access !== undefined
+        ? [
+            "-c",
+            `sandbox_workspace_write.network_access=${input.network_access}`,
+          ]
+        : []),
       ...(input.allow_non_git ? ["--skip-git-repo-check"] : []),
       ...(input.resume_session_id
         ? ["resume", input.resume_session_id, "-"]

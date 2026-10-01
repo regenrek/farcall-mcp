@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.6] - 2026-10-01
+
+### Added
+
+- Optional Codex `writable_roots` and `network_access` permissions for single runs and each batch task, including exact-session resume.
+- Shared admission claims for every explicit write scope, rejecting overlapping paths and Git aliases across concurrent calls and providers.
+
+### Verification
+
+- Deterministic MCP regressions for permission validation, resume, conflicting scopes, simultaneous admission and cancellation cleanup.
+- Model-free Codex 0.159.2 sandbox checks: explicit roots writable, unrelated paths and Git metadata denied, TCP access disabled/enabled as requested.
+
 ## [0.1.5] - 2026-10-01
 
 ### Added

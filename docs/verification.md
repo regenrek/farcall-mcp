@@ -1,5 +1,27 @@
 # Verification
 
+## Explicit Codex permissions (0.1.6)
+
+On 1 October 2026, the local macOS check passed all 104 deterministic tests,
+lint, formatting and bundle generation. Both offline npm entrypoints completed
+their MCP preflights; both plugin manifests and the marketplace passed strict
+validation. All 12 emitted tool schemas passed Draft 2020-12 meta-schema checking
+and compilation with `jsonschema-rs` 0.58.2.
+
+New regressions cover optional permission overrides, explicit false/empty values,
+invalid roots, symlink and Git aliases, overlapping extra directories, concurrent
+admission from separate servers, cross-provider conflicts, exact-session resume,
+changed retry rejection and cleanup after cancellation, shutdown or timeout.
+
+A separate model-free check used the real Codex CLI 0.159.2 sandbox with the
+adapter's generated configuration arguments. Writes succeeded in the working
+directory and two explicitly added directories. An unrelated directory and Git
+metadata remained protected. A local HTTP fixture was unreachable with
+`network_access: false` and reachable with `true`. This establishes local TCP
+and filesystem behavior on macOS, not external connectivity, browser startup,
+Linux sandbox behavior or a real model task. Evidence is local under
+`artifacts/sandbox-diagnosis/`; no benchmark inputs or active installations changed.
+
 ## What was checked locally
 
 On 28 September 2026, Node 24.19.0 on macOS passed the deterministic tests, Oxlint with zero warnings, formatting, the local Codex scaffold validator on both plugins & both Claude plugin validators. That initial check used the external Codex plugin-creator scaffold validator, which is not part of this repository; it is not a native host installation test. The CLI argument shapes were checked against Claude Code 2.1.283 & Codex CLI 0.157.0 without invoking a model.

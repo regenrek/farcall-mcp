@@ -733,3 +733,314 @@ test("an aborted signal does not relabel existing completed and failed outcomes"
   assert.equal(replay.status, "partial_failure");
   assert.deepEqual(replay.tasks, original.tasks);
 });
+
+for (const mode of [
+  "same-extra",
+  "extra-alias",
+  "extra-cwd",
+  "extra-parent",
+  "extra-checkout",
+  "missing-extra",
+  "file-extra",
+  "relative-extra",
+  "readonly-network",
+  "readonly-roots",
+]) {
+  test(`writable scope admission rejects ${mode} before any dispatch`, async (t) => {
+    const { root, tasks, call } = await setup(t, "codex", 2);
+    for (const task of tasks) task.sandbox = "workspace-write";
+    const extra = path.join(root, "shared");
+    await mkdir(extra);
+    tasks[0].writable_roots = [extra];
+    if (mode === "same-extra") tasks[1].writable_roots = [extra];
+    if (mode === "extra-alias") {
+      const alias = path.join(root, "alias");
+      await symlink(extra, alias);
+      tasks[1].writable_roots = [alias];
+    }
+    if (mode === "extra-cwd") tasks[0].writable_roots = [tasks[1].cwd];
+    if (mode === "extra-parent") tasks[0].writable_roots = [root];
+    if (mode === "extra-checkout") {
+      const nested = path.join(tasks[1].cwd, "nested");
+      await mkdir(nested);
+      tasks[0].writable_roots = [nested];
+    }
+    if (mode === "missing-extra")
+      tasks[1].writable_roots = [path.join(root, "missing")];
+    if (mode === "file-extra") {
+      const file = path.join(root, "file");
+      await writeFile(file, "fixture");
+      tasks[1].writable_roots = [file];
+    }
+    if (mode === "relative-extra") tasks[1].writable_roots = ["relative"];
+    if (mode === "readonly-network") {
+      tasks[1].sandbox = "read-only";
+      tasks[1].network_access = false;
+    }
+    if (mode === "readonly-roots") {
+      tasks[1].sandbox = "read-only";
+      tasks[1].writable_roots = [];
+    }
+    assert.equal((await call()).isError, true);
+    await noStarts(tasks);
+    await unlocked(tasks);
+  });
+}
+
+test("batch permissions are canonical, per-task, fingerprinted and preserved on exact resume", async (t) => {
+  const { root, tasks, batch, call } = await setup(t, "codex", 2);
+  const extra = path.join(root, 'plugin "quoted" \\ path');
+  await mkdir(extra);
+  const alias = path.join(root, "alias");
+  await symlink(extra, alias);
+  Object.assign(tasks[0], {
+    sandbox: "workspace-write",
+    writable_roots: [alias, extra],
+    network_access: true,
+  });
+  Object.assign(tasks[1], {
+    sandbox: "workspace-write",
+    writable_roots: [],
+    network_access: false,
+  });
+  const original = (await call()).structuredContent;
+  assert.equal(original.status, "completed");
+  for (const [i, task] of tasks.entries()) {
+    const args = (await json(path.join(task.cwd, "started.json"))).args;
+    assert.ok(
+      args.includes(`sandbox_workspace_write.network_access=${i === 0}`),
+    );
+    assert.ok(
+      args.includes(
+        `sandbox_workspace_write.writable_roots=${JSON.stringify(i === 0 ? [extra] : [])}`,
+      ),
+    );
+  }
+  await absent(path.join(extra, "artifacts/farcall/.active"));
+  assert.deepEqual(await readdir(path.join(root, "state/write-scopes")), []);
+  assert.equal(
+    (
+      await call({
+        ...batch,
+        tasks: tasks.map((task, i) =>
+          i ? task : { ...task, network_access: false },
+        ),
+      })
+    ).isError,
+    true,
+  );
+  const changedRoot = path.join(root, "different");
+  await mkdir(changedRoot);
+  assert.equal(
+    (
+      await call({
+        ...batch,
+        tasks: tasks.map((task, i) =>
+          i ? task : { ...task, writable_roots: [changedRoot] },
+        ),
+      })
+    ).isError,
+    true,
+  );
+  const correction = {
+    batch_id: "permissions-resume",
+    tasks: tasks.map((task, i) => ({
+      ...task,
+      delegation_id: `fix-${i}`,
+      resume_delegation_id: task.delegation_id,
+      resume_session_id: original.tasks[i].session_id,
+    })),
+  };
+  assert.equal((await call(correction)).structuredContent.status, "completed");
+  for (const [i, task] of tasks.entries()) {
+    const args = (await json(path.join(task.cwd, "started.json"))).args;
+    assert.ok(
+      args.indexOf(`sandbox_workspace_write.network_access=${i === 0}`) <
+        args.indexOf("resume"),
+    );
+    assert.equal(
+      args[args.indexOf("resume") + 1],
+      original.tasks[i].session_id,
+    );
+  }
+});
+
+for (const mode of ["nested-extra", "git-alias", "cross-provider"]) {
+  test(`separate calls reject ${mode} overlap against an active worker and release extra locks`, async (t) => {
+    const { root, tasks, call, client, connect } = await setup(t, "codex", 2, [
+      { delay: 600 },
+      {},
+    ]);
+    const extra = path.join(root, "runtime");
+    await mkdir(extra);
+    const child = path.join(extra, "db");
+    await mkdir(child);
+    const { task_id: ignored, ...single } = tasks[0];
+    assert.equal(ignored, "w0");
+    Object.assign(single, {
+      sandbox: "workspace-write",
+      writable_roots: [extra],
+      trace: false,
+    });
+    const pending = client.callTool({ name: "run", arguments: single });
+    await waitFor(path.join(tasks[0].cwd, "started.json"));
+    let response;
+    if (mode === "git-alias") {
+      await rm(path.join(tasks[1].cwd, ".git"), { recursive: true });
+      await symlink(
+        path.join(tasks[0].cwd, ".git"),
+        path.join(tasks[1].cwd, ".git"),
+      );
+      response = await call({ batch_id: "alias-active", tasks: [tasks[1]] });
+    } else if (mode === "cross-provider") {
+      // A second provider process uses the same provider-neutral scope registry.
+      const claudeClient = new Client({ name: "scope-check", version: "1" });
+      try {
+        await claudeClient.connect(
+          new StdioClientTransport({
+            command: process.execPath,
+            args: [path.resolve("plugins/claude-worker/server.mjs")],
+            env: {
+              ...process.env,
+              FARCALL_STATE_DIR: path.join(root, "state"),
+            },
+          }),
+        );
+        response = await claudeClient.callTool({
+          name: "preflight",
+          arguments: {
+            cwd: child,
+            delegation_id: "overlap",
+            duration_seconds: 0,
+          },
+        });
+      } finally {
+        await claudeClient.close();
+      }
+    } else {
+      const { client: other } = await connect();
+      response = await other.callTool({
+        name: "run_batch",
+        arguments: {
+          batch_id: "nested-active",
+          tasks: [
+            {
+              ...tasks[1],
+              sandbox: "workspace-write",
+              writable_roots: [child],
+            },
+          ],
+        },
+      });
+    }
+    assert.equal(response.isError, true);
+    assert.match(JSON.stringify(response), /active or stale worker lock/);
+    assert.equal((await pending).isError, false);
+    await absent(path.join(extra, "artifacts/farcall/.active"));
+    assert.deepEqual(await readdir(path.join(root, "state/write-scopes")), []);
+  });
+}
+
+for (const mode of ["cancel", "shutdown", "timeout", "locked-extra"]) {
+  test(`additional write scope cleanup on ${mode}`, async (t) => {
+    const { root, tasks, batch, call, transport, ledger } = await setup(
+      t,
+      "codex",
+      2,
+      [
+        { tree: true, delay: 20000 },
+        { tree: true, delay: 20000 },
+      ],
+    );
+    for (const [i, task] of tasks.entries()) {
+      const extra = path.join(root, `runtime-${i}`);
+      await mkdir(extra);
+      Object.assign(task, {
+        sandbox: "workspace-write",
+        writable_roots: [extra],
+        timeout_seconds: mode === "timeout" ? 1 : 10,
+      });
+    }
+    if (mode === "locked-extra") {
+      const lock = path.join(tasks[1].writable_roots[0], "artifacts/farcall");
+      await mkdir(lock, { recursive: true });
+      await writeFile(path.join(lock, ".active"), "{}");
+      assert.equal((await call()).structuredContent.status, "rejected");
+      await noStarts(tasks);
+      await absent(
+        path.join(tasks[0].writable_roots[0], "artifacts/farcall/.active"),
+      );
+    } else {
+      const controller = new AbortController();
+      const pending = call(batch, { signal: controller.signal }).catch(
+        (error) => error,
+      );
+      for (const task of tasks)
+        await waitFor(path.join(task.cwd, "descendant.pid"));
+      if (mode === "cancel") controller.abort();
+      if (mode === "shutdown") process.kill(transport.pid, "SIGTERM");
+      await pending;
+      await waitFor(path.join(ledger, "completion.json"));
+      // Persistence precedes final lock cleanup after transport cancellation.
+      const deadline = performance.now() + 3000;
+      while (
+        (await readdir(path.join(root, "state/write-scopes"))).length &&
+        performance.now() < deadline
+      )
+        await delay(20);
+      for (const task of tasks) {
+        await absent(
+          path.join(task.writable_roots[0], "artifacts/farcall/.active"),
+        );
+        await dead((await json(path.join(task.cwd, "started.json"))).pid);
+        await dead(
+          Number(await readFile(path.join(task.cwd, "descendant.pid"), "utf8")),
+        );
+      }
+    }
+    await unlocked(tasks);
+    assert.deepEqual(await readdir(path.join(root, "state/write-scopes")), []);
+  });
+}
+
+test("simultaneous admissions from separate servers dispatch only one writer to a shared extra root", async (t) => {
+  const { root, tasks, client, connect } = await setup(t, "codex", 2, [
+    { delay: 600 },
+    { delay: 600 },
+  ]);
+  const shared = path.join(root, "runtime");
+  await mkdir(shared);
+  const { client: second } = await connect();
+  const responses = await Promise.all(
+    tasks.map((task, i) => {
+      const { task_id: ignored, ...single } = task;
+      assert.equal(ignored, `w${i}`);
+      return [client, second][i].callTool({
+        name: "run",
+        arguments: {
+          ...single,
+          sandbox: "workspace-write",
+          writable_roots: [shared],
+        },
+      });
+    }),
+  );
+  assert.equal(responses.filter((response) => !response.isError).length, 1);
+  assert.equal(responses.filter((response) => response.isError).length, 1);
+  assert.match(
+    JSON.stringify(responses.find((response) => response.isError)),
+    /active or stale worker lock/,
+  );
+  let starts = 0;
+  for (const task of tasks) {
+    try {
+      await readFile(path.join(task.cwd, "started.json"));
+      starts++;
+    } catch (error) {
+      assert.equal(error.code, "ENOENT");
+    }
+  }
+  assert.equal(starts, 1);
+  await absent(path.join(shared, "artifacts/farcall/.active"));
+  assert.deepEqual(await readdir(path.join(root, "state/write-scopes")), []);
+});

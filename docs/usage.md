@@ -62,6 +62,34 @@ Choose allowed tools for the actual task. The default permission mode does not a
 
 For `codex_worker.run`, use the same common fields, any model your Codex CLI supports (for example `gpt-6-astra`), & `sandbox: "read-only"` for reviews or `"workspace-write"` for implementation. Omit Claude-specific fields. Codex runs with approval requests disabled, so disallowed operations fail instead of waiting for input. No bypass mode is exposed.
 
+For a workspace-write task that needs sibling directories or network access, pass
+explicit per-call permissions. Both fields also work on each `run_batch` task:
+
+```json
+{
+  "sandbox": "workspace-write",
+  "writable_roots": ["/absolute/path/plugin", "/absolute/path/runtime"],
+  "network_access": true
+}
+```
+
+`writable_roots` accepts up to 16 existing absolute directories. Farcall resolves
+symlinks, removes duplicates and locks the corresponding checkout roots; it does
+not create missing directories. `network_access: false` explicitly disables network
+access. An explicit empty roots list overrides Codex's configured extra roots.
+Omitting either field preserves Codex's existing configuration. These fields require
+`sandbox: "workspace-write"`; they do not grant broader access in read-only mode.
+Repeat the intended permissions on exact-session resume. Changed permissions need
+a new delegation ID, and a new batch ID when applicable.
+
+The adapter passes `sandbox_workspace_write.writable_roots` and
+`sandbox_workspace_write.network_access` as CLI config overrides for that invocation.
+It never changes project trust or user/project config files. Project-local Codex
+config loads only for trusted projects, so do not rely on it to convey a worker's
+required permissions. Admin policy and Codex's protected paths still apply;
+adding a checkout does not make its `.git` or `.codex` metadata writable. Network
+access alone does not guarantee that browser automation or dependencies work.
+
 For a task outside Git, explicitly set `allow_non_git: true` (default: `false`). The worker passes `--skip-git-repo-check` for that invocation, including resume. It does not initialize Git or edit Claude/Codex configuration. The sandbox and approval policy remain unchanged; `read-only` alone does not enable this option. Set it again when resuming outside Git. Changing the option requires a new delegation ID, including when retrying a failed call with an unknown session ID.
 
 ```json

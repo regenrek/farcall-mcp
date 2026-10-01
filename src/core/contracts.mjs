@@ -34,6 +34,19 @@ export const codexInput = z.strictObject({
   ...run,
   effort: z.enum(["minimal", "low", "medium", "high", "xhigh", "max", "ultra"]),
   sandbox: z.enum(["read-only", "workspace-write"]).default("read-only"),
+  writable_roots: z
+    .array(absolutePath)
+    .max(16)
+    .optional()
+    .describe(
+      "Additional existing writable directories for this workspace-write invocation. Canonicalized and locked; also supply on resume.",
+    ),
+  network_access: z
+    .boolean()
+    .optional()
+    .describe(
+      "Explicit workspace-write network policy for this invocation. Omit to retain Codex configuration; false disables, true enables. Also supply on resume.",
+    ),
   allow_non_git: z
     .boolean()
     .default(false)
@@ -75,6 +88,15 @@ export function parseInput(provider, value, preflight) {
       ? claudeInput
       : codexInput;
   const input = schema.parse(value);
+  if (
+    !preflight &&
+    provider === "codex" &&
+    input.sandbox !== "workspace-write" &&
+    (input.writable_roots !== undefined || input.network_access !== undefined)
+  )
+    throw new Error(
+      "writable_roots and network_access require sandbox workspace-write",
+    );
   if (
     !preflight &&
     (input.prompt !== undefined) === (input.prompt_file !== undefined)

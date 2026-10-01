@@ -69,8 +69,28 @@ databases. Directory validation is **not an OS sandbox**. Shared databases,
 services, ports, browser sessions and other editors remain the caller's responsibility.
 Keep checkout topology stable during a call. Locks outside Git cover the selected
 working directory, as with `run`; they are not a global filesystem lock manager.
-Checkout locks are path-based: do not run separate calls through different checkout
-roots that alias the same Git directory.
+For Codex workspace-write tasks, `writable_roots` and `network_access` are explicit
+per-task options, as described in [usage](usage.md). Additional roots participate
+in admission, including ancestor/descendant overlap, shared checkouts and Git
+directory aliases. This also excludes conflicting separate `run`/`run_batch`
+calls and calls through the other provider. Multiple roots belonging to one task
+may overlap; roots belonging to different tasks may not. Different subdirectories
+of one checkout are still a single lock scope.
+
+A provider-neutral claim registry under `FARCALL_STATE_DIR/write-scopes` coordinates
+admission across server processes, alongside the existing checkout `.active` files.
+All coordinating servers must use the same state directory and this version or newer.
+Only filesystem admission is serialized; accepted workers still run concurrently.
+The admission mutex waits at most five seconds. Cancellation and normal completion
+remove the claims and all checkout locks. A crash can leave claims or the registry's
+`.active` admission mutex; inspect their owner and worker evidence before removing
+them. Recovery never automatically steals a stale claim. Checkout topology must
+remain stable while a job runs.
+
+Claims cover `cwd` and explicitly supplied roots. They cannot discover additional
+write access inherited from provider configuration, custom tools or an external
+service. Use explicit roots for reproducible worker permissions. Directory admission
+remains a coordination mechanism, not an OS sandbox.
 
 ## Completion, cancellation and timeouts
 

@@ -1,22 +1,13 @@
-import { mkdir, realpath } from "node:fs/promises";
-import { homedir, hostname } from "node:os";
+import { hostname } from "node:os";
 import path from "node:path";
 import { containedDirectory, atomicJson, readJson } from "./artifacts.mjs";
+import { stateDirectory } from "./state.mjs";
 
 export const MAX_BATCH_RESULT_BYTES = 256 * 1024;
 
 // A per-user, provider-scoped ID registry, independent of the task directories.
 export async function batchDirectory(provider, id) {
-  const base =
-    process.env.FARCALL_STATE_DIR ??
-    path.join(
-      process.env.XDG_STATE_HOME ?? path.join(homedir(), ".local/state"),
-      "farcall",
-    );
-  if (!path.isAbsolute(base))
-    throw new Error("FARCALL_STATE_DIR must be absolute");
-  await mkdir(base, { recursive: true, mode: 0o700 });
-  const root = await containedDirectory(await realpath(base), "batches");
+  const root = await containedDirectory(await stateDirectory(), "batches");
   const providers = await containedDirectory(root, provider);
   return path.join(providers, id);
 }

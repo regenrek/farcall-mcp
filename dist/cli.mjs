@@ -47,7 +47,7 @@ var init_package = __esm({
   "package.json"() {
     package_default = {
       name: "farcall-mcp",
-      version: "0.1.5",
+      version: "0.1.6",
       description: "Completion-wait MCP workers for Claude Code and Codex CLI",
       type: "module",
       license: "MIT",
@@ -526,8 +526,8 @@ var init_parseUtil = __esm({
     init_errors();
     init_en();
     makeIssue = (params) => {
-      const { data, path: path8, errorMaps, issueData } = params;
-      const fullPath = [...path8, ...issueData.path || []];
+      const { data, path: path10, errorMaps, issueData } = params;
+      const fullPath = [...path10, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -811,11 +811,11 @@ var init_types = __esm({
     init_parseUtil();
     init_util();
     ParseInputLazyPath = class {
-      constructor(parent, value, path8, key) {
+      constructor(parent, value, path10, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path8;
+        this._path = path10;
         this._key = key;
       }
       get path() {
@@ -4289,10 +4289,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path8) {
-  if (!path8)
+function getElementAtPath(obj, path10) {
+  if (!path10)
     return obj;
-  return path8.reduce((acc, key) => acc?.[key], obj);
+  return path10.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -4551,11 +4551,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path8, issues) {
+function prefixIssues(path10, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path8);
+    iss.path.unshift(path10);
     return iss;
   });
 }
@@ -5076,16 +5076,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path8 = []) => {
+  const processError = (error63, path10 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path8, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path10, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path8, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path10, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path8, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path10, ...issue2.path]);
       } else {
-        const fullpath = [...path8, ...issue2.path];
+        const fullpath = [...path10, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -5124,17 +5124,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path8 = []) => {
+  const processError = (error63, path10 = []) => {
     var _a3;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path8, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path10, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path8, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path10, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path8, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path10, ...issue2.path]);
       } else {
-        const fullpath = [...path8, ...issue2.path];
+        const fullpath = [...path10, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -5173,8 +5173,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path8 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path8) {
+  const path10 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path10) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -6185,9 +6185,9 @@ function parseURLObject(trimmed, def) {
 function stripTabAndNewline(value) {
   return value.replace(asciiTabOrNewline, "");
 }
-function urlHostnameOk(url2, hostname6) {
-  hostname6.lastIndex = 0;
-  return hostname6.test(url2.hostname);
+function urlHostnameOk(url2, hostname7) {
+  hostname7.lastIndex = 0;
+  return hostname7.test(url2.hostname);
 }
 function urlProtocolOk(url2, protocol) {
   protocol.lastIndex = 0;
@@ -21676,11 +21676,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path8) {
-  if (path8.length === 0) {
+function getDotPath(path10) {
+  if (path10.length === 0) {
     return "object root";
   }
-  return path8.reduce((acc, seg, index) => {
+  return path10.reduce((acc, seg, index) => {
     if (index === 0) {
       return String(seg);
     }
@@ -23618,13 +23618,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path8 = ref.slice(1).split("/").filter(Boolean);
-  if (path8.length === 0) {
+  const path10 = ref.slice(1).split("/").filter(Boolean);
+  if (path10.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path8[0] === defsKey) {
-    const key = path8[1] === void 0 ? void 0 : decodeJSONPointerSegment(path8[1]);
+  if (path10[0] === defsKey) {
+    const key = path10[1] === void 0 ? void 0 : decodeJSONPointerSegment(path10[1]);
     if (!key || !ctx.defs[key]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -32078,8 +32078,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path8) {
-      let input2 = path8;
+    function removeDotSegments(path10) {
+      let input2 = path10;
       const output2 = [];
       let nextSlash = -1;
       let len = 0;
@@ -32488,8 +32488,8 @@ var require_schemes = __commonJS({
       }
       if (wsComponent.resourceName) {
         const queryIndex = wsComponent.resourceName.indexOf("?");
-        const path8 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
-        wsComponent.path = path8 && path8 !== "/" ? path8 : void 0;
+        const path10 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path10 && path10 !== "/" ? path10 : void 0;
         wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
@@ -37779,6 +37779,10 @@ function parseBatch(provider2, value) {
 function parseInput(provider2, value, preflight) {
   const schema = preflight ? preflightInput : provider2 === "claude" ? claudeInput : codexInput;
   const input2 = schema.parse(value);
+  if (!preflight && provider2 === "codex" && input2.sandbox !== "workspace-write" && (input2.writable_roots !== void 0 || input2.network_access !== void 0))
+    throw new Error(
+      "writable_roots and network_access require sandbox workspace-write"
+    );
   if (!preflight && input2.prompt !== void 0 === (input2.prompt_file !== void 0)) {
     throw new Error("Provide exactly one of prompt or prompt_file");
   }
@@ -37821,6 +37825,12 @@ var init_contracts = __esm({
       ...run,
       effort: external_exports.enum(["minimal", "low", "medium", "high", "xhigh", "max", "ultra"]),
       sandbox: external_exports.enum(["read-only", "workspace-write"]).default("read-only"),
+      writable_roots: external_exports.array(absolutePath).max(16).optional().describe(
+        "Additional existing writable directories for this workspace-write invocation. Canonicalized and locked; also supply on resume."
+      ),
+      network_access: external_exports.boolean().optional().describe(
+        "Explicit workspace-write network policy for this invocation. Omit to retain Codex configuration; false disables, true enables. Also supply on resume."
+      ),
       allow_non_git: external_exports.boolean().default(false).describe(
         "Allow this invocation outside a Git repository. Also set on resume. Does not change sandbox permissions or edit Git/user configuration."
       )
@@ -37908,6 +37918,14 @@ var init_codex = __esm({
           `model_reasoning_effort=${JSON.stringify(input2.effort)}`,
           "-c",
           'approval_policy="never"',
+          ...input2.writable_roots !== void 0 ? [
+            "-c",
+            `sandbox_workspace_write.writable_roots=${JSON.stringify(input2.writable_roots)}`
+          ] : [],
+          ...input2.network_access !== void 0 ? [
+            "-c",
+            `sandbox_workspace_write.network_access=${input2.network_access}`
+          ] : [],
           ...input2.allow_non_git ? ["--skip-git-repo-check"] : [],
           ...input2.resume_session_id ? ["resume", input2.resume_session_id, "-"] : ["-"]
         ];
@@ -38015,8 +38033,8 @@ async function prepare(input2, preflight) {
         throw new Error("prompt_file must be inside cwd/artifacts");
       const handle = await open2(file2, "r");
       try {
-        const stat2 = await handle.stat();
-        if (!stat2.isFile() || stat2.size > 1e6)
+        const stat3 = await handle.stat();
+        if (!stat3.isFile() || stat3.size > 1e6)
           throw new Error("Prompt must be a file under 1 MB");
         prompt = await handle.readFile("utf8");
       } finally {
@@ -38074,8 +38092,8 @@ async function acquireLock(root, info) {
 }
 async function existingRecord(directory) {
   try {
-    const stat2 = await lstat(directory);
-    if (!stat2.isDirectory() || stat2.isSymbolicLink())
+    const stat3 = await lstat(directory);
+    if (!stat3.isDirectory() || stat3.isSymbolicLink())
       throw new Error("Delegation directory must be a real directory");
     return await readJson(path3.join(directory, "request.json"));
   } catch (error62) {
@@ -38322,16 +38340,175 @@ var init_process = __esm({
   }
 });
 
-// src/application/delegate.mjs
-import { mkdir as mkdir2, writeFile as writeFile2 } from "node:fs/promises";
+// src/platform/state.mjs
+import { mkdir as mkdir2, realpath as realpath3 } from "node:fs/promises";
+import { homedir } from "node:os";
 import path5 from "node:path";
+async function stateDirectory() {
+  const base = process.env.FARCALL_STATE_DIR ?? path5.join(
+    process.env.XDG_STATE_HOME ?? path5.join(homedir(), ".local/state"),
+    "farcall"
+  );
+  if (!path5.isAbsolute(base))
+    throw new Error("FARCALL_STATE_DIR must be absolute");
+  await mkdir2(base, { recursive: true, mode: 448 });
+  return realpath3(base);
+}
+var init_state = __esm({
+  "src/platform/state.mjs"() {
+  }
+});
+
+// src/platform/scopes.mjs
+import { realpath as realpath4, stat as stat2, readdir, lstat as lstat2, unlink as unlink2 } from "node:fs/promises";
+import { randomUUID as randomUUID2 } from "node:crypto";
+import { hostname as hostname4 } from "node:os";
+import path6 from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
+async function canonicalWritableRoots(roots) {
+  const resolved = [];
+  for (const root of roots) {
+    const canonical = await realpath4(root);
+    if ([root, canonical].some(
+      (value) => [...value].some(
+        (char) => char.codePointAt(0) < 32 || char.codePointAt(0) === 127
+      )
+    ))
+      throw new Error("Writable paths must not contain control characters");
+    if (!(await stat2(canonical)).isDirectory())
+      throw new Error("Writable roots must be existing directories");
+    resolved.push(canonical);
+  }
+  return [...new Set(resolved)].toSorted();
+}
+async function delegationScopes(roots) {
+  const scopes = /* @__PURE__ */ new Map();
+  for (const root of roots) {
+    const checkout = await checkoutRoot(root);
+    if (scopes.has(checkout)) continue;
+    scopes.set(checkout, {
+      root: checkout,
+      git_directory: await gitDirectory(checkout),
+      lock_root: await containedDirectory(
+        await containedDirectory(checkout, "artifacts"),
+        "farcall"
+      )
+    });
+  }
+  return [...scopes.values()];
+}
+function validateScopeIsolation(plans) {
+  for (let i = 0; i < plans.length; i++)
+    for (const other of plans.slice(i + 1))
+      if (scopesOverlap(plans[i].scopes, other.scopes))
+        throw new Error(
+          "Batch requires distinct, non-overlapping checkout and writable roots, including Git directory aliases"
+        );
+}
+async function admissionGuard(registry2) {
+  const deadline = performance.now() + 5e3;
+  for (; ; ) {
+    try {
+      return await acquireLock(registry2, { server_pid: process.pid });
+    } catch (error62) {
+      if (error62.cause?.code !== "EEXIST" || performance.now() >= deadline)
+        throw error62;
+      await delay(25);
+    }
+  }
+}
+async function releaseAll(releases) {
+  const settled = await Promise.allSettled(
+    releases.map((release) => release())
+  );
+  const errors = settled.filter((item) => item.status === "rejected").map((item) => item.reason);
+  if (errors.length)
+    throw new AggregateError(
+      errors,
+      "Failed to release worker locks; inspect evidence"
+    );
+}
+async function acquireDelegationLocks(plans, info) {
+  validateScopeIsolation(plans);
+  const registry2 = await containedDirectory(
+    await stateDirectory(),
+    "write-scopes"
+  );
+  const releaseGuard = await admissionGuard(registry2);
+  const claim2 = path6.join(registry2, `${randomUUID2()}.json`);
+  const scopes = plans.flatMap((plan) => plan.scopes);
+  const releases = [];
+  try {
+    for (const name of await readdir(registry2)) {
+      if (!name.endsWith(".json")) continue;
+      const file2 = path6.join(registry2, name);
+      if (!(await lstat2(file2)).isFile())
+        throw new Error("Invalid write-scope claim; inspect registry");
+      const previous = await readJson(file2);
+      if (!Array.isArray(previous.scopes) || previous.scopes.some(
+        (scope) => typeof scope.root !== "string" || !path6.isAbsolute(scope.root)
+      ))
+        throw new Error("Incomplete write-scope claim; inspect registry");
+      if (scopesOverlap(scopes, previous.scopes))
+        throw new Error(
+          `Checkout already has an active or stale worker lock (overlapping writable scope). Inspect ${file2} before recovery.`
+        );
+    }
+    for (const root of [
+      ...new Set(scopes.map((scope) => scope.lock_root))
+    ].toSorted())
+      releases.push(await acquireLock(root, info));
+    await atomicJson(claim2, { ...info, hostname: hostname4(), scopes });
+  } catch (error62) {
+    await releaseAll(releases);
+    throw error62;
+  } finally {
+    await releaseGuard();
+  }
+  return async () => {
+    const unlock = await admissionGuard(registry2);
+    try {
+      await releaseAll(releases);
+      await unlink2(claim2);
+    } finally {
+      await unlock();
+    }
+  };
+}
+var contains, scopesOverlap;
+var init_scopes = __esm({
+  "src/platform/scopes.mjs"() {
+    init_artifacts();
+    init_checkout();
+    init_state();
+    contains = (a, b) => {
+      const relative = path6.relative(a, b);
+      return relative === "" || relative !== ".." && !relative.startsWith(`..${path6.sep}`) && !path6.isAbsolute(relative);
+    };
+    scopesOverlap = (a, b) => a.some(
+      (left) => b.some(
+        (right) => contains(left.root, right.root) || contains(right.root, left.root) || left.git_directory && left.git_directory === right.git_directory
+      )
+    );
+  }
+});
+
+// src/application/delegate.mjs
+import { mkdir as mkdir3, writeFile as writeFile2 } from "node:fs/promises";
+import path7 from "node:path";
 async function prepareDelegation(provider2, value, { preflight = false } = {}) {
   if (!adapters[provider2]) throw new Error("Unknown provider");
   const input2 = parseInput(provider2, value, preflight);
+  if (input2.writable_roots !== void 0)
+    input2.writable_roots = await canonicalWritableRoots(input2.writable_roots);
   const { cwd, root, prompt, checkout, lockRoot } = await prepare(
     input2,
     preflight
   );
+  const scopes = await delegationScopes([
+    checkout,
+    ...input2.writable_roots ?? []
+  ]);
   const adapter = adapters[provider2];
   const command = preflight ? process.execPath : adapter.executable();
   const args = preflight ? ["-e", preflightScript, String(input2.duration_seconds), input2.outcome] : adapter.args(input2);
@@ -38350,7 +38527,7 @@ async function prepareDelegation(provider2, value, { preflight = false } = {}) {
     prompt_sha256: sha256(prompt)
   };
   const fingerprint = sha256(JSON.stringify(request));
-  const directory = path5.join(root, input2.delegation_id);
+  const directory = path7.join(root, input2.delegation_id);
   return {
     input: input2,
     cwd,
@@ -38358,6 +38535,7 @@ async function prepareDelegation(provider2, value, { preflight = false } = {}) {
     prompt,
     checkout,
     lockRoot,
+    scopes,
     adapter,
     command,
     args,
@@ -38375,7 +38553,7 @@ async function inspectDelegation(plan) {
     if (previous.fingerprint !== fingerprint)
       throw new Error("Delegation ID already used for a different request");
     try {
-      return await readJson(path5.join(directory, "completion.json"));
+      return await readJson(path7.join(directory, "completion.json"));
     } catch (error62) {
       if (error62.code === "ENOENT")
         throw new Error(
@@ -38386,7 +38564,7 @@ async function inspectDelegation(plan) {
     }
   }
   if (input2.resume_session_id) {
-    const oldDirectory = path5.join(root, input2.resume_delegation_id);
+    const oldDirectory = path7.join(root, input2.resume_delegation_id);
     const oldRequest = await existingRecord(oldDirectory);
     if (!oldRequest || oldRequest.provider !== provider2 || oldRequest.cwd !== cwd || oldRequest.preflight) {
       throw new Error(
@@ -38394,7 +38572,7 @@ async function inspectDelegation(plan) {
       );
     }
     const oldCompletion = await readJson(
-      path5.join(oldDirectory, "completion.json")
+      path7.join(oldDirectory, "completion.json")
     );
     if (oldCompletion.session_id !== input2.resume_session_id)
       throw new Error("Resume session does not match its saved completion");
@@ -38415,7 +38593,7 @@ async function reserveDelegation(plan, { commandOverride, onReserved } = {}) {
     args,
     prompt
   } = plan;
-  await mkdir2(directory, { mode: 448 });
+  await mkdir3(directory, { mode: 448 });
   onReserved?.(directory);
   const identity = {
     fingerprint,
@@ -38426,7 +38604,7 @@ async function reserveDelegation(plan, { commandOverride, onReserved } = {}) {
     requested_at: timestamp()
   };
   await atomicJson(
-    path5.join(directory, "request.json"),
+    path7.join(directory, "request.json"),
     input2.trace ? {
       ...request,
       ...identity,
@@ -38436,7 +38614,7 @@ async function reserveDelegation(plan, { commandOverride, onReserved } = {}) {
     } : identity
   );
   if (input2.trace) {
-    await writeFile2(path5.join(directory, "prompt.txt"), prompt, {
+    await writeFile2(path7.join(directory, "prompt.txt"), prompt, {
       flag: "wx",
       mode: 384
     });
@@ -38480,7 +38658,7 @@ async function executeDelegation(plan, { signal, commandOverride } = {}) {
   const status = execution.status === "exited" ? state.failed ? "failed" : state.native_result ? "completed" : "missing_result" : execution.status;
   const resultLimit = input2.max_result_chars ?? 4e3;
   const resultTruncated = typeof state.result === "string" && state.result.length > resultLimit;
-  const resultFile = resultTruncated ? path5.join(directory, "result.txt") : null;
+  const resultFile = resultTruncated ? path7.join(directory, "result.txt") : null;
   if (resultFile) {
     await writeFile2(resultFile, state.result, { flag: "wx", mode: 384 });
   }
@@ -38510,15 +38688,15 @@ async function executeDelegation(plan, { signal, commandOverride } = {}) {
   };
   if (input2.trace && state.native_result)
     await atomicJson(
-      path5.join(directory, "native-result.json"),
+      path7.join(directory, "native-result.json"),
       state.native_result
     );
-  await atomicJson(path5.join(directory, "completion.json"), completion);
+  await atomicJson(path7.join(directory, "completion.json"), completion);
   return completion;
 }
 async function delegate(provider2, value, options = {}) {
   const plan = await prepareDelegation(provider2, value, options);
-  const release = await acquireLock(plan.lockRoot, {
+  const release = await acquireDelegationLocks([plan], {
     delegation_id: plan.input.delegation_id,
     provider: provider2,
     server_pid: process.pid,
@@ -38541,6 +38719,7 @@ var init_delegate = __esm({
     init_contracts();
     init_artifacts();
     init_process();
+    init_scopes();
     adapters = { claude, codex };
     preflightScript = `
   process.stdin.resume();
@@ -38553,20 +38732,12 @@ var init_delegate = __esm({
 });
 
 // src/platform/batches.mjs
-import { mkdir as mkdir3, realpath as realpath3 } from "node:fs/promises";
-import { homedir, hostname as hostname4 } from "node:os";
-import path6 from "node:path";
+import { hostname as hostname5 } from "node:os";
+import path8 from "node:path";
 async function batchDirectory(provider2, id) {
-  const base = process.env.FARCALL_STATE_DIR ?? path6.join(
-    process.env.XDG_STATE_HOME ?? path6.join(homedir(), ".local/state"),
-    "farcall"
-  );
-  if (!path6.isAbsolute(base))
-    throw new Error("FARCALL_STATE_DIR must be absolute");
-  await mkdir3(base, { recursive: true, mode: 448 });
-  const root = await containedDirectory(await realpath3(base), "batches");
+  const root = await containedDirectory(await stateDirectory(), "batches");
   const providers = await containedDirectory(root, provider2);
-  return path6.join(providers, id);
+  return path8.join(providers, id);
 }
 function taskResult(task, worker = null, status = "not_started") {
   return {
@@ -38575,7 +38746,7 @@ function taskResult(task, worker = null, status = "not_started") {
     status: worker?.status ?? status,
     session_id: worker?.session_id ?? "unknown",
     evidence_directory: task.evidence_directory,
-    worker_result_file: worker ? path6.join(task.evidence_directory, "completion.json") : null,
+    worker_result_file: worker ? path8.join(task.evidence_directory, "completion.json") : null,
     worker_result: worker
   };
 }
@@ -38601,7 +38772,7 @@ function boundBatchResult(result) {
 }
 async function saveBatchResult(directory, result) {
   const bounded = boundBatchResult(result);
-  await atomicJson(path6.join(directory, "completion.json"), bounded);
+  await atomicJson(path8.join(directory, "completion.json"), bounded);
   return bounded;
 }
 async function readOptional(file2) {
@@ -38613,10 +38784,10 @@ async function readOptional(file2) {
   }
 }
 async function recoverBatch(directory, request) {
-  const completed = await readOptional(path6.join(directory, "completion.json"));
+  const completed = await readOptional(path8.join(directory, "completion.json"));
   if (completed) return completed;
   let active = false;
-  if (request.hostname === hostname4() && request.server_pid !== process.pid) {
+  if (request.hostname === hostname5() && request.server_pid !== process.pid) {
     try {
       process.kill(request.server_pid, 0);
       active = true;
@@ -38629,10 +38800,10 @@ async function recoverBatch(directory, request) {
       const state = await readOptional(taskStateFile(directory, index));
       if (state?.phase === "terminal") return state.result;
       const identity = await readOptional(
-        path6.join(task.evidence_directory, "request.json")
+        path8.join(task.evidence_directory, "request.json")
       );
       const worker = identity?.fingerprint === task.fingerprint ? await readOptional(
-        path6.join(task.evidence_directory, "completion.json")
+        path8.join(task.evidence_directory, "completion.json")
       ) : null;
       if (worker) return taskResult(task, worker);
       return taskResult(
@@ -38655,29 +38826,16 @@ var MAX_BATCH_RESULT_BYTES, taskStateFile;
 var init_batches = __esm({
   "src/platform/batches.mjs"() {
     init_artifacts();
+    init_state();
     MAX_BATCH_RESULT_BYTES = 256 * 1024;
-    taskStateFile = (directory, index) => path6.join(directory, `task-${index}.json`);
+    taskStateFile = (directory, index) => path8.join(directory, `task-${index}.json`);
   }
 });
 
 // src/application/batch.mjs
-import { mkdir as mkdir4, lstat as lstat2, rm } from "node:fs/promises";
-import { hostname as hostname5 } from "node:os";
-import path7 from "node:path";
-function validateIsolation(plans) {
-  for (let i = 0; i < plans.length; i++) {
-    for (const other of plans.slice(i + 1)) {
-      if (plans[i].gitDirectory && plans[i].gitDirectory === other.gitDirectory)
-        throw new Error("Batch tasks must not share a Git directory");
-      for (const key of ["cwd", "checkout"]) {
-        if (contains(plans[i][key], other[key]) || contains(other[key], plans[i][key]))
-          throw new Error(
-            "Batch requires distinct, non-overlapping working directories and checkout roots"
-          );
-      }
-    }
-  }
-}
+import { mkdir as mkdir4, lstat as lstat3, rm } from "node:fs/promises";
+import { hostname as hostname6 } from "node:os";
+import path9 from "node:path";
 async function runBatch(provider2, value, options = {}) {
   const input2 = parseBatch(provider2, value);
   const plans = [];
@@ -38685,11 +38843,10 @@ async function runBatch(provider2, value, options = {}) {
     const plan = await prepareDelegation(provider2, task);
     plans.push({
       ...plan,
-      task_id,
-      gitDirectory: await gitDirectory(plan.checkout)
+      task_id
     });
   }
-  validateIsolation(plans);
+  validateScopeIsolation(plans);
   const tasks = plans.map((plan) => ({
     task_id: plan.task_id,
     delegation_id: plan.input.delegation_id,
@@ -38725,12 +38882,12 @@ async function admitBatch(provider2, input2, plans, tasks, fingerprint, director
     await mkdir4(directory, { mode: 448 });
   } catch (error62) {
     if (error62.code !== "EEXIST") throw error62;
-    const stat2 = await lstat2(directory);
-    if (!stat2.isDirectory() || stat2.isSymbolicLink())
+    const stat3 = await lstat3(directory);
+    if (!stat3.isDirectory() || stat3.isSymbolicLink())
       throw new Error("Batch directory must be a real directory", {
         cause: error62
       });
-    const previous = await readOptional(path7.join(directory, "request.json"));
+    const previous = await readOptional(path9.join(directory, "request.json"));
     if (!previous)
       throw new Error(
         "Incomplete batch identity; no workers redispatched. Inspect batch evidence.",
@@ -38748,11 +38905,11 @@ async function admitBatch(provider2, input2, plans, tasks, fingerprint, director
     fingerprint,
     bridge_version: VERSION,
     server_pid: process.pid,
-    hostname: hostname5(),
+    hostname: hostname6(),
     requested_at: timestamp(),
     tasks
   };
-  await atomicJson(path7.join(directory, "request.json"), request);
+  await atomicJson(path9.join(directory, "request.json"), request);
   const result = (status, results, extra = {}) => ({
     batch_id: input2.batch_id,
     provider: provider2,
@@ -38761,23 +38918,17 @@ async function admitBatch(provider2, input2, plans, tasks, fingerprint, director
     evidence_directory: directory,
     ...extra
   });
-  const releases = [];
+  let release;
   const reserved = [];
   let admitted = false;
   try {
-    for (const plan of plans.toSorted(
-      (a, b) => a.lockRoot.localeCompare(b.lockRoot)
-    )) {
-      releases.push(
-        await acquireLock(plan.lockRoot, {
-          batch_id: input2.batch_id,
-          delegation_id: plan.input.delegation_id,
-          provider: provider2,
-          server_pid: process.pid,
-          started_at: timestamp()
-        })
-      );
-    }
+    release = await acquireDelegationLocks(plans, {
+      batch_id: input2.batch_id,
+      delegation_ids: input2.tasks.map((task) => task.delegation_id),
+      provider: provider2,
+      server_pid: process.pid,
+      started_at: timestamp()
+    });
     const cached2 = [];
     for (const plan of plans) cached2.push(await inspectDelegation(plan));
     for (let i = 0; i < plans.length; i++) {
@@ -38851,33 +39002,18 @@ async function admitBatch(provider2, input2, plans, tasks, fingerprint, director
       )
     );
   } finally {
-    await releaseLocks(releases);
+    await release?.();
   }
 }
-async function releaseLocks(releases) {
-  const cleanup = await Promise.allSettled(
-    releases.map((release) => release())
-  );
-  const errors = cleanup.filter((entry) => entry.status === "rejected").map((entry) => entry.reason);
-  if (errors.length)
-    throw new AggregateError(
-      errors,
-      "Failed to release batch locks; inspect evidence"
-    );
-}
-var activeBatches, contains;
+var activeBatches;
 var init_batch = __esm({
   "src/application/batch.mjs"() {
-    init_checkout();
+    init_scopes();
     init_contracts();
     init_artifacts();
     init_batches();
     init_delegate();
     activeBatches = /* @__PURE__ */ new Map();
-    contains = (a, b) => {
-      const relative = path7.relative(a, b);
-      return relative === "" || !relative.startsWith(`..${path7.sep}`) && relative !== ".." && !path7.isAbsolute(relative);
-    };
   }
 });
 

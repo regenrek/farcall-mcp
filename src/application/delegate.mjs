@@ -5,13 +5,17 @@ import { codex } from "../adapters/codex.mjs";
 import { parseInput, VERSION, timestamp } from "../core/contracts.mjs";
 import {
   prepare,
-  acquireLock,
   atomicJson,
   existingRecord,
   readJson,
   sha256,
 } from "../platform/artifacts.mjs";
 import { runProcess } from "../platform/process.mjs";
+import {
+  canonicalWritableRoots,
+  delegationScopes,
+  acquireDelegationLocks,
+} from "../platform/scopes.mjs";
 
 const adapters = { claude, codex };
 const preflightScript = `
@@ -30,10 +34,16 @@ export async function prepareDelegation(
 ) {
   if (!adapters[provider]) throw new Error("Unknown provider");
   const input = parseInput(provider, value, preflight);
+  if (input.writable_roots !== undefined)
+    input.writable_roots = await canonicalWritableRoots(input.writable_roots);
   const { cwd, root, prompt, checkout, lockRoot } = await prepare(
     input,
     preflight,
   );
+  const scopes = await delegationScopes([
+    checkout,
+    ...(input.writable_roots ?? []),
+  ]);
   const adapter = adapters[provider];
   const command = preflight ? process.execPath : adapter.executable();
   const args = preflight
@@ -63,6 +73,7 @@ export async function prepareDelegation(
     prompt,
     checkout,
     lockRoot,
+    scopes,
     adapter,
     command,
     args,
@@ -262,7 +273,7 @@ export async function executeDelegation(
 
 export async function delegate(provider, value, options = {}) {
   const plan = await prepareDelegation(provider, value, options);
-  const release = await acquireLock(plan.lockRoot, {
+  const release = await acquireDelegationLocks([plan], {
     delegation_id: plan.input.delegation_id,
     provider,
     server_pid: process.pid,

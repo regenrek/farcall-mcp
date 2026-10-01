@@ -1,9 +1,12 @@
 import { mkdir, lstat, rm } from "node:fs/promises";
 import { hostname } from "node:os";
 import path from "node:path";
-import { gitDirectory } from "../platform/checkout.mjs";
+import {
+  validateScopeIsolation,
+  acquireDelegationLocks,
+} from "../platform/scopes.mjs";
 import { parseBatch, timestamp, VERSION } from "../core/contracts.mjs";
-import { acquireLock, atomicJson, sha256 } from "../platform/artifacts.mjs";
+import { atomicJson, sha256 } from "../platform/artifacts.mjs";
 import {
   batchDirectory,
   taskStateFile,
@@ -20,32 +23,6 @@ import {
 } from "./delegate.mjs";
 
 const activeBatches = new Map();
-const contains = (a, b) => {
-  const relative = path.relative(a, b);
-  return (
-    relative === "" ||
-    (!relative.startsWith(`..${path.sep}`) &&
-      relative !== ".." &&
-      !path.isAbsolute(relative))
-  );
-};
-function validateIsolation(plans) {
-  for (let i = 0; i < plans.length; i++) {
-    for (const other of plans.slice(i + 1)) {
-      if (plans[i].gitDirectory && plans[i].gitDirectory === other.gitDirectory)
-        throw new Error("Batch tasks must not share a Git directory");
-      for (const key of ["cwd", "checkout"]) {
-        if (
-          contains(plans[i][key], other[key]) ||
-          contains(other[key], plans[i][key])
-        )
-          throw new Error(
-            "Batch requires distinct, non-overlapping working directories and checkout roots",
-          );
-      }
-    }
-  }
-}
 
 export async function runBatch(provider, value, options = {}) {
   const input = parseBatch(provider, value);
@@ -56,10 +33,9 @@ export async function runBatch(provider, value, options = {}) {
     plans.push({
       ...plan,
       task_id,
-      gitDirectory: await gitDirectory(plan.checkout),
     });
   }
-  validateIsolation(plans);
+  validateScopeIsolation(plans);
   const tasks = plans.map((plan) => ({
     task_id: plan.task_id,
     delegation_id: plan.input.delegation_id,
@@ -141,24 +117,17 @@ async function admitBatch(
     evidence_directory: directory,
     ...extra,
   });
-  const releases = [];
+  let release;
   const reserved = [];
   let admitted = false;
   try {
-    // Acquire every existing single-run checkout lock before reserving or starting.
-    for (const plan of plans.toSorted((a, b) =>
-      a.lockRoot.localeCompare(b.lockRoot),
-    )) {
-      releases.push(
-        await acquireLock(plan.lockRoot, {
-          batch_id: input.batch_id,
-          delegation_id: plan.input.delegation_id,
-          provider,
-          server_pid: process.pid,
-          started_at: timestamp(),
-        }),
-      );
-    }
+    release = await acquireDelegationLocks(plans, {
+      batch_id: input.batch_id,
+      delegation_ids: input.tasks.map((task) => task.delegation_id),
+      provider,
+      server_pid: process.pid,
+      started_at: timestamp(),
+    });
     const cached = [];
     for (const plan of plans) cached.push(await inspectDelegation(plan));
     for (let i = 0; i < plans.length; i++) {
@@ -243,21 +212,6 @@ async function admitBatch(
       ),
     );
   } finally {
-    // Cleanup every acquired lock, even when releasing a different lock fails.
-    await releaseLocks(releases);
+    await release?.();
   }
-}
-
-async function releaseLocks(releases) {
-  const cleanup = await Promise.allSettled(
-    releases.map((release) => release()),
-  );
-  const errors = cleanup
-    .filter((entry) => entry.status === "rejected")
-    .map((entry) => entry.reason);
-  if (errors.length)
-    throw new AggregateError(
-      errors,
-      "Failed to release batch locks; inspect evidence",
-    );
 }
