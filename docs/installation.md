@@ -37,7 +37,7 @@ codex plugin marketplace add regenrek/farcall-mcp
 codex plugin add claude-worker@farcall
 ```
 
-Start a new Codex session, then invoke `$claude-worker` with your task. The plugin sets a two-hour tool timeout & keeps the worker tool outside Code Mode, so your Codex configuration stays unchanged. This requires Codex 0.157.0 or newer; older versions ignore the setting & offer the tool only inside Code Mode.
+Start a new Codex session, then invoke `$claude-worker` with your task. The plugin sets a two-hour tool timeout & keeps the worker tool outside Code Mode, so your Codex configuration stays unchanged. This requires Codex 0.147.0 or newer; older versions ignore the setting. If the tool does not appear at all, its server did not start. Codex must find Node 24 or newer as `node` on its PATH.
 
 For explicit control over the server name & timeout, use a direct MCP entry instead of the plugin. Build first, then add this to your Codex configuration, replacing the absolute path.
 
