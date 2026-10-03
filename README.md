@@ -57,6 +57,12 @@ Change `model` to an identifier supported by the worker CLI. [Models, permission
 
 Full logs are opt-in with `trace: true`. Normal runs keep only the state needed for retries & resume, plus the full answer if the returned preview is shortened. [Local state & tracing](docs/usage.md#optional-traces).
 
+## Use with bb
+
+In [bb](https://github.com/get-bb/bb), Farcall workers are CLI processes, not separate bb threads. [Install Machine Sidebar](https://github.com/regenrek/bb-plugin-machine-sidebar#install) & enable **Show Farcall tasks** to list them under their coordinator. The sidebar uses bb's tool-call events: an open batch shows "Call open", not live progress for each worker.
+
+For a plan, delegate & verify workflow on top of Farcall, see [Split Orchestrator](https://github.com/regenrek/split-orchestrator).
+
 ## Polling vs. MCP waiting
 
 ![Estimated API costs. With polling, Claude cost $21.10 and Astra $22.12, including $9.75 for polling. Total $43.22. With MCP waiting, Claude cost $22.99 and Astra $8.11. Total $31.10.](docs/images/polling-cost.png)
