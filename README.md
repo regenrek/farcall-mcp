@@ -59,7 +59,9 @@ Full logs are opt-in with `trace: true`. Normal runs keep only the state needed 
 
 ## Use with bb
 
-In [bb](https://github.com/get-bb/bb), Farcall workers run inside the coordinator's tool call, so they are not separate bb threads. [Machine Sidebar](https://github.com/regenrek/bb-plugin-machine-sidebar) can list them under their coordinator: install it from the bb plugin store (`bb plugin install machine-sidebar`) and turn on **Show Farcall tasks**. For a plan, delegate & verify workflow on top of Farcall, see [Split Orchestrator](https://github.com/regenrek/split-orchestrator).
+In [bb](https://github.com/get-bb/bb), Farcall workers are CLI processes, not separate bb threads. [Install Machine Sidebar](https://github.com/regenrek/bb-plugin-machine-sidebar#install) & enable **Show Farcall tasks** to list them under their coordinator. The sidebar uses bb's tool-call events: an open batch shows "Call open", not live progress for each worker.
+
+For a plan, delegate & verify workflow on top of Farcall, see [Split Orchestrator](https://github.com/regenrek/split-orchestrator).
 
 ## Polling vs. MCP waiting
 
