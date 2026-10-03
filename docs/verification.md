@@ -119,7 +119,7 @@ The long preflight saves a timestamped summary & raw lifecycle records under ign
 
 Claude Code currently backgrounds a pending MCP call after two minutes by default. Set `CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS=0` in the parent to keep it pending. Each Claude plugin declaration sets `timeout` to 7200000 milliseconds, which also raises that server's idle timeout floor. These settings are documented in the [Claude Code environment reference](https://code.claude.com/docs/en/env-vars).
 
-Codex plugins use a relative `cwd` rooted at the installed plugin & a `tool_timeout_sec` of 7200. The direct-only Code Mode namespace setting belongs to the parent configuration. Keep the actual exposed namespace outside Code Mode, then verify it with the parent trace. Native plugin config & Agent Plugins v1 config are different formats; these packages use native `.codex-plugin` manifests.
+Codex plugins use a relative `cwd` rooted at the installed plugin & a `tool_timeout_sec` of 7200. They also set `omit_tools_from` to `code_mode` & `deferred`, so Codex 0.157.0 or newer exposes the worker as a direct tool without parent configuration. Verify the direct call with the parent trace. Native plugin config & Agent Plugins v1 config are different formats; these packages use native `.codex-plugin` manifests.
 
 The CLI/API boundaries were checked against the local Codex source at `88235f881d`, including `codex-rs/exec/src/exec_events.rs`, `codex-rs/codex-mcp/src/plugin_config.rs` & `codex-rs/core/src/config/config_tests.rs`. Claude packaging follows the [plugin reference](https://code.claude.com/docs/en/plugins-reference). Source inspection verifies argument & config assumptions; it does not replace the host acceptance above.
 

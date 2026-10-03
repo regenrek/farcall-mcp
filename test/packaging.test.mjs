@@ -41,6 +41,9 @@ for (const provider of ["claude", "codex"]) {
         host === "claude" ? config.timeout : config.tool_timeout_sec * 1000,
         7200000,
       );
+      // Codex must expose the waiting tool directly, never through Code Mode.
+      if (host === "codex")
+        assert.deepEqual(config.omit_tools_from, ["code_mode", "deferred"]);
       const client = new Client({ name: "manifest-test", version: "1" });
       t.after(() => client.close());
       await client.connect(

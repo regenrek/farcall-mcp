@@ -28,7 +28,7 @@ codex plugin marketplace add regenrek/farcall-mcp
 codex plugin add claude-worker@farcall
 ```
 
-Start a new session after installation. In Codex, keep the worker tool outside Code Mode. Follow the [host setup guide](docs/installation.md) for persistent settings, manual installation & a check that your host waits without polling.
+Start a new session after installation. In Codex 0.157.0 or newer, the plugin keeps the worker tool outside Code Mode without extra configuration. Follow the [host setup guide](docs/installation.md) for persistent settings, manual installation & a check that your host waits without polling.
 
 ## Use it
 

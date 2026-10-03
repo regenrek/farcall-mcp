@@ -17,4 +17,4 @@ Preflight is for requested host verification or diagnosing changed host behavior
 
 Use an exact Claude model identifier. Default permissions do not auto-approve shell commands. Add only the allowed tool patterns needed for the authorized task. `acceptEdits` permits file edits, not arbitrary shell work. Chrome is opt-in.
 
-When Claude Code is the parent, start it with `CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS=0` so it does not background the call after two minutes. The plugin supplies a two-hour per-server timeout. When Codex is the parent, keep the actual worker namespace in `features.code_mode.direct_only_tool_namespaces`. These are parent-host settings, not worker arguments.
+When Claude Code is the parent, start it with `CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS=0` so it does not background the call after two minutes. This is a parent-host setting, not a worker argument. The plugin supplies a two-hour per-server timeout. When Codex is the parent, the plugin keeps the worker out of Code Mode. If the tool appears only inside Code Mode, tell the user that Codex 0.157.0 or newer is required.

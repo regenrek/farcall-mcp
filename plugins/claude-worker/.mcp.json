@@ -7,7 +7,11 @@
       ],
       "cwd": ".",
       "tool_timeout_sec": 7200,
-      "startup_timeout_sec": 20
+      "startup_timeout_sec": 20,
+      "omit_tools_from": [
+        "code_mode",
+        "deferred"
+      ]
     }
   }
 }
