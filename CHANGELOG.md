@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.8] - 2026-10-03
+
+### Fixed
+
+- Codex plugins keep the worker tools out of Code Mode with `omit_tools_from`, so Codex 0.147.0 or newer exposes them as direct tools without user configuration ([#1](https://github.com/regenrek/farcall-mcp/issues/1)). Older Codex versions ignore the setting.
+- Installation docs & skills no longer ask plugin users to edit `features.code_mode.direct_only_tool_namespaces`. Skills name the possible causes when the tool still appears only inside Code Mode.
+
 ## [0.1.7] - 2026-10-01
 
 ### Added

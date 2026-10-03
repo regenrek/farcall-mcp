@@ -36489,7 +36489,7 @@ import path from "node:path";
 // package.json
 var package_default = {
   name: "farcall-mcp",
-  version: "0.1.7",
+  version: "0.1.8",
   description: "Completion-wait MCP workers for Claude Code and Codex CLI",
   type: "module",
   license: "MIT",

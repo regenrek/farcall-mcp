@@ -47,7 +47,7 @@ var init_package = __esm({
   "package.json"() {
     package_default = {
       name: "farcall-mcp",
-      version: "0.1.7",
+      version: "0.1.8",
       description: "Completion-wait MCP workers for Claude Code and Codex CLI",
       type: "module",
       license: "MIT",
