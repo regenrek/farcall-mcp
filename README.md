@@ -57,6 +57,8 @@ Change `model` to an identifier supported by the worker CLI. [Models, permission
 
 Full logs are opt-in with `trace: true`. Normal runs keep only the state needed for retries & resume, plus the full answer if the returned preview is shortened. [Local state & tracing](docs/usage.md#optional-traces).
 
+Stale locks recover automatically only when the same-host server and all recorded worker groups are gone. Legacy or uncertain locks still require inspection. Before removing a worker checkout, copy its `artifacts/farcall/<delegation_id>/` records elsewhere, only after `.active` is gone. [Crash recovery & record preservation](docs/usage.md#checkout-locks--crash-recovery).
+
 ## Polling vs. MCP waiting
 
 ![Estimated API costs. With polling, Claude cost $21.10 and Astra $22.12, including $9.75 for polling. Total $43.22. With MCP waiting, Claude cost $22.99 and Astra $8.11. Total $31.10.](docs/images/polling-cost.png)

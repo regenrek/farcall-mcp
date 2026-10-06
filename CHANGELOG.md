@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Recover same-host stale checkout locks and matching write-scope claims only after the server and every recorded worker process group are absent (or never spawned); retain manual inspection for legacy, live, foreign-host and uncertain records. Report recovered files and document preserving retry/resume records before checkout removal.
+
 ## [0.1.8] - 2026-10-03
 
 ### Fixed
