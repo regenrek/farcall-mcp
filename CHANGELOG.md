@@ -7,6 +7,10 @@
 - Explain worker-host Codex authentication, quota checks through `/status` or the usage dashboard, version-dependent session diagnostics, and fresh login or the documented headless auth-copy fallback, including the boundary between parent-only pools and inherited process settings.
 - Explain concise coordinator results, preview limits and reading full answers through `result_file` and evidence references.
 
+### Fixed
+
+- Recover same-host stale checkout locks and matching write-scope claims only after the server and every recorded worker process group are absent (or never spawned); retain manual inspection for legacy, live, foreign-host and uncertain records. Report recovered files and document preserving retry/resume records before checkout removal.
+
 ## [0.1.8] - 2026-10-03
 
 ### Fixed

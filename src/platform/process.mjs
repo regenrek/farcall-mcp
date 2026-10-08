@@ -14,6 +14,8 @@ export async function runProcess({
   signal,
   timeout,
   onEvent,
+  beforeSpawn,
+  onSpawn,
   trace = false,
   graceMs = 1000,
   drainMs = 1000,
@@ -53,6 +55,8 @@ export async function runProcess({
       });
       return { status: "cancelled" };
     }
+    await beforeSpawn?.();
+    if (signal?.aborted) return { status: "cancelled" };
     record("dispatch", { command, args, cwd });
     if (evidenceError) throw new Error("Cannot record dispatch evidence");
     child = spawn(command, args, {
@@ -157,7 +161,14 @@ export async function runProcess({
     signal?.addEventListener("abort", abort, { once: true });
     if (signal?.aborted) abort();
     deadline = setTimeout(() => terminate("timeout"), timeout * 1000);
-    child.stdin.end(prompt);
+    try {
+      if (child.pid) await onSpawn?.(child.pid);
+    } catch (error) {
+      record("identity_error", { message: error.message });
+      terminate("identity_error");
+    }
+    if (!reason) child.stdin.end(prompt);
+    else child.stdin.destroy();
     const outcome = await exited;
     clearTimeout(killTimer);
     let stdoutTruncated = false;

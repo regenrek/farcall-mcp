@@ -10,7 +10,11 @@ import {
   lstat,
 } from "node:fs/promises";
 import path from "node:path";
-import { hostname } from "node:os";
+import {
+  lockIdentity,
+  staleLockReason,
+  recoveryReason,
+} from "./lock-identity.mjs";
 import { checkoutRoot } from "./checkout.mjs";
 
 export const sha256 = (value) =>
@@ -66,51 +70,126 @@ export async function prepare(input, preflight) {
   const lockRoot = await containedDirectory(lockArtifacts, "farcall");
   return { cwd, root, prompt, checkout, lockRoot };
 }
-export async function acquireLock(root, info) {
+export async function inspectLock(file) {
+  try {
+    const stat = await lstat(file);
+    if (!stat.isFile() || stat.isSymbolicLink())
+      throw new Error("not a regular lock file");
+    const text = await readFile(file, "utf8");
+    const lock = JSON.parse(text);
+    return { lock, text, reason: staleLockReason(lock) };
+  } catch (error) {
+    if (error.code === "ENOENT") throw error;
+    return { reason: `unreadable or incomplete lock: ${error.message}` };
+  }
+}
+
+export function lockRefusal(file, reason, cause) {
+  return new Error(
+    `Checkout already has an active or stale worker lock (${reason}). Inspect ${file} and its worker processes before removing it.`,
+    { cause },
+  );
+}
+
+export function lockRecoveryError(error, recoveries) {
+  if (!recoveries?.length) return error;
+  const diagnostic = error instanceof Error ? error : new Error(String(error));
+  diagnostic.lock_recoveries = recoveries;
+  diagnostic.message += ` Recovered locks: ${JSON.stringify(recoveries)}`;
+  return diagnostic;
+}
+
+export async function recoverLock(file, recoveries, inspected) {
+  const current = await inspectLock(file);
+  if (current.reason) throw lockRefusal(file, current.reason);
+  if (inspected && current.text !== inspected.text)
+    throw lockRefusal(file, "lock changed during recovery");
+  await unlink(file);
+  recoveries.push({
+    file,
+    lock_id: current.lock.lock_id,
+    reason: recoveryReason,
+  });
+}
+
+export async function acquireLock(root, info, { recoveries = [] } = {}) {
   const file = path.join(root, ".active");
+  const fenceFile = `${file}.recovery`;
+  try {
+    await lstat(fenceFile);
+    throw lockRefusal(
+      fenceFile,
+      "recovery already in progress or interrupted",
+      { code: "EEXIST" },
+    );
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+  const identity =
+    info.worker_identity_version === 1
+      ? info
+      : lockIdentity({ ...info, lock_id: randomUUID() });
   let handle;
   try {
     handle = await open(file, "wx", 0o600);
   } catch (error) {
-    if (error.code === "EEXIST") {
-      let owner = "unknown";
-      try {
-        const lock = await readJson(file);
-        let alive = "unknown";
-        if (
-          lock.hostname === hostname() &&
-          Number.isSafeInteger(lock.server_pid) &&
-          lock.server_pid > 0
-        ) {
-          try {
-            process.kill(lock.server_pid, 0);
-            alive = "yes";
-          } catch (probe) {
-            if (probe.code === "ESRCH") alive = "no";
-          }
-        }
-        owner = `PID ${lock.server_pid ?? "unknown"}, host ${lock.hostname ?? "unknown"}, server alive ${alive}`;
-      } catch {
-        /* A partially written lock still excludes a second job. */
-      }
-      throw new Error(
-        `Checkout already has an active or stale worker lock (${owner}). Inspect ${file} and its worker processes before removing it.`,
-        { cause: error },
+    if (error.code !== "EEXIST") throw error;
+    try {
+      const inspected = await inspectLock(file);
+      if (inspected.reason) throw lockRefusal(file, inspected.reason, error);
+    } catch (probe) {
+      if (probe.code !== "ENOENT") throw probe;
+    }
+    // Serialize competing recovery attempts, including the global admission
+    // mutex itself. An orphaned recovery fence fails closed for manual inspection.
+    let fence;
+    try {
+      fence = await open(fenceFile, "wx", 0o600);
+    } catch {
+      throw lockRefusal(
+        fenceFile,
+        "recovery already in progress or interrupted",
+        error,
       );
     }
-    throw error;
+    try {
+      try {
+        await recoverLock(file, recoveries);
+      } catch (probe) {
+        if (probe.code !== "ENOENT") {
+          probe.cause = error;
+          throw probe;
+        }
+      }
+      try {
+        handle = await open(file, "wx", 0o600);
+      } catch (replacement) {
+        if (replacement.code === "EEXIST")
+          throw lockRefusal(
+            file,
+            "another admission acquired the lock during recovery",
+            replacement,
+          );
+        throw replacement;
+      }
+    } finally {
+      await fence.close();
+      await unlink(fenceFile);
+    }
   }
   try {
-    await handle.writeFile(JSON.stringify({ ...info, hostname: hostname() }));
+    await handle.writeFile(JSON.stringify(identity));
   } catch (error) {
     await handle.close();
     await unlink(file);
     throw error;
   }
-  return async () => {
+  const release = async () => {
     await handle.close();
     await unlink(file);
   };
+  release.update = (value) => atomicJson(file, value);
+  return release;
 }
 export async function existingRecord(directory) {
   try {

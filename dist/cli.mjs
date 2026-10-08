@@ -6185,9 +6185,9 @@ function parseURLObject(trimmed, def) {
 function stripTabAndNewline(value) {
   return value.replace(asciiTabOrNewline, "");
 }
-function urlHostnameOk(url2, hostname7) {
-  hostname7.lastIndex = 0;
-  return hostname7.test(url2.hostname);
+function urlHostnameOk(url2, hostname6) {
+  hostname6.lastIndex = 0;
+  return hostname6.test(url2.hostname);
 }
 function urlProtocolOk(url2, protocol) {
   protocol.lastIndex = 0;
@@ -37952,6 +37952,54 @@ var init_codex = __esm({
   }
 });
 
+// src/platform/lock-identity.mjs
+import { hostname as hostname3 } from "node:os";
+function lockIdentity(info, delegationIds = []) {
+  return {
+    ...info,
+    hostname: hostname3(),
+    server_pid: process.pid,
+    started_at: info.started_at ?? (/* @__PURE__ */ new Date()).toISOString(),
+    worker_identity_version: 1,
+    workers: delegationIds.map((delegation_id) => ({
+      delegation_id,
+      state: "not_spawned"
+    }))
+  };
+}
+function staleLockReason(lock) {
+  if (lock.hostname !== hostname3()) return "foreign or unknown hostname";
+  if (!positivePid(lock.server_pid)) return "missing or invalid server_pid";
+  if (!absent(lock.server_pid))
+    return `server PID ${lock.server_pid} is alive or cannot be probed`;
+  if (lock.worker_identity_version !== 1 || typeof lock.lock_id !== "string" || !lock.lock_id || typeof lock.started_at !== "string" || !Number.isFinite(Date.parse(lock.started_at)) || !Array.isArray(lock.workers))
+    return "legacy or incomplete worker identity";
+  for (const worker of lock.workers) {
+    if (worker?.state === "not_spawned" && worker.process_group_id === void 0)
+      continue;
+    if (worker?.state !== "spawned" || !positivePid(worker.process_group_id))
+      return "worker spawn in progress or incomplete process-group identity";
+    if (!absent(-worker.process_group_id))
+      return `worker process group ${worker.process_group_id} is alive or cannot be probed`;
+  }
+  return null;
+}
+var positivePid, absent, recoveryReason;
+var init_lock_identity = __esm({
+  "src/platform/lock-identity.mjs"() {
+    positivePid = (value) => Number.isSafeInteger(value) && value > 0;
+    absent = (pid) => {
+      try {
+        process.kill(pid, 0);
+        return false;
+      } catch (error62) {
+        return error62.code === "ESRCH";
+      }
+    };
+    recoveryReason = "same hostname; server PID absent; all worker groups absent or never spawned";
+  }
+});
+
 // src/platform/checkout.mjs
 import { stat, readFile, realpath } from "node:fs/promises";
 import path2 from "node:path";
@@ -38005,7 +38053,6 @@ import {
   lstat
 } from "node:fs/promises";
 import path3 from "node:path";
-import { hostname as hostname3 } from "node:os";
 async function atomicJson(file2, value) {
   const temporary = `${file2}.${randomUUID()}.tmp`;
   await writeFile(temporary, `${JSON.stringify(value, null, 2)}
@@ -38053,46 +38100,117 @@ async function prepare(input2, preflight) {
   const lockRoot = await containedDirectory(lockArtifacts, "farcall");
   return { cwd, root, prompt, checkout, lockRoot };
 }
-async function acquireLock(root, info) {
+async function inspectLock(file2) {
+  try {
+    const stat3 = await lstat(file2);
+    if (!stat3.isFile() || stat3.isSymbolicLink())
+      throw new Error("not a regular lock file");
+    const text = await readFile2(file2, "utf8");
+    const lock = JSON.parse(text);
+    return { lock, text, reason: staleLockReason(lock) };
+  } catch (error62) {
+    if (error62.code === "ENOENT") throw error62;
+    return { reason: `unreadable or incomplete lock: ${error62.message}` };
+  }
+}
+function lockRefusal(file2, reason, cause) {
+  return new Error(
+    `Checkout already has an active or stale worker lock (${reason}). Inspect ${file2} and its worker processes before removing it.`,
+    { cause }
+  );
+}
+function lockRecoveryError(error62, recoveries) {
+  if (!recoveries?.length) return error62;
+  const diagnostic = error62 instanceof Error ? error62 : new Error(String(error62));
+  diagnostic.lock_recoveries = recoveries;
+  diagnostic.message += ` Recovered locks: ${JSON.stringify(recoveries)}`;
+  return diagnostic;
+}
+async function recoverLock(file2, recoveries, inspected) {
+  const current = await inspectLock(file2);
+  if (current.reason) throw lockRefusal(file2, current.reason);
+  if (inspected && current.text !== inspected.text)
+    throw lockRefusal(file2, "lock changed during recovery");
+  await unlink(file2);
+  recoveries.push({
+    file: file2,
+    lock_id: current.lock.lock_id,
+    reason: recoveryReason
+  });
+}
+async function acquireLock(root, info, { recoveries = [] } = {}) {
   const file2 = path3.join(root, ".active");
+  const fenceFile = `${file2}.recovery`;
+  try {
+    await lstat(fenceFile);
+    throw lockRefusal(
+      fenceFile,
+      "recovery already in progress or interrupted",
+      { code: "EEXIST" }
+    );
+  } catch (error62) {
+    if (error62.code !== "ENOENT") throw error62;
+  }
+  const identity = info.worker_identity_version === 1 ? info : lockIdentity({ ...info, lock_id: randomUUID() });
   let handle;
   try {
     handle = await open2(file2, "wx", 384);
   } catch (error62) {
-    if (error62.code === "EEXIST") {
-      let owner = "unknown";
-      try {
-        const lock = await readJson(file2);
-        let alive = "unknown";
-        if (lock.hostname === hostname3() && Number.isSafeInteger(lock.server_pid) && lock.server_pid > 0) {
-          try {
-            process.kill(lock.server_pid, 0);
-            alive = "yes";
-          } catch (probe) {
-            if (probe.code === "ESRCH") alive = "no";
-          }
-        }
-        owner = `PID ${lock.server_pid ?? "unknown"}, host ${lock.hostname ?? "unknown"}, server alive ${alive}`;
-      } catch {
-      }
-      throw new Error(
-        `Checkout already has an active or stale worker lock (${owner}). Inspect ${file2} and its worker processes before removing it.`,
-        { cause: error62 }
+    if (error62.code !== "EEXIST") throw error62;
+    try {
+      const inspected = await inspectLock(file2);
+      if (inspected.reason) throw lockRefusal(file2, inspected.reason, error62);
+    } catch (probe) {
+      if (probe.code !== "ENOENT") throw probe;
+    }
+    let fence;
+    try {
+      fence = await open2(fenceFile, "wx", 384);
+    } catch {
+      throw lockRefusal(
+        fenceFile,
+        "recovery already in progress or interrupted",
+        error62
       );
     }
-    throw error62;
+    try {
+      try {
+        await recoverLock(file2, recoveries);
+      } catch (probe) {
+        if (probe.code !== "ENOENT") {
+          probe.cause = error62;
+          throw probe;
+        }
+      }
+      try {
+        handle = await open2(file2, "wx", 384);
+      } catch (replacement) {
+        if (replacement.code === "EEXIST")
+          throw lockRefusal(
+            file2,
+            "another admission acquired the lock during recovery",
+            replacement
+          );
+        throw replacement;
+      }
+    } finally {
+      await fence.close();
+      await unlink(fenceFile);
+    }
   }
   try {
-    await handle.writeFile(JSON.stringify({ ...info, hostname: hostname3() }));
+    await handle.writeFile(JSON.stringify(identity));
   } catch (error62) {
     await handle.close();
     await unlink(file2);
     throw error62;
   }
-  return async () => {
+  const release = async () => {
     await handle.close();
     await unlink(file2);
   };
+  release.update = (value) => atomicJson(file2, value);
+  return release;
 }
 async function existingRecord(directory) {
   try {
@@ -38119,6 +38237,7 @@ async function existingRecord(directory) {
 var sha256, readJson;
 var init_artifacts = __esm({
   "src/platform/artifacts.mjs"() {
+    init_lock_identity();
     init_checkout();
     sha256 = (value) => createHash("sha256").update(value).digest("hex");
     readJson = async (file2) => JSON.parse(await readFile2(file2, "utf8"));
@@ -38139,6 +38258,8 @@ async function runProcess({
   signal,
   timeout,
   onEvent,
+  beforeSpawn,
+  onSpawn,
   trace = false,
   graceMs = 1e3,
   drainMs = 1e3
@@ -38179,6 +38300,8 @@ async function runProcess({
       });
       return { status: "cancelled" };
     }
+    await beforeSpawn?.();
+    if (signal?.aborted) return { status: "cancelled" };
     record2("dispatch", { command, args, cwd });
     if (evidenceError) throw new Error("Cannot record dispatch evidence");
     child = spawn(command, args, {
@@ -38283,7 +38406,14 @@ async function runProcess({
     signal?.addEventListener("abort", abort, { once: true });
     if (signal?.aborted) abort();
     deadline = setTimeout(() => terminate("timeout"), timeout * 1e3);
-    child.stdin.end(prompt);
+    try {
+      if (child.pid) await onSpawn?.(child.pid);
+    } catch (error62) {
+      record2("identity_error", { message: error62.message });
+      terminate("identity_error");
+    }
+    if (!reason) child.stdin.end(prompt);
+    else child.stdin.destroy();
     const outcome = await exited;
     clearTimeout(killTimer);
     let stdoutTruncated = false;
@@ -38366,7 +38496,6 @@ var init_state = __esm({
 // src/platform/scopes.mjs
 import { realpath as realpath4, stat as stat2, readdir, lstat as lstat2, unlink as unlink2 } from "node:fs/promises";
 import { randomUUID as randomUUID2 } from "node:crypto";
-import { hostname as hostname4 } from "node:os";
 import path6 from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 async function canonicalWritableRoots(roots) {
@@ -38409,11 +38538,15 @@ function validateScopeIsolation(plans) {
           "Batch requires distinct, non-overlapping checkout and writable roots, including Git directory aliases"
         );
 }
-async function admissionGuard(registry2) {
+async function admissionGuard(registry2, recoveries) {
   const deadline = performance.now() + 5e3;
   for (; ; ) {
     try {
-      return await acquireLock(registry2, { server_pid: process.pid });
+      return await acquireLock(
+        registry2,
+        { server_pid: process.pid },
+        { recoveries }
+      );
     } catch (error62) {
       if (error62.cause?.code !== "EEXIST" || performance.now() >= deadline)
         throw error62;
@@ -38438,7 +38571,12 @@ async function acquireDelegationLocks(plans, info) {
     await stateDirectory(),
     "write-scopes"
   );
-  const releaseGuard = await admissionGuard(registry2);
+  const recoveries = [];
+  const releaseGuard = await admissionGuard(registry2, recoveries);
+  const identity = lockIdentity(
+    { ...info, lock_id: randomUUID2() },
+    plans.map((plan) => plan.input.delegation_id)
+  );
   const claim2 = path6.join(registry2, `${randomUUID2()}.json`);
   const scopes = plans.flatMap((plan) => plan.scopes);
   const releases = [];
@@ -38447,30 +38585,58 @@ async function acquireDelegationLocks(plans, info) {
       if (!name.endsWith(".json")) continue;
       const file2 = path6.join(registry2, name);
       if (!(await lstat2(file2)).isFile())
-        throw new Error("Invalid write-scope claim; inspect registry");
-      const previous = await readJson(file2);
-      if (!Array.isArray(previous.scopes) || previous.scopes.some(
-        (scope) => typeof scope.root !== "string" || !path6.isAbsolute(scope.root)
-      ))
-        throw new Error("Incomplete write-scope claim; inspect registry");
-      if (scopesOverlap(scopes, previous.scopes))
-        throw new Error(
-          `Checkout already has an active or stale worker lock (overlapping writable scope). Inspect ${file2} before recovery.`
+        throw lockRefusal(file2, "invalid write-scope claim");
+      let previous;
+      try {
+        previous = await readJson(file2);
+      } catch (error62) {
+        throw lockRefusal(
+          file2,
+          `unreadable or incomplete write-scope claim: ${error62.message}`
         );
+      }
+      if (!Array.isArray(previous?.scopes) || previous.scopes.some(
+        (scope) => typeof scope?.root !== "string" || !path6.isAbsolute(scope.root)
+      ))
+        throw lockRefusal(file2, "incomplete write-scope claim");
+      if (!scopesOverlap(scopes, previous.scopes)) continue;
+      const inspected = await inspectLock(file2);
+      if (inspected.reason) throw lockRefusal(file2, inspected.reason);
+      const matching = [];
+      for (const scope of previous.scopes) {
+        if (scope.lock_root !== path6.join(scope.root, "artifacts", "farcall"))
+          throw lockRefusal(file2, "incomplete checkout lock path");
+        const checkoutFile = path6.join(scope.lock_root, ".active");
+        try {
+          const checkout = await inspectLock(checkoutFile);
+          if (!checkout.lock?.lock_id || checkout.lock.lock_id === previous.lock_id) {
+            if (checkout.reason)
+              throw lockRefusal(checkoutFile, checkout.reason);
+            matching.push([checkoutFile, checkout]);
+          }
+        } catch (error62) {
+          if (error62.code !== "ENOENT") throw error62;
+        }
+      }
+      for (const [checkoutFile, checkout] of matching)
+        await recoverLock(checkoutFile, recoveries, checkout);
+      await recoverLock(file2, recoveries, inspected);
     }
     for (const root of [
       ...new Set(scopes.map((scope) => scope.lock_root))
     ].toSorted())
-      releases.push(await acquireLock(root, info));
-    await atomicJson(claim2, { ...info, hostname: hostname4(), scopes });
+      releases.push(await acquireLock(root, identity, { recoveries }));
+    await atomicJson(claim2, { ...identity, scopes });
   } catch (error62) {
     await releaseAll(releases);
-    throw error62;
+    throw lockRecoveryError(error62, recoveries);
   } finally {
     await releaseGuard();
   }
-  return async () => {
-    const unlock = await admissionGuard(registry2);
+  const release = async () => {
+    await updating.catch(() => {
+    });
+    const unlock = await admissionGuard(registry2, recoveries);
     try {
       await releaseAll(releases);
       await unlink2(claim2);
@@ -38478,6 +38644,25 @@ async function acquireDelegationLocks(plans, info) {
       await unlock();
     }
   };
+  let updating = Promise.resolve();
+  const updateWorker = (delegationId, worker) => {
+    updating = updating.then(async () => {
+      const index = identity.workers.findIndex(
+        (item) => item.delegation_id === delegationId
+      );
+      if (index < 0) throw new Error("Unknown lock worker identity");
+      identity.workers[index] = { delegation_id: delegationId, ...worker };
+      for (const checkout of releases) await checkout.update(identity);
+      await atomicJson(claim2, { ...identity, scopes });
+    });
+    return updating;
+  };
+  release.lifecycle = (delegationId) => ({
+    beforeSpawn: () => updateWorker(delegationId, { state: "spawning" }),
+    onSpawn: (process_group_id) => updateWorker(delegationId, { state: "spawned", process_group_id })
+  });
+  release.recoveries = recoveries;
+  return release;
 }
 var contains, scopesOverlap;
 var init_scopes = __esm({
@@ -38485,6 +38670,7 @@ var init_scopes = __esm({
     init_artifacts();
     init_checkout();
     init_state();
+    init_lock_identity();
     contains = (a, b) => {
       const relative = path6.relative(a, b);
       return relative === "" || relative !== ".." && !relative.startsWith(`..${path6.sep}`) && !path6.isAbsolute(relative);
@@ -38624,7 +38810,7 @@ async function reserveDelegation(plan, { commandOverride, onReserved } = {}) {
     });
   }
 }
-async function executeDelegation(plan, { signal, commandOverride } = {}) {
+async function executeDelegation(plan, { signal, commandOverride, lockLifecycle, lockRecoveries = [] } = {}) {
   const {
     input: input2,
     directory,
@@ -38646,6 +38832,7 @@ async function executeDelegation(plan, { signal, commandOverride } = {}) {
     signal,
     timeout: input2.timeout_seconds,
     trace: input2.trace,
+    ...lockLifecycle,
     onEvent(event) {
       if (!event || typeof event !== "object") return;
       if (preflight) {
@@ -38673,6 +38860,7 @@ async function executeDelegation(plan, { signal, commandOverride } = {}) {
     ...execution,
     status,
     completed_at: timestamp(),
+    ...lockRecoveries.length ? { lock_recoveries: lockRecoveries } : {},
     session_id: state.session_id ?? "unknown",
     requested_model: input2.model ?? null,
     reported_model: state.reported_model ?? "unknown",
@@ -38708,9 +38896,16 @@ async function delegate(provider2, value, options = {}) {
   });
   try {
     const cached2 = await inspectDelegation(plan);
-    if (cached2) return cached2;
+    if (cached2)
+      return release.recoveries.length ? { ...cached2, lock_recoveries: release.recoveries } : cached2;
     await reserveDelegation(plan, options);
-    return await executeDelegation(plan, options);
+    return await executeDelegation(plan, {
+      ...options,
+      lockLifecycle: release.lifecycle(plan.input.delegation_id),
+      lockRecoveries: release.recoveries
+    });
+  } catch (error62) {
+    throw lockRecoveryError(error62, release.recoveries);
   } finally {
     await release();
   }
@@ -38736,7 +38931,7 @@ var init_delegate = __esm({
 });
 
 // src/platform/batches.mjs
-import { hostname as hostname5 } from "node:os";
+import { hostname as hostname4 } from "node:os";
 import path8 from "node:path";
 async function batchDirectory(provider2, id) {
   const root = await containedDirectory(await stateDirectory(), "batches");
@@ -38791,7 +38986,7 @@ async function recoverBatch(directory, request) {
   const completed = await readOptional(path8.join(directory, "completion.json"));
   if (completed) return completed;
   let active = false;
-  if (request.hostname === hostname5() && request.server_pid !== process.pid) {
+  if (request.hostname === hostname4() && request.server_pid !== process.pid) {
     try {
       process.kill(request.server_pid, 0);
       active = true;
@@ -38838,7 +39033,7 @@ var init_batches = __esm({
 
 // src/application/batch.mjs
 import { mkdir as mkdir4, lstat as lstat3, rm } from "node:fs/promises";
-import { hostname as hostname6 } from "node:os";
+import { hostname as hostname5 } from "node:os";
 import path9 from "node:path";
 async function runBatch(provider2, value, options = {}) {
   const input2 = parseBatch(provider2, value);
@@ -38909,7 +39104,7 @@ async function admitBatch(provider2, input2, plans, tasks, fingerprint, director
     fingerprint,
     bridge_version: VERSION,
     server_pid: process.pid,
-    hostname: hostname6(),
+    hostname: hostname5(),
     requested_at: timestamp(),
     tasks
   };
@@ -38920,6 +39115,7 @@ async function admitBatch(provider2, input2, plans, tasks, fingerprint, director
     status,
     tasks: results,
     evidence_directory: directory,
+    ...release?.recoveries.length ? { lock_recoveries: release.recoveries } : {},
     ...extra
   });
   let release;
@@ -38963,7 +39159,10 @@ async function admitBatch(provider2, input2, plans, tasks, fingerprint, director
           }
           terminal = taskResult(
             tasks[index],
-            await executeDelegation(plan, options)
+            await executeDelegation(plan, {
+              ...options,
+              lockLifecycle: release.lifecycle(plan.input.delegation_id)
+            })
           );
           if (!started) terminal.dispatch_state = "not_started";
         } catch (error62) {
@@ -38991,7 +39190,7 @@ async function admitBatch(provider2, input2, plans, tasks, fingerprint, director
     const status = results.every((task) => task.status === "completed") ? "completed" : results.some((task) => task.status === "cancelled") ? "cancelled" : results.some((task) => task.status === "unknown") ? "interrupted" : "partial_failure";
     return await saveBatchResult(directory, result(status, results));
   } catch (error62) {
-    if (admitted) throw error62;
+    if (admitted) throw lockRecoveryError(error62, release?.recoveries);
     await Promise.all(
       reserved.map((folder) => rm(folder, { recursive: true, force: true }))
     );
@@ -39001,7 +39200,8 @@ async function admitBatch(provider2, input2, plans, tasks, fingerprint, director
         "rejected",
         tasks.map((task) => taskResult(task)),
         {
-          error: String(error62?.message ?? error62).slice(0, 2e3)
+          error: String(error62?.message ?? error62).slice(0, 2e3),
+          ...error62.lock_recoveries?.length ? { lock_recoveries: error62.lock_recoveries } : {}
         }
       )
     );

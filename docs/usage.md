@@ -214,13 +214,59 @@ A truncated answer additionally creates `result.txt`. Failed CLI processes can r
 
 The records can contain private output. Add `artifacts/` to the target project's ignore rules. Disabling Farcall traces does not disable the CLI's own session history. Full traces cannot be recovered retroactively from a run with tracing off.
 
+## Checkout locks & crash recovery
+
+New checkout locks (`artifacts/farcall/.active`) and global write-scope claims
+(`~/.local/state/farcall/write-scopes/*.json`, or the configured state directory)
+record a shared `lock_id`, `server_pid`, `hostname`, `started_at` and versioned
+worker identities. Each worker starts as `not_spawned`; Farcall persists `spawning`
+before launching it, then records `spawned` with its detached process-group ID.
+A batch records every worker group in all of its locks and its shared claim.
+
+On admission, Farcall automatically removes an overlapping claim and its matching
+checkout locks only when the hostname matches, the server PID is absent, and every
+worker group is absent or explicitly never spawned. An orphan checkout lock is
+checked by the same rule. Each removed file and the reason are returned in the
+additive `lock_recoveries` field and saved with the completion or batch result.
+Recovery clears coordination records; it does not redispatch interrupted work or
+remove delegation evidence. Claims unrelated to the requested scopes are left alone.
+
+Foreign-host records, live servers or worker groups, legacy records without worker
+identity, incomplete records, and interrupted `spawning` states require inspection.
+Errors name the exact file and the blocking condition. Only an `ESRCH` process probe
+counts as absence; permission errors fail closed. Never remove a lock just because
+its server died: its worker group can still be writing.
+
+Live reused PIDs or process-group IDs also block recovery, even if their start time
+would differ. `started_at` is the lock admission time, not an OS process birth time;
+Farcall does not infer death from record age. This conservative rule can leave a
+stale lock blocked by an unrelated reused ID. Probes and unlinking are not an atomic
+OS operation, so ID reuse between them remains a small residual race. Hostname
+uniqueness and the local PID namespace must be reliable. Workers that deliberately
+detach into another process group remain outside Farcall's tracking boundary.
+
+Admission is serialized by a short-lived global `.active` mutex. Competing stale
+mutex recovery uses an exclusive `.active.recovery` fence. If the server dies during
+recovery and leaves a fence, inspect that exact file and the locks/processes before
+removing it; fences are never automatically recovered. Legacy admission mutexes
+also require manual inspection.
+
+Before removing a worker checkout, copy `artifacts/farcall/<delegation_id>/` to a
+location outside that checkout to preserve retry and resume records (and optional
+traces). **Never copy or remove these records while `artifacts/farcall/.active`
+exists**, including at the enclosing Git checkout root when the worker's `cwd` is
+a subdirectory. Finish or safely recover the run first. Archiving the records
+preserves the evidence; Farcall still requires the original provider and checkout
+identity for exact-session resume, so moving a checkout does not automatically make
+its records resumable from a new path.
+
 ## Limits
 
 Codex exec does not provide a verified model ID or price in its standard JSONL result. Those fields remain unknown. Claude's init-reported model is checked against the request; this does not detect later provider fallbacks. Resumed usage totals may be cumulative. A missing cost is not zero.
 
 A shared lock at the nearest Git root prevents overlapping Farcall workers, including calls from different subdirectories. Linked Git worktrees have separate locks. Outside Git, the lock covers only `cwd`. It cannot prevent unrelated editors from changing files. Use separate checkouts for parallel implementation.
 
-Cancellation & timeout terminate the child's process group. A child that deliberately detaches into another group is outside that boundary. Captured stdout & stderr share a drain window of at most one second after process exit; forced pipe closure is reported as `stdout_truncated` or `stderr_truncated`. With tracing enabled, stderr goes directly to its log file. After a hard server crash, inspect `artifacts/farcall/.active` & its processes before removing the lock.
+Cancellation & timeout terminate the child's process group. A child that deliberately detaches into another group is outside that boundary. Captured stdout & stderr share a drain window of at most one second after process exit; forced pipe closure is reported as `stdout_truncated` or `stderr_truncated`. With tracing enabled, stderr goes directly to its log file. Hard-crash recovery follows the checks below.
 
 Farcall is a trusted local CLI bridge, not an isolation boundary for untrusted agents.
 
