@@ -29,6 +29,36 @@ These are instructions for the parent, not a Farcall configuration file. Every c
 
 New effort values or incompatible CLI changes may require a Farcall update.
 
+## Worker accounts
+
+`codex-worker` starts `codex exec` on the machine running the Farcall server.
+By default it uses that OS user's Codex login: `CODEX_HOME` (normally `~/.codex`)
+and the configured credential store, which may be the OS keychain. API-key or
+custom-provider authentication configured for that CLI can change this. See
+[Codex authentication](https://developers.openai.com/codex/auth/).
+
+Farcall does not select accounts, balance subscription allowances, or copy the
+coordinator's account, proxy or pool settings into the worker. The child inherits
+the Farcall server's process environment, so an explicitly configured CLI or
+inherited environment can affect routing. A pool used only by the parent does
+not establish which account the worker will use. Check each worker host with the
+same OS user and `CODEX_HOME` as its Farcall server.
+
+Before a long run, choose an account with remaining subscription allowance.
+`codex login status` checks the CLI's authentication mode; it does not report
+remaining quota. Inspect recent `rate_limits` and nested `credits` fields in the
+worker's native Codex session records under `CODEX_HOME/sessions`, when present.
+These are snapshots, not a live quota guarantee; absent fields mean unknown.
+Exhausted subscription allowance may consume credits if enabled for that account.
+Farcall neither switches to another account nor enforces a credit budget.
+
+To switch accounts, finish active workers, then use `codex logout` and
+`codex login` in that same host environment and check `codex login status` again.
+Sign in afresh instead of copying authentication files between accounts or
+machines: tokens refresh and rotate, so copied credentials can become stale.
+The [CLI reference](https://developers.openai.com/codex/cli/reference/#codex-login)
+describes the login commands. Farcall does not edit login or user configuration.
+
 ## Run & resume
 
 Ask for the worker, give it a task and say what you want back. The same pattern works for implementation and review:
@@ -137,6 +167,26 @@ For a correction, supply a new prompt & use a new delegation ID. Include the exa
 An identical request with the same ID returns the saved result. A changed request with that ID fails. A crash leaves evidence to inspect rather than silently starting paid work again.
 
 `trace` & `max_result_chars` are part of request identity. Changing either requires a new delegation ID and starts a new call; a cached result cannot create logs retroactively. To read an already saved longer answer, use `result_file` instead of rerunning the task.
+
+## Keep results short
+
+Every returned worker result enters the coordinator's context, including each
+task in a batch. Ask for a short summary of changes, checks and blockers, with
+file references for details. If the task permits writing a report, keep the full
+report in an agreed file and return its path instead of pasting it into chat.
+
+`max_result_chars` bounds the returned preview (default 4,000 characters, range
+256–24,000). If the answer exceeds it, Farcall saves the full text as `result.txt`
+in the returned `evidence_directory` and returns its path in `result_file`, even
+with tracing off. `result_file` is an output field, not an input destination;
+it is `null` when no truncation was needed. Read the file only when its details
+are needed, rather than rerunning the worker or loading all evidence into the
+coordinator's context. A preview limit does not reduce the worker's generated
+output, so request a concise answer as well.
+
+For example: “Return a brief summary and test results. Save detailed findings to
+`artifacts/review.md` and include the path.” Use a report-writing task only when
+file writes are authorized. [Batch result limits](batches.md) also apply.
 
 ## Optional traces
 

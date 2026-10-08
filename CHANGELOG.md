@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Documentation
+
+- Explain worker-host Codex authentication, account/quota checks and fresh login when switching accounts, including the boundary between parent-only pools and inherited process settings.
+- Explain concise coordinator results, preview limits and reading full answers through `result_file` and evidence references.
+
 ## [0.1.8] - 2026-10-03
 
 ### Fixed

@@ -57,6 +57,8 @@ Change `model` to an identifier supported by the worker CLI. [Models, permission
 
 Full logs are opt-in with `trace: true`. Normal runs keep only the state needed for retries & resume, plus the full answer if the returned preview is shortened. [Local state & tracing](docs/usage.md#optional-traces).
 
+Before a long run, [check the worker account](docs/usage.md#worker-accounts) & [keep returned results short](docs/usage.md#keep-results-short).
+
 ## Polling vs. MCP waiting
 
 ![Estimated API costs. With polling, Claude cost $21.10 and Astra $22.12, including $9.75 for polling. Total $43.22. With MCP waiting, Claude cost $22.99 and Astra $8.11. Total $31.10.](docs/images/polling-cost.png)
