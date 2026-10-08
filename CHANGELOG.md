@@ -4,7 +4,7 @@
 
 ### Documentation
 
-- Explain worker-host Codex authentication, account/quota checks and fresh login when switching accounts, including the boundary between parent-only pools and inherited process settings.
+- Explain worker-host Codex authentication, quota checks through `/status` or the usage dashboard, version-dependent session diagnostics, and fresh login or the documented headless auth-copy fallback, including the boundary between parent-only pools and inherited process settings.
 - Explain concise coordinator results, preview limits and reading full answers through `result_file` and evidence references.
 
 ## [0.1.8] - 2026-10-03

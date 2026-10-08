@@ -45,17 +45,26 @@ not establish which account the worker will use. Check each worker host with the
 same OS user and `CODEX_HOME` as its Farcall server.
 
 Before a long run, choose an account with remaining subscription allowance.
-`codex login status` checks the CLI's authentication mode; it does not report
-remaining quota. Inspect recent `rate_limits` and nested `credits` fields in the
-worker's native Codex session records under `CODEX_HOME/sessions`, when present.
-These are snapshots, not a live quota guarantee; absent fields mean unknown.
+Check `/status` in an interactive Codex session on that host or the account's
+usage dashboard, as described in [Codex usage guidance](https://developers.openai.com/codex/pricing/).
+`codex login status` checks the CLI's authentication mode, not remaining quota.
+
+Session-file `rate_limits` and nested `credits` fields, when present under
+`CODEX_HOME/sessions`, are version-dependent diagnostics, not a stable quota API.
+Match the record's account and timestamp to the worker login and time you are
+checking; an old record or one from another login is not evidence of current
+allowance. Missing fields or an unverified account/time match mean unknown.
 Exhausted subscription allowance may consume credits if enabled for that account.
 Farcall neither switches to another account nor enforces a credit budget.
 
 To switch accounts, finish active workers, then use `codex logout` and
 `codex login` in that same host environment and check `codex login status` again.
-Sign in afresh instead of copying authentication files between accounts or
-machines: tokens refresh and rotate, so copied credentials can become stale.
+Prefer a fresh login. OpenAI also documents [copying the auth cache as a headless
+fallback](https://developers.openai.com/codex/auth/#fallback-authenticate-locally-and-copy-your-auth-cache).
+Use that fallback only when needed; never run the source and copied login in
+parallel at two locations, because rotating tokens can leave a copy stale.
+This concerns duplicated login credentials, not separate fresh logins to the
+same account.
 The [CLI reference](https://developers.openai.com/codex/cli/reference/#codex-login)
 describes the login commands. Farcall does not edit login or user configuration.
 
