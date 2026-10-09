@@ -63,6 +63,14 @@ Stale locks recover automatically only when the same-host server and all recorde
 
 ## Polling vs. MCP waiting
 
+Farcall keeps the directly delegated MCP call open until its result. If a worker
+starts native Codex subagents, Farcall does not control that worker's
+`wait_agent`, sleep or status loops. The parent can be waiting while short native
+timeouts cause extra model turns inside the worker; that alone does not establish
+a Farcall waiting bug. Host scheduling still matters: an open MCP call does not
+guarantee that a host never polls. Native wait configuration belongs to the
+calling workflow, outside Farcall.
+
 ![Estimated API costs. With polling, Claude cost $21.10 and Astra $22.12, including $9.75 for polling. Total $43.22. With MCP waiting, Claude cost $22.99 and Astra $8.11. Total $31.10.](docs/images/polling-cost.png)
 
 Two runs of the same task, with estimated API costs rather than subscription spend. Implementation & review also differed, so polling does not explain the whole difference. Run J used an earlier version of the MCP worker.
