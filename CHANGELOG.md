@@ -4,6 +4,8 @@
 
 ### Documentation
 
+- Clarify concise implementation handoffs, targeted evidence reads and the limits of character-based result previews; leave review and acceptance policy to the calling workflow.
+
 - Explain worker-host Codex authentication, quota checks through `/status` or the usage dashboard, version-dependent session diagnostics, and fresh login or the documented headless auth-copy fallback, including the boundary between parent-only pools and inherited process settings.
 - Explain concise coordinator results, preview limits and reading full answers through `result_file` and evidence references.
 

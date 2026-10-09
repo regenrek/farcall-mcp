@@ -193,9 +193,29 @@ are needed, rather than rerunning the worker or loading all evidence into the
 coordinator's context. A preview limit does not reduce the worker's generated
 output, so request a concise answer as well.
 
-For example: “Return a brief summary and test results. Save detailed findings to
-`artifacts/review.md` and include the path.” Use a report-writing task only when
-file writes are authorized. [Batch result limits](batches.md) also apply.
+For an implementation handoff, request the exact commit hash (or explicitly
+state that no commit was created), the outcome and test evidence, failures,
+blockers, unresolved decisions, and a path to the detailed artifact. Put material
+failures and decisions early. For example: “Return a brief handoff with the exact
+commit, checks passed/failed/not run, blockers and open decisions. Save detailed
+findings to `artifacts/review.md` and include the path.” Use a report-writing task
+only when file writes are authorized.
+
+The preview is a character-limited prefix, not a semantic summary. A failure
+later in the answer can be outside it. Check status, permission denials and
+truncation/externalization flags; when needed to decide the outcome, read the
+relevant remainder from `result_file` or the batch's `worker_result_file` before
+accepting the work. A successful CLI exit or a positive preview alone is not
+acceptance evidence. [Batch result limits](batches.md) preserve status and file
+references even when a completion is externalized.
+
+Read the specific files or evidence needed for a decision rather than importing
+complete traces or diffs into the parent automatically. Farcall does not generate
+this handoff, assign reviewers or decide acceptance; those rules belong to the
+calling workflow. Full Farcall trace capture remains opt-in, and native session
+retention depends on the worker CLI. Short results reduce returned text but do
+not keep parent context constant: repeated calls, metadata and follow-up reads
+still add context.
 
 ## Optional traces
 
