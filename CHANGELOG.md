@@ -2,9 +2,15 @@
 
 ## [Unreleased]
 
+## [0.1.10] - 2026-10-23
+
 ### Security
 
 - Enforce Node 24.22.1+ (24.x) or 26.12.1+ (26.x) before bundled CLI/MCP initialization, covering the October 2026 security baseline including CVE-2026-111497. Reject unsupported majors and prereleases; explain inherited PATH and safe client/daemon restarts without changing user configuration.
+
+### Documentation
+
+- Explain optional bb Machine Sidebar visibility and link to Split Orchestrator.
 
 ## [0.1.9] - 2026-10-18
 

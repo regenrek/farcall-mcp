@@ -15,7 +15,7 @@ Keep the model-assisted host acceptance separate from deterministic tests. Recor
 Claude Code 2.1.302 rejects the existing `claude-worker` name during strict
 validation because the `claude-` prefix is reserved. This also affects its entry
 in the Claude marketplace. The official [manifest reference](https://code.claude.com/docs/en/plugins/manifest-reference#name)
-states that Claude Code still installs and loads these plugins. Version 0.1.9
+states that Claude Code still installs and loads these plugins. Farcall
 retains the existing plugin IDs for update compatibility and records this known
 validation failure; it does not claim all strict checks pass. The `codex-worker`
 manifest passes. Do not suppress unrelated validation errors. A future rename
