@@ -61,6 +61,12 @@ Before a long run, [check the worker account](docs/usage.md#worker-accounts) & [
 
 Stale locks recover automatically only when the same-host server and all recorded worker groups are gone. Legacy or uncertain locks still require inspection. Before removing a worker checkout, copy its `artifacts/farcall/<delegation_id>/` records elsewhere, only after `.active` is gone. [Crash recovery & record preservation](docs/usage.md#checkout-locks--crash-recovery).
 
+## Use with bb
+
+In [bb](https://github.com/get-bb/bb), Farcall workers are CLI processes, not separate bb threads. [Install Machine Sidebar](https://github.com/regenrek/bb-plugin-machine-sidebar#install) & enable **Show Farcall tasks** to list them under their coordinator. The sidebar uses bb's tool-call events: an open batch shows "Call open", not live progress for each worker.
+
+For a plan, delegate & verify workflow on top of Farcall, see [Split Orchestrator](https://github.com/regenrek/split-orchestrator).
+
 ## Polling vs. MCP waiting
 
 Farcall keeps the directly delegated MCP call open until its result. If a worker
