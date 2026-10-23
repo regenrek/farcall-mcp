@@ -57,7 +57,7 @@ The optional-trace update passes 42 tests. Both providers accept inline prompts 
 
 The stderr follow-up brings the suite to 45 passing tests. Its regressions cover UTF-8 characters split across chunks, stderr arriving after the worker exits & a detached child holding only stderr open. Both captured pipes share the bounded drain window; truncation is reported separately for each.
 
-The Codex marketplace is now `farcall`. The build takes all versions from `package.json` & inserts the Node 24 guard before bundled initialization. CI runs the offline package smoke test. Claude's documented inline-MCP override is retained, with a test requiring identical keys so the Codex declaration cannot accidentally launch in Claude.
+The Codex marketplace is now `farcall`. The build takes all versions from `package.json` & inserts the Node security baseline guard before bundled initialization. CI runs the offline package smoke test. Claude's documented inline-MCP override is retained, with a test requiring identical keys so the Codex declaration cannot accidentally launch in Claude.
 
 ## Non-Git directories
 

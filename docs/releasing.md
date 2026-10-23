@@ -1,6 +1,6 @@
 # Release steps
 
-1. Use Node 24 & run `pnpm install --frozen-lockfile`, then `pnpm check`.
+1. Use a supported Node version (see [installation](installation.md#node-security-baseline)) & run `pnpm install --frozen-lockfile`, then `pnpm check`.
 2. Validate both plugin directories with `claude plugin validate --strict`. Validate the Claude marketplace at `.claude-plugin/marketplace.json` too.
 3. Run the packaged smoke checks in `docs/verification.md`. Inspect `pnpm pack` output for prompts, credentials or local paths.
 4. Update the version in `package.json`. The build reads that version for the runtime & synchronizes all four plugin manifests. Rebuild & commit the generated servers, manifests & dependency notices.

@@ -8,6 +8,8 @@ The worker builds or reviews. The parent waits for the result, then resumes the 
 
 ## Install
 
+Requires Node 24.22.1+ (24.x) or 26.12.1+ (26.x) on the parent host's PATH. [Runtime updates](docs/installation.md#node-security-baseline).
+
 **In Claude Code**, install the Codex worker.
 
 ```text

@@ -88,7 +88,7 @@ test("Claude overrides every auto-loaded Codex server with its own configuration
   }
 });
 
-test("each bundle rejects older Node before initializing dependencies", async () => {
+test("each bundle enforces the security floor before initializing dependencies", async () => {
   const { runInNewContext } = await import("node:vm");
   for (const file of [
     "dist/cli.mjs",
@@ -103,13 +103,37 @@ test("each bundle rejects older Node before initializing dependencies", async ()
       source.indexOf("\n") + 1,
       source.indexOf("import { createRequire"),
     );
-    assert.throws(
-      () =>
-        runInNewContext(prefix, { process: { versions: { node: "22.0.0" } } }),
-      /requires Node 24/,
-    );
-    assert.doesNotThrow(() =>
-      runInNewContext(prefix, { process: { versions: { node: "24.0.0" } } }),
-    );
+    for (const version of [
+      "22.23.4",
+      "24.19.0",
+      "24.21.99",
+      "24.22.0",
+      "25.9.0",
+      "26.11.99",
+      "26.12.0",
+      "26.12.1-rc.1",
+      "27.0.0",
+      "invalid",
+    ]) {
+      assert.throws(
+        () =>
+          runInNewContext(prefix, { process: { versions: { node: version } } }),
+        /CVE-2026-111497/,
+        `${file}: ${version}`,
+      );
+    }
+    for (const version of [
+      "24.22.1",
+      "24.22.2",
+      "24.23.0",
+      "26.12.1",
+      "26.13.0",
+    ]) {
+      assert.doesNotThrow(
+        () =>
+          runInNewContext(prefix, { process: { versions: { node: version } } }),
+        `${file}: ${version}`,
+      );
+    }
   }
 });

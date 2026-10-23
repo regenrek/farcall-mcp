@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Security
+
+- Enforce Node 24.22.1+ (24.x) or 26.12.1+ (26.x) before bundled CLI/MCP initialization, covering the October 2026 security baseline including CVE-2026-111497. Reject unsupported majors and prereleases; explain inherited PATH and safe client/daemon restarts without changing user configuration.
+
 ## [0.1.9] - 2026-10-18
 
 ### Documentation

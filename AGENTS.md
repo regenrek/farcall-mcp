@@ -1,6 +1,6 @@
 # Project guidance
 
-Use Node 24 or newer. Keep src/ readable and provider-neutral outside adapters/.
+Use Node 24.22.1+ (24.x) or 26.12.1+ (26.x). Keep src/ readable and provider-neutral outside adapters/.
 Run pnpm check after changes. Generated servers in dist/ and plugins/ are release
 artifacts, not files to edit manually. Do not invoke real paid model jobs during
 tests. Keep raw prompts, sessions, credentials and benchmark data out of commits.
