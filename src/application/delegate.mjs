@@ -9,6 +9,7 @@ import {
   existingRecord,
   readJson,
   sha256,
+  lockRecoveryError,
 } from "../platform/artifacts.mjs";
 import { runProcess } from "../platform/process.mjs";
 import {
@@ -173,7 +174,7 @@ export async function reserveDelegation(
 
 export async function executeDelegation(
   plan,
-  { signal, commandOverride } = {},
+  { signal, commandOverride, lockLifecycle, lockRecoveries = [] } = {},
 ) {
   const {
     input,
@@ -196,6 +197,7 @@ export async function executeDelegation(
     signal,
     timeout: input.timeout_seconds,
     trace: input.trace,
+    ...lockLifecycle,
     onEvent(event) {
       if (!event || typeof event !== "object") return;
       if (preflight) {
@@ -240,6 +242,7 @@ export async function executeDelegation(
     ...execution,
     status,
     completed_at: timestamp(),
+    ...(lockRecoveries.length ? { lock_recoveries: lockRecoveries } : {}),
     session_id: state.session_id ?? "unknown",
     requested_model: input.model ?? null,
     reported_model: state.reported_model ?? "unknown",
@@ -281,9 +284,18 @@ export async function delegate(provider, value, options = {}) {
   });
   try {
     const cached = await inspectDelegation(plan);
-    if (cached) return cached;
+    if (cached)
+      return release.recoveries.length
+        ? { ...cached, lock_recoveries: release.recoveries }
+        : cached;
     await reserveDelegation(plan, options);
-    return await executeDelegation(plan, options);
+    return await executeDelegation(plan, {
+      ...options,
+      lockLifecycle: release.lifecycle(plan.input.delegation_id),
+      lockRecoveries: release.recoveries,
+    });
+  } catch (error) {
+    throw lockRecoveryError(error, release.recoveries);
   } finally {
     await release();
   }

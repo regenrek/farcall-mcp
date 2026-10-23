@@ -57,6 +57,10 @@ Change `model` to an identifier supported by the worker CLI. [Models, permission
 
 Full logs are opt-in with `trace: true`. Normal runs keep only the state needed for retries & resume, plus the full answer if the returned preview is shortened. [Local state & tracing](docs/usage.md#optional-traces).
 
+Before a long run, [check the worker account](docs/usage.md#worker-accounts) & [keep returned results short](docs/usage.md#keep-results-short).
+
+Stale locks recover automatically only when the same-host server and all recorded worker groups are gone. Legacy or uncertain locks still require inspection. Before removing a worker checkout, copy its `artifacts/farcall/<delegation_id>/` records elsewhere, only after `.active` is gone. [Crash recovery & record preservation](docs/usage.md#checkout-locks--crash-recovery).
+
 ## Use with bb
 
 In [bb](https://github.com/get-bb/bb), Farcall workers are CLI processes, not separate bb threads. [Install Machine Sidebar](https://github.com/regenrek/bb-plugin-machine-sidebar#install) & enable **Show Farcall tasks** to list them under their coordinator. The sidebar uses bb's tool-call events: an open batch shows "Call open", not live progress for each worker.
@@ -64,6 +68,14 @@ In [bb](https://github.com/get-bb/bb), Farcall workers are CLI processes, not se
 For a plan, delegate & verify workflow on top of Farcall, see [Split Orchestrator](https://github.com/regenrek/split-orchestrator).
 
 ## Polling vs. MCP waiting
+
+Farcall keeps the directly delegated MCP call open until its result. If a worker
+starts native Codex subagents, Farcall does not control that worker's
+`wait_agent`, sleep or status loops. The parent can be waiting while short native
+timeouts cause extra model turns inside the worker; that alone does not establish
+a Farcall waiting bug. Host scheduling still matters: an open MCP call does not
+guarantee that a host never polls. Native wait configuration belongs to the
+calling workflow, outside Farcall.
 
 ![Estimated API costs. With polling, Claude cost $21.10 and Astra $22.12, including $9.75 for polling. Total $43.22. With MCP waiting, Claude cost $22.99 and Astra $8.11. Total $31.10.](docs/images/polling-cost.png)
 

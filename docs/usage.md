@@ -29,6 +29,45 @@ These are instructions for the parent, not a Farcall configuration file. Every c
 
 New effort values or incompatible CLI changes may require a Farcall update.
 
+## Worker accounts
+
+`codex-worker` starts `codex exec` on the machine running the Farcall server.
+By default it uses that OS user's Codex login: `CODEX_HOME` (normally `~/.codex`)
+and the configured credential store, which may be the OS keychain. API-key or
+custom-provider authentication configured for that CLI can change this. See
+[Codex authentication](https://developers.openai.com/codex/auth/).
+
+Farcall does not select accounts, balance subscription allowances, or copy the
+coordinator's account, proxy or pool settings into the worker. The child inherits
+the Farcall server's process environment, so an explicitly configured CLI or
+inherited environment can affect routing. A pool used only by the parent does
+not establish which account the worker will use. Check each worker host with the
+same OS user and `CODEX_HOME` as its Farcall server.
+
+Before a long run, choose an account with remaining subscription allowance.
+Check `/status` in an interactive Codex session on that host or the account's
+usage dashboard, as described in [Codex usage guidance](https://developers.openai.com/codex/pricing/).
+`codex login status` checks the CLI's authentication mode, not remaining quota.
+
+Session-file `rate_limits` and nested `credits` fields, when present under
+`CODEX_HOME/sessions`, are version-dependent diagnostics, not a stable quota API.
+Match the record's account and timestamp to the worker login and time you are
+checking; an old record or one from another login is not evidence of current
+allowance. Missing fields or an unverified account/time match mean unknown.
+Exhausted subscription allowance may consume credits if enabled for that account.
+Farcall neither switches to another account nor enforces a credit budget.
+
+To switch accounts, finish active workers, then use `codex logout` and
+`codex login` in that same host environment and check `codex login status` again.
+Prefer a fresh login. OpenAI also documents [copying the auth cache as a headless
+fallback](https://developers.openai.com/codex/auth/#fallback-authenticate-locally-and-copy-your-auth-cache).
+Use that fallback only when needed; never run the source and copied login in
+parallel at two locations, because rotating tokens can leave a copy stale.
+This concerns duplicated login credentials, not separate fresh logins to the
+same account.
+The [CLI reference](https://developers.openai.com/codex/cli/reference/#codex-login)
+describes the login commands. Farcall does not edit login or user configuration.
+
 ## Run & resume
 
 Ask for the worker, give it a task and say what you want back. The same pattern works for implementation and review:
@@ -138,6 +177,46 @@ An identical request with the same ID returns the saved result. A changed reques
 
 `trace` & `max_result_chars` are part of request identity. Changing either requires a new delegation ID and starts a new call; a cached result cannot create logs retroactively. To read an already saved longer answer, use `result_file` instead of rerunning the task.
 
+## Keep results short
+
+Every returned worker result enters the coordinator's context, including each
+task in a batch. Ask for a short summary of changes, checks and blockers, with
+file references for details. If the task permits writing a report, keep the full
+report in an agreed file and return its path instead of pasting it into chat.
+
+`max_result_chars` bounds the returned preview (default 4,000 characters, range
+256–24,000). If the answer exceeds it, Farcall saves the full text as `result.txt`
+in the returned `evidence_directory` and returns its path in `result_file`, even
+with tracing off. `result_file` is an output field, not an input destination;
+it is `null` when no truncation was needed. Read the file only when its details
+are needed, rather than rerunning the worker or loading all evidence into the
+coordinator's context. A preview limit does not reduce the worker's generated
+output, so request a concise answer as well.
+
+For an implementation handoff, request the exact commit hash (or explicitly
+state that no commit was created), the outcome and test evidence, failures,
+blockers, unresolved decisions, and a path to the detailed artifact. Put material
+failures and decisions early. For example: “Return a brief handoff with the exact
+commit, checks passed/failed/not run, blockers and open decisions. Save detailed
+findings to `artifacts/review.md` and include the path.” Use a report-writing task
+only when file writes are authorized.
+
+The preview is a character-limited prefix, not a semantic summary. A failure
+later in the answer can be outside it. Check status, permission denials and
+truncation/externalization flags; when needed to decide the outcome, read the
+relevant remainder from `result_file` or the batch's `worker_result_file` before
+accepting the work. A successful CLI exit or a positive preview alone is not
+acceptance evidence. [Batch result limits](batches.md) preserve status and file
+references even when a completion is externalized.
+
+Read the specific files or evidence needed for a decision rather than importing
+complete traces or diffs into the parent automatically. Farcall does not generate
+this handoff, assign reviewers or decide acceptance; those rules belong to the
+calling workflow. Full Farcall trace capture remains opt-in, and native session
+retention depends on the worker CLI. Short results reduce returned text but do
+not keep parent context constant: repeated calls, metadata and follow-up reads
+still add context.
+
 ## Optional traces
 
 Full logging is off by default. Set `trace: true` on a `run` or `preflight` call when debugging or recording a benchmark. It saves the prompt copy, native events, stderr, lifecycle records & native final response under `artifacts/farcall/<delegation_id>/`. Logging locally does not itself use model tokens; reading those files into an agent's context does.
@@ -155,13 +234,59 @@ A truncated answer additionally creates `result.txt`. Failed CLI processes can r
 
 The records can contain private output. Add `artifacts/` to the target project's ignore rules. Disabling Farcall traces does not disable the CLI's own session history. Full traces cannot be recovered retroactively from a run with tracing off.
 
+## Checkout locks & crash recovery
+
+New checkout locks (`artifacts/farcall/.active`) and global write-scope claims
+(`~/.local/state/farcall/write-scopes/*.json`, or the configured state directory)
+record a shared `lock_id`, `server_pid`, `hostname`, `started_at` and versioned
+worker identities. Each worker starts as `not_spawned`; Farcall persists `spawning`
+before launching it, then records `spawned` with its detached process-group ID.
+A batch records every worker group in all of its locks and its shared claim.
+
+On admission, Farcall automatically removes an overlapping claim and its matching
+checkout locks only when the hostname matches, the server PID is absent, and every
+worker group is absent or explicitly never spawned. An orphan checkout lock is
+checked by the same rule. Each removed file and the reason are returned in the
+additive `lock_recoveries` field and saved with the completion or batch result.
+Recovery clears coordination records; it does not redispatch interrupted work or
+remove delegation evidence. Claims unrelated to the requested scopes are left alone.
+
+Foreign-host records, live servers or worker groups, legacy records without worker
+identity, incomplete records, and interrupted `spawning` states require inspection.
+Errors name the exact file and the blocking condition. Only an `ESRCH` process probe
+counts as absence; permission errors fail closed. Never remove a lock just because
+its server died: its worker group can still be writing.
+
+Live reused PIDs or process-group IDs also block recovery, even if their start time
+would differ. `started_at` is the lock admission time, not an OS process birth time;
+Farcall does not infer death from record age. This conservative rule can leave a
+stale lock blocked by an unrelated reused ID. Probes and unlinking are not an atomic
+OS operation, so ID reuse between them remains a small residual race. Hostname
+uniqueness and the local PID namespace must be reliable. Workers that deliberately
+detach into another process group remain outside Farcall's tracking boundary.
+
+Admission is serialized by a short-lived global `.active` mutex. Competing stale
+mutex recovery uses an exclusive `.active.recovery` fence. If the server dies during
+recovery and leaves a fence, inspect that exact file and the locks/processes before
+removing it; fences are never automatically recovered. Legacy admission mutexes
+also require manual inspection.
+
+Before removing a worker checkout, copy `artifacts/farcall/<delegation_id>/` to a
+location outside that checkout to preserve retry and resume records (and optional
+traces). **Never copy or remove these records while `artifacts/farcall/.active`
+exists**, including at the enclosing Git checkout root when the worker's `cwd` is
+a subdirectory. Finish or safely recover the run first. Archiving the records
+preserves the evidence; Farcall still requires the original provider and checkout
+identity for exact-session resume, so moving a checkout does not automatically make
+its records resumable from a new path.
+
 ## Limits
 
 Codex exec does not provide a verified model ID or price in its standard JSONL result. Those fields remain unknown. Claude's init-reported model is checked against the request; this does not detect later provider fallbacks. Resumed usage totals may be cumulative. A missing cost is not zero.
 
 A shared lock at the nearest Git root prevents overlapping Farcall workers, including calls from different subdirectories. Linked Git worktrees have separate locks. Outside Git, the lock covers only `cwd`. It cannot prevent unrelated editors from changing files. Use separate checkouts for parallel implementation.
 
-Cancellation & timeout terminate the child's process group. A child that deliberately detaches into another group is outside that boundary. Captured stdout & stderr share a drain window of at most one second after process exit; forced pipe closure is reported as `stdout_truncated` or `stderr_truncated`. With tracing enabled, stderr goes directly to its log file. After a hard server crash, inspect `artifacts/farcall/.active` & its processes before removing the lock.
+Cancellation & timeout terminate the child's process group. A child that deliberately detaches into another group is outside that boundary. Captured stdout & stderr share a drain window of at most one second after process exit; forced pipe closure is reported as `stdout_truncated` or `stderr_truncated`. With tracing enabled, stderr goes directly to its log file. Hard-crash recovery follows the checks below.
 
 Farcall is a trusted local CLI bridge, not an isolation boundary for untrusted agents.
 

@@ -1,6 +1,5 @@
 import { realpath, stat, readdir, lstat, unlink } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
-import { hostname } from "node:os";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import {
@@ -8,9 +7,14 @@ import {
   atomicJson,
   containedDirectory,
   readJson,
+  inspectLock,
+  recoverLock,
+  lockRefusal,
+  lockRecoveryError,
 } from "./artifacts.mjs";
 import { checkoutRoot, gitDirectory } from "./checkout.mjs";
 import { stateDirectory } from "./state.mjs";
+import { lockIdentity } from "./lock-identity.mjs";
 
 export async function canonicalWritableRoots(roots) {
   const resolved = [];
@@ -78,12 +82,16 @@ export function validateScopeIsolation(plans) {
 }
 
 // Serialize only filesystem admission, never worker execution. The mutex and
-// claims fail closed after an unclean interruption; never infer safety from PID reuse.
-async function admissionGuard(registry) {
+// claims recover only with complete, dead-owner identity. Live reused PIDs block.
+async function admissionGuard(registry, recoveries) {
   const deadline = performance.now() + 5000;
   for (;;) {
     try {
-      return await acquireLock(registry, { server_pid: process.pid });
+      return await acquireLock(
+        registry,
+        { server_pid: process.pid },
+        { recoveries },
+      );
     } catch (error) {
       if (error.cause?.code !== "EEXIST" || performance.now() >= deadline)
         throw error;
@@ -112,7 +120,12 @@ export async function acquireDelegationLocks(plans, info) {
     await stateDirectory(),
     "write-scopes",
   );
-  const releaseGuard = await admissionGuard(registry);
+  const recoveries = [];
+  const releaseGuard = await admissionGuard(registry, recoveries);
+  const identity = lockIdentity(
+    { ...info, lock_id: randomUUID() },
+    plans.map((plan) => plan.input.delegation_id),
+  );
   const claim = path.join(registry, `${randomUUID()}.json`);
   const scopes = plans.flatMap((plan) => plan.scopes);
   const releases = [];
@@ -121,35 +134,67 @@ export async function acquireDelegationLocks(plans, info) {
       if (!name.endsWith(".json")) continue;
       const file = path.join(registry, name);
       if (!(await lstat(file)).isFile())
-        throw new Error("Invalid write-scope claim; inspect registry");
-      const previous = await readJson(file);
+        throw lockRefusal(file, "invalid write-scope claim");
+      let previous;
+      try {
+        previous = await readJson(file);
+      } catch (error) {
+        throw lockRefusal(
+          file,
+          `unreadable or incomplete write-scope claim: ${error.message}`,
+        );
+      }
       if (
-        !Array.isArray(previous.scopes) ||
+        !Array.isArray(previous?.scopes) ||
         previous.scopes.some(
           (scope) =>
-            typeof scope.root !== "string" || !path.isAbsolute(scope.root),
+            typeof scope?.root !== "string" || !path.isAbsolute(scope.root),
         )
       )
-        throw new Error("Incomplete write-scope claim; inspect registry");
-      if (scopesOverlap(scopes, previous.scopes))
-        throw new Error(
-          `Checkout already has an active or stale worker lock (overlapping writable scope). Inspect ${file} before recovery.`,
-        );
+        throw lockRefusal(file, "incomplete write-scope claim");
+      if (!scopesOverlap(scopes, previous.scopes)) continue;
+      const inspected = await inspectLock(file);
+      if (inspected.reason) throw lockRefusal(file, inspected.reason);
+      const matching = [];
+      for (const scope of previous.scopes) {
+        if (scope.lock_root !== path.join(scope.root, "artifacts", "farcall"))
+          throw lockRefusal(file, "incomplete checkout lock path");
+        const checkoutFile = path.join(scope.lock_root, ".active");
+        try {
+          const checkout = await inspectLock(checkoutFile);
+          if (
+            !checkout.lock?.lock_id ||
+            checkout.lock.lock_id === previous.lock_id
+          ) {
+            if (checkout.reason)
+              throw lockRefusal(checkoutFile, checkout.reason);
+            matching.push([checkoutFile, checkout]);
+          }
+        } catch (error) {
+          if (error.code !== "ENOENT") throw error;
+        }
+      }
+      // Check every matching checkout before changing anything. A batch claim
+      // represents all its worker groups, including siblings in other checkouts.
+      for (const [checkoutFile, checkout] of matching)
+        await recoverLock(checkoutFile, recoveries, checkout);
+      await recoverLock(file, recoveries, inspected);
     }
     // Keep legacy checkout locks so existing single-run servers also exclude jobs.
     for (const root of [
       ...new Set(scopes.map((scope) => scope.lock_root)),
     ].toSorted())
-      releases.push(await acquireLock(root, info));
-    await atomicJson(claim, { ...info, hostname: hostname(), scopes });
+      releases.push(await acquireLock(root, identity, { recoveries }));
+    await atomicJson(claim, { ...identity, scopes });
   } catch (error) {
     await releaseAll(releases);
-    throw error;
+    throw lockRecoveryError(error, recoveries);
   } finally {
     await releaseGuard();
   }
-  return async () => {
-    const unlock = await admissionGuard(registry);
+  const release = async () => {
+    await updating.catch(() => {});
+    const unlock = await admissionGuard(registry, recoveries);
     try {
       await releaseAll(releases);
       await unlink(claim);
@@ -157,4 +202,25 @@ export async function acquireDelegationLocks(plans, info) {
       await unlock();
     }
   };
+  // Batch workers can spawn concurrently; serialize snapshots across all files.
+  let updating = Promise.resolve();
+  const updateWorker = (delegationId, worker) => {
+    updating = updating.then(async () => {
+      const index = identity.workers.findIndex(
+        (item) => item.delegation_id === delegationId,
+      );
+      if (index < 0) throw new Error("Unknown lock worker identity");
+      identity.workers[index] = { delegation_id: delegationId, ...worker };
+      for (const checkout of releases) await checkout.update(identity);
+      await atomicJson(claim, { ...identity, scopes });
+    });
+    return updating;
+  };
+  release.lifecycle = (delegationId) => ({
+    beforeSpawn: () => updateWorker(delegationId, { state: "spawning" }),
+    onSpawn: (process_group_id) =>
+      updateWorker(delegationId, { state: "spawned", process_group_id }),
+  });
+  release.recoveries = recoveries;
+  return release;
 }

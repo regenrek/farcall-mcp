@@ -123,6 +123,7 @@ test("npm CLI bundle starts outside the repository", async (t) => {
     new StdioClientTransport({
       command: process.execPath,
       args: [entry, "codex"],
+      env: { FARCALL_STATE_DIR: path.join(root, "state") },
     }),
   );
   const result = await client.callTool({

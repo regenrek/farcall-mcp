@@ -47,7 +47,12 @@ for (const provider of ["claude", "codex"]) {
       const client = new Client({ name: "manifest-test", version: "1" });
       t.after(() => client.close());
       await client.connect(
-        new StdioClientTransport({ command: process.execPath, args, cwd }),
+        new StdioClientTransport({
+          command: process.execPath,
+          args,
+          cwd,
+          env: { FARCALL_STATE_DIR: path.join(root, "state") },
+        }),
       );
       const result = await client.callTool({
         name: "preflight",

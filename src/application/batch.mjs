@@ -6,7 +6,11 @@ import {
   acquireDelegationLocks,
 } from "../platform/scopes.mjs";
 import { parseBatch, timestamp, VERSION } from "../core/contracts.mjs";
-import { atomicJson, sha256 } from "../platform/artifacts.mjs";
+import {
+  atomicJson,
+  sha256,
+  lockRecoveryError,
+} from "../platform/artifacts.mjs";
 import {
   batchDirectory,
   taskStateFile,
@@ -115,6 +119,9 @@ async function admitBatch(
     status,
     tasks: results,
     evidence_directory: directory,
+    ...(release?.recoveries.length
+      ? { lock_recoveries: release.recoveries }
+      : {}),
     ...extra,
   });
   let release;
@@ -162,7 +169,10 @@ async function admitBatch(
           // The shared lifecycle records cancellation even when no process starts.
           terminal = taskResult(
             tasks[index],
-            await executeDelegation(plan, options),
+            await executeDelegation(plan, {
+              ...options,
+              lockLifecycle: release.lifecycle(plan.input.delegation_id),
+            }),
           );
           if (!started) terminal.dispatch_state = "not_started";
         } catch (error) {
@@ -197,7 +207,7 @@ async function admitBatch(
           : "partial_failure";
     return await saveBatchResult(directory, result(status, results));
   } catch (error) {
-    if (admitted) throw error;
+    if (admitted) throw lockRecoveryError(error, release?.recoveries);
     await Promise.all(
       reserved.map((folder) => rm(folder, { recursive: true, force: true })),
     );
@@ -208,6 +218,9 @@ async function admitBatch(
         tasks.map((task) => taskResult(task)),
         {
           error: String(error?.message ?? error).slice(0, 2000),
+          ...(error.lock_recoveries?.length
+            ? { lock_recoveries: error.lock_recoveries }
+            : {}),
         },
       ),
     );
