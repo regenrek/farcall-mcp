@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Security
+
+- Update Zod to 4.6.7 to prevent memory exhaustion when validating oversized arrays.
+- Update the MCP SDK to 1.32.2.
+- Require Node 24.22.3+ (24.x) or 26.13.1+ (26.x) for the [November 11, 2026 Node security releases](https://nodejs.org/en/blog/vulnerability/november-2026-security-releases/).
+
 ## [0.1.10] - 2026-10-23
 
 ### Security

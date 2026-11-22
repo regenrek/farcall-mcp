@@ -108,27 +108,26 @@ test("each bundle enforces the security floor before initializing dependencies",
       "24.19.0",
       "24.21.99",
       "24.22.0",
+      "24.22.1",
+      "24.22.2",
+      "24.22.3-rc.1",
       "25.9.0",
       "26.11.99",
       "26.12.0",
-      "26.12.1-rc.1",
+      "26.12.1",
+      "26.13.0",
+      "26.13.1-rc.1",
       "27.0.0",
       "invalid",
     ]) {
       assert.throws(
         () =>
           runInNewContext(prefix, { process: { versions: { node: version } } }),
-        /CVE-2026-111497/,
+        /requires Node 24\.22\.3\+ \(24\.x\) or 26\.13\.1\+ \(26\.x\)/,
         `${file}: ${version}`,
       );
     }
-    for (const version of [
-      "24.22.1",
-      "24.22.2",
-      "24.23.0",
-      "26.12.1",
-      "26.13.0",
-    ]) {
+    for (const version of ["24.22.3", "24.23.0", "26.13.1"]) {
       assert.doesNotThrow(
         () =>
           runInNewContext(prefix, { process: { versions: { node: version } } }),

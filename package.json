@@ -12,7 +12,7 @@
   "homepage": "https://github.com/regenrek/farcall-mcp#readme",
   "bugs": "https://github.com/regenrek/farcall-mcp/issues",
   "engines": {
-    "node": "^24.22.1 || ^26.12.1"
+    "node": "^24.22.3 || ^26.13.1"
   },
   "packageManager": "pnpm@10.32.1",
   "bin": {
@@ -39,7 +39,12 @@
     "esbuild": "0.25.12",
     "oxlint": "1.56.0",
     "prettier": "3.8.2",
-    "@modelcontextprotocol/sdk": "1.30.1",
-    "zod": "4.6.5"
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "zod": "4.6.7"
+  },
+  "pnpm": {
+    "overrides": {
+      "ajv>fast-uri": "3.1.9"
+    }
   }
 }

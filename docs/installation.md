@@ -1,10 +1,10 @@
 # Installation & host setup
 
-Node 24.22.1+ (24.x) or 26.12.1+ (26.x), macOS or Linux, and an installed, signed-in worker CLI are required. Codex tasks need a Git working tree by default. For an authorized task in a plain directory, set `allow_non_git: true` on the worker call (and on resume). This passes `--skip-git-repo-check` for that invocation without initializing Git or changing user configuration; the selected sandbox still applies.
+Node 24.22.3+ (24.x) or 26.13.1+ (26.x), macOS or Linux, and an installed, signed-in worker CLI are required. Codex tasks need a Git working tree by default. For an authorized task in a plain directory, set `allow_non_git: true` on the worker call (and on resume). This passes `--skip-git-repo-check` for that invocation without initializing Git or changing user configuration; the selected sandbox still applies.
 
 ### Node security baseline
 
-Farcall checks the running Node version before initializing the bundled CLI or MCP server. It rejects versions below these patch levels, unsupported major versions and prereleases, with an error on stderr. The baseline includes [CVE-2026-111497 and the October 2026 Node security fixes](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases). This is a version check, not a guarantee against future vulnerabilities or a probe for vendor backports.
+Farcall checks the running Node version before initializing the bundled CLI or MCP server. It rejects versions below these patch levels, unsupported major versions and prereleases, with an error on stderr. The check uses version numbers, so vendor backports do not change the minimum. See the [November 2026 Node security release notes](https://nodejs.org/en/blog/vulnerability/november-2026-security-releases/).
 
 The plugin uses `node` from the parent client's PATH. Changing an nvm default does not update an already running client or daemon. Let active `run` / `run_batch` calls finish before restarting the parent and any persistent daemon with the updated runtime; closing a Farcall server cancels its active jobs. Then verify the Node executable used by the new MCP process. Updating the plugin does not patch existing processes or the provider CLI's own runtime. Farcall never installs Node or edits user configuration automatically.
 

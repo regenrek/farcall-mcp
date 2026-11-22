@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 (function requireSupportedNode(version = process.versions.node) {
-  // October 2026 security releases, including CVE-2026-111497.
+  // November 2026 security releases.
   // Keep this function self-contained: build.mjs embeds it before bundle code.
   const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(version);
   const [major, minor, patch] = match ? match.slice(1).map(Number) : [];
-  const minimum = { 24: [22, 1], 26: [12, 1] }[major];
+  const minimum = { 24: [22, 3], 26: [13, 1] }[major];
   if (
     !minimum ||
     minor < minimum[0] ||
     (minor === minimum[0] && patch < minimum[1])
   ) {
     throw new Error(
-      `farcall-mcp requires Node 24.22.1+ (24.x) or 26.12.1+ (26.x); found ${version}. ` +
-        "This security baseline includes CVE-2026-111497. Check the parent host's PATH. " +
+      `farcall-mcp requires Node 24.22.3+ (24.x) or 26.13.1+ (26.x). Found ${version}. ` +
+        "This baseline includes the November 2026 Node security fixes. Check the parent host's PATH. " +
         "After active jobs finish, restart the parent client and any persistent daemon with a supported Node version.",
     );
   }
@@ -70,7 +70,7 @@ var init_package = __esm({
       homepage: "https://github.com/regenrek/farcall-mcp#readme",
       bugs: "https://github.com/regenrek/farcall-mcp/issues",
       engines: {
-        node: "^24.22.1 || ^26.12.1"
+        node: "^24.22.3 || ^26.13.1"
       },
       packageManager: "pnpm@10.32.1",
       bin: {
@@ -97,8 +97,13 @@ var init_package = __esm({
         esbuild: "0.25.12",
         oxlint: "1.56.0",
         prettier: "3.8.2",
-        "@modelcontextprotocol/sdk": "1.30.1",
-        zod: "4.6.5"
+        "@modelcontextprotocol/sdk": "1.32.2",
+        zod: "4.6.7"
+      },
+      pnpm: {
+        overrides: {
+          "ajv>fast-uri": "3.1.9"
+        }
       }
     };
   }
@@ -117,10 +122,10 @@ var init_version = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/helpers/util.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/helpers/util.js
 var util, objectUtil, ZodParsedType, getParsedType;
 var init_util = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/helpers/util.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/helpers/util.js"() {
     (function(util2) {
       util2.assertEqual = (_) => {
       };
@@ -254,10 +259,10 @@ var init_util = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/ZodError.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/ZodError.js
 var ZodIssueCode, ZodError;
 var init_ZodError = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/ZodError.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/ZodError.js"() {
     init_util();
     ZodIssueCode = util.arrayToEnum([
       "invalid_type",
@@ -389,10 +394,10 @@ var init_ZodError = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/locales/en.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/locales/en.js
 var errorMap, en_default;
 var init_en = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/locales/en.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/locales/en.js"() {
     init_ZodError();
     init_util();
     errorMap = (issue2, _ctx) => {
@@ -499,19 +504,19 @@ var init_en = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/errors.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/errors.js
 function getErrorMap() {
   return overrideErrorMap;
 }
 var overrideErrorMap;
 var init_errors = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/errors.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/errors.js"() {
     init_en();
     overrideErrorMap = en_default;
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/helpers/parseUtil.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/helpers/parseUtil.js
 function addIssueToContext(ctx, issueData) {
   const overrideMap = getErrorMap();
   const issue2 = makeIssue({
@@ -533,7 +538,7 @@ function addIssueToContext(ctx, issueData) {
 }
 var makeIssue, ParseStatus, INVALID, DIRTY, OK, isAborted, isDirty, isValid, isAsync;
 var init_parseUtil = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/helpers/parseUtil.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/helpers/parseUtil.js"() {
     init_errors();
     init_en();
     makeIssue = (params) => {
@@ -627,16 +632,16 @@ var init_parseUtil = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/helpers/typeAliases.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/helpers/typeAliases.js
 var init_typeAliases = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/helpers/typeAliases.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/helpers/typeAliases.js"() {
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/helpers/errorUtil.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/helpers/errorUtil.js
 var errorUtil;
 var init_errorUtil = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/helpers/errorUtil.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/helpers/errorUtil.js"() {
     (function(errorUtil2) {
       errorUtil2.errToObj = (message) => typeof message === "string" ? { message } : message || {};
       errorUtil2.toString = (message) => typeof message === "string" ? message : message?.message;
@@ -644,7 +649,7 @@ var init_errorUtil = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/types.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/types.js
 function processCreateParams(params) {
   if (!params)
     return {};
@@ -815,7 +820,7 @@ function createZodEnum(values, params) {
 }
 var ParseInputLazyPath, handleResult, ZodType, cuidRegex, cuid2Regex, ulidRegex, uuidRegex, nanoidRegex, jwtRegex, durationRegex, emailRegex, _emojiRegex, emojiRegex, ipv4Regex, ipv4CidrRegex, ipv6Regex, ipv6CidrRegex, base64Regex, base64urlRegex, dateRegexSource, dateRegex, ZodString, ZodNumber, ZodBigInt, ZodBoolean, ZodDate, ZodSymbol, ZodUndefined, ZodNull, ZodAny, ZodUnknown, ZodNever, ZodVoid, ZodArray, ZodObject, ZodUnion, getDiscriminator, ZodDiscriminatedUnion, ZodIntersection, ZodTuple, ZodRecord, ZodMap, ZodSet, ZodFunction, ZodLazy, ZodLiteral, ZodEnum, ZodNativeEnum, ZodPromise, ZodEffects, ZodOptional, ZodNullable, ZodDefault, ZodCatch, ZodNaN, BRAND, ZodBranded, ZodPipeline, ZodReadonly, late, ZodFirstPartyTypeKind, stringType, numberType, nanType, bigIntType, booleanType, dateType, symbolType, undefinedType, nullType, anyType, unknownType, neverType, voidType, arrayType, objectType, strictObjectType, unionType, discriminatedUnionType, intersectionType, tupleType, recordType, mapType, setType, functionType, lazyType, literalType, enumType, nativeEnumType, promiseType, effectsType, optionalType, nullableType, preprocessType, pipelineType;
 var init_types = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/types.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/types.js"() {
     init_ZodError();
     init_errors();
     init_errorUtil();
@@ -4060,9 +4065,9 @@ var init_types = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/external.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/external.js
 var init_external = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/external.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/external.js"() {
     init_errors();
     init_parseUtil();
     init_typeAliases();
@@ -4072,14 +4077,14 @@ var init_external = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/index.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/index.js
 var init_v3 = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v3/index.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/index.js"() {
     init_external();
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/util.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/util.js
 var util_exports = {};
 __export(util_exports, {
   BIGINT_FORMAT_RANGES: () => BIGINT_FORMAT_RANGES,
@@ -4150,6 +4155,7 @@ __export(util_exports, {
   required: () => required,
   safeExtend: () => safeExtend,
   shallowClone: () => shallowClone,
+  sizeCaps: () => sizeCaps,
   slugify: () => slugify,
   stringifyPrimitive: () => stringifyPrimitive,
   toZod: () => toZod,
@@ -4573,6 +4579,18 @@ function prefixIssues(path10, issues) {
 function unwrapMessage(message) {
   return typeof message === "string" ? message : message?.message;
 }
+function sizeCaps(defChecks) {
+  const caps = [];
+  for (const ch of defChecks ?? []) {
+    const d = ch._zod.def;
+    if (!/_(length|size)$|_equals$/.test(d.check))
+      break;
+    const max = d.maximum ?? d.length ?? d.size;
+    if (max >= 0)
+      caps.push([max, ch]);
+  }
+  return caps;
+}
 function attachSchema(issues, start, inst) {
   var _a3;
   for (let i = start; i < issues.length; i++) {
@@ -4812,7 +4830,7 @@ function constantCatch(value) {
 }
 var Cached, EVALUATING, captureStackTrace, allowsEval, getParsedType2, propertyKeyTypes, primitiveTypes, NUMBER_FORMAT_RANGES, BIGINT_FORMAT_RANGES, highSurrogate, Class, installing, broke, breaker, CONSTANT_CATCH;
 var init_util2 = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/util.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/util.js"() {
     init_core();
     Cached = class {
       constructor(getter) {
@@ -4927,7 +4945,7 @@ var init_util2 = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/core.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/core.js
 function newError(Definition) {
   const E = _E;
   if (E) {
@@ -5030,7 +5048,7 @@ function config(newConfig) {
 }
 var _a, NEVER, _zodDesc, _E, $brand, $ZodAsyncError, $ZodEncodeError, globalConfig;
 var init_core = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/core.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/core.js"() {
     init_util2();
     NEVER = /* @__PURE__ */ Object.freeze({
       status: "aborted"
@@ -5054,7 +5072,7 @@ var init_core = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/errors.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/errors.js
 function _getMessage() {
   const internals = this._zod;
   internals.message ?? (internals.message = JSON.stringify(internals.def, jsonStringifyReplacer, 2));
@@ -5212,7 +5230,7 @@ function prettifyError(error62) {
 }
 var _messageDesc, _issuesDesc, _installedToString, initializer, $ZodError, $ZodRealError;
 var init_errors2 = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/errors.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/errors.js"() {
     init_core();
     init_util2();
     _messageDesc = {
@@ -5253,7 +5271,7 @@ var init_errors2 = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/parse.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/parse.js
 function finalizeParams(callee, params) {
   return { callee: params?.callee ?? callee, Err: params?.Err };
 }
@@ -5293,7 +5311,7 @@ function validateFallback(schema, value, _ctx) {
 }
 var _parse, parse, _parseAsync, parseAsync, _safeParse, safeParse, _safeParseAsync, safeParseAsync, COMPILE_INVALID, COMPILE_FALLBACK, validate, validateAsync, _encode, encode, _decode, decode, _encodeAsync, encodeAsync, _decodeAsync, decodeAsync, _safeEncode, safeEncode, _safeDecode, safeDecode, _safeEncodeAsync, safeEncodeAsync, _safeDecodeAsync, safeDecodeAsync;
 var init_parse = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/parse.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/parse.js"() {
     init_core();
     init_errors2();
     init_util2();
@@ -5421,7 +5439,7 @@ var init_parse = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/regexes.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/regexes.js
 var regexes_exports = {};
 __export(regexes_exports, {
   anyString: () => anyString,
@@ -5522,7 +5540,7 @@ function fixedBase64url(length) {
 }
 var cuid, cuid2, ulid, xid, ksuid, nanoid, duration, extendedDuration, guid, uuid, uuid4, uuid6, uuid7, email, html5Email, rfc5322Email, unicodeEmail, idnEmail, browserEmail, _emoji, ipv4, ipv6, mac, cidrv4, cidrv6, base64, base64url, hostname, domain, httpProtocol, e164, creditCard, currencyCode, iban, dateSource, date, anyString, string, bigint, integer, number, boolean, _null, _undefined, lowercase, uppercase, hex, md5_hex, md5_base64, md5_base64url, sha1_hex, sha1_base64, sha1_base64url, sha256_hex, sha256_base64, sha256_base64url, sha384_hex, sha384_base64, sha384_base64url, sha512_hex, sha512_base64, sha512_base64url;
 var init_regexes = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/regexes.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/regexes.js"() {
     init_util2();
     cuid = /^[cC][0-9a-z]{6,}$/;
     cuid2 = /^[0-9a-z]+$/;
@@ -5599,7 +5617,7 @@ var init_regexes = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/checks.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/checks.js
 function handleCheckPropertyResult(result, payload, property) {
   if (result.issues.length) {
     payload.issues.push(...prefixIssues(property, result.issues));
@@ -5607,7 +5625,7 @@ function handleCheckPropertyResult(result, payload, property) {
 }
 var $ZodCheck, _whenHasSize, _whenHasLength, numericOriginMap, $ZodCheckLessThan, $ZodCheckGreaterThan, $ZodCheckMultipleOf, $ZodCheckNumberFormat, $ZodCheckBigIntFormat, $ZodCheckMaxSize, $ZodCheckMinSize, $ZodCheckSizeEquals, $ZodCheckMaxLength, $ZodCheckMinLength, $ZodCheckLengthEquals, $ZodCheckStringFormat, $ZodCheckRegex, $ZodCheckLowerCase, $ZodCheckUpperCase, $ZodCheckIncludes, $ZodCheckStartsWith, $ZodCheckEndsWith, $ZodCheckProperty, $ZodCheckProperties, $ZodCheckMimeType, $ZodCheckOverwrite;
 var init_checks = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/checks.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/checks.js"() {
     init_core();
     init_regexes();
     init_util2();
@@ -6083,10 +6101,10 @@ var init_checks = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/doc.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/doc.js
 var Doc;
 var init_doc = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/doc.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/doc.js"() {
     Doc = class {
       constructor(args = [], closed = {}) {
         this.content = [];
@@ -6129,19 +6147,19 @@ ${content.join("\n")}
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/versions.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/versions.js
 var version;
 var init_versions = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/versions.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/versions.js"() {
     version = {
       major: 4,
       minor: 6,
-      patch: 5
+      patch: 7
     };
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/schemas.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/schemas.js
 async function validateAsync2(inst, value) {
   const ctx = { async: true };
   return toStandardResult(await inst._zod.run({ value, issues: [] }, ctx), ctx);
@@ -6297,6 +6315,28 @@ function isValidJWT2(token, algorithm = null) {
   } catch {
     return false;
   }
+}
+function capSize(inst, size) {
+  const caps = sizeCaps(inst._zod.def.checks);
+  if (!caps.length)
+    return;
+  const cap = Math.min(...caps.map((c) => c[0]));
+  const parse3 = inst._zod.parse;
+  inst._zod.parse = (payload, ctx) => {
+    const n = size(payload.value);
+    if (n > cap && !ctx?.skipChecks && ctx?.direction !== "backward") {
+      for (const [max, ch] of sizeCaps(inst._zod.def.checks)) {
+        if (n > max && ch._zod.def.when(payload)) {
+          const start = payload.issues.length;
+          ch._zod.check(payload);
+          payload.issues[start].continue = false;
+          attachSchema(payload.issues, start, inst);
+          return payload;
+        }
+      }
+    }
+    return parse3(payload, ctx);
+  };
 }
 function handleArrayResult(result, final, index) {
   if (result.issues.length) {
@@ -6798,9 +6838,9 @@ function handleRefineResult(result, payload, input2, inst) {
     payload.issues.push(issue(_iss));
   }
 }
-var $ZodType, toStandardResult, $ZodString, $ZodStringFormat, $ZodGUID, $ZodUUID, $ZodEmail, URL_BAD_FORMAT, URL_UNPARSEABLE, asciiTabOrNewline, $ZodURL, $ZodEmoji, $ZodNanoID, $ZodCUID, $ZodCUID2, $ZodULID, $ZodXID, $ZodKSUID, $ZodISODateTime, $ZodISODate, $ZodISOTime, $ZodISODuration, $ZodIPv4, ipv6Alphabet, $ZodIPv6, $ZodMAC, $ZodCIDRv4, $ZodCIDRv6, base64Charset, $ZodBase64, base64urlCharset, $ZodBase64URL, $ZodE164, CC_SANITIZE, $ZodCreditCard, $ZodIBAN, $ZodJWT, $ZodCustomStringFormat, $ZodNumber, $ZodNumberFormat, $ZodBoolean, $ZodBigInt, $ZodBigIntFormat, $ZodSymbol, $ZodUndefined, $ZodNull, $ZodAny, $ZodUnknown, $ZodNever, $ZodVoid, $ZodDate, $ZodArray, NO_SYMBOL_KEYS, $ZodObject, $ZodObjectJIT, $ZodUnion, $ZodXor, $ZodDiscriminatedUnion, $ZodIntersection, $ZodTuple, $ZodRecord, $ZodMap, $ZodSet, $ZodEnum, $ZodLiteral, $ZodFile, $ZodTransform, $ZodOptional, $ZodExactOptional, $ZodNullable, $ZodDefault, $ZodPrefault, $ZodNonOptional, $ZodSuccess, $ZodCatch, $ZodNaN, $ZodPipe, $ZodCodec, $ZodPreprocess, $ZodReadonly, $ZodTemplateLiteral, $ZodFunction, $ZodPromise, $ZodLazy, $ZodCustom;
+var $ZodType, toStandardResult, $ZodString, $ZodStringFormat, $ZodGUID, $ZodUUID, $ZodEmail, URL_BAD_FORMAT, URL_UNPARSEABLE, asciiTabOrNewline, $ZodURL, $ZodEmoji, $ZodNanoID, $ZodCUID, $ZodCUID2, $ZodULID, $ZodXID, $ZodKSUID, $ZodISODateTime, $ZodISODate, $ZodISOTime, $ZodISODuration, $ZodIPv4, ipv6Alphabet, $ZodIPv6, $ZodMAC, $ZodCIDRv4, $ZodCIDRv6, base64Charset, $ZodBase64, base64urlCharset, $ZodBase64URL, $ZodE164, CC_SANITIZE, $ZodCreditCard, $ZodIBAN, $ZodJWT, $ZodCustomStringFormat, $ZodNumber, $ZodNumberFormat, $ZodBoolean, $ZodBigInt, $ZodBigIntFormat, $ZodSymbol, $ZodUndefined, $ZodNull, $ZodAny, $ZodUnknown, $ZodNever, $ZodVoid, $ZodDate, arraySize, mapSize, setSize, $ZodArray, NO_SYMBOL_KEYS, $ZodObject, $ZodObjectJIT, $ZodUnion, $ZodXor, $ZodDiscriminatedUnion, $ZodIntersection, $ZodTuple, $ZodRecord, $ZodMap, $ZodSet, $ZodEnum, $ZodLiteral, $ZodFile, $ZodTransform, $ZodOptional, $ZodExactOptional, $ZodNullable, $ZodDefault, $ZodPrefault, $ZodNonOptional, $ZodSuccess, $ZodCatch, $ZodNaN, $ZodPipe, $ZodCodec, $ZodPreprocess, $ZodReadonly, $ZodTemplateLiteral, $ZodFunction, $ZodPromise, $ZodLazy, $ZodCustom;
 var init_schemas = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/schemas.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/schemas.js"() {
     init_checks();
     init_core();
     init_doc();
@@ -7405,6 +7445,9 @@ var init_schemas = __esm({
         return payload;
       };
     });
+    arraySize = (input2) => Array.isArray(input2) ? input2.length : -1;
+    mapSize = (input2) => input2 instanceof Map ? input2.size : -1;
+    setSize = (input2) => input2 instanceof Set ? input2.size : -1;
     $ZodArray = /* @__PURE__ */ $constructor("$ZodArray", (inst, def) => {
       $ZodType.init(inst, def);
       const memo2 = globalConfig.memoizer;
@@ -7442,6 +7485,7 @@ var init_schemas = __esm({
         }
         return payload;
       };
+      capSize(inst, arraySize);
     });
     NO_SYMBOL_KEYS = [];
     $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
@@ -8080,6 +8124,7 @@ var init_schemas = __esm({
           return Promise.all(proms).then(() => payload);
         return payload;
       };
+      capSize(inst, mapSize);
     });
     $ZodSet = /* @__PURE__ */ $constructor("$ZodSet", (inst, def) => {
       $ZodType.init(inst, def);
@@ -8116,6 +8161,7 @@ var init_schemas = __esm({
           return Promise.all(proms).then(() => payload);
         return payload;
       };
+      capSize(inst, setSize);
     });
     $ZodEnum = /* @__PURE__ */ $constructor("$ZodEnum", (inst, def) => {
       $ZodType.init(inst, def);
@@ -8568,7 +8614,7 @@ var init_schemas = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/memoizer.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/memoizer.js
 function isRef(value) {
   return value !== null && typeof value === "object";
 }
@@ -8732,7 +8778,7 @@ function isBackEdge(ctx, value) {
 }
 var $ZodCyclicError, STATE, NO_ISSUES, recursive, NONE, ASSUMED, PROVEN, handoff, open, memo;
 var init_memoizer = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/memoizer.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/memoizer.js"() {
     init_util2();
     $ZodCyclicError = class extends Error {
       constructor() {
@@ -8850,7 +8896,7 @@ var init_memoizer = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ar.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ar.js
 function ar_default() {
   return {
     localeError: error()
@@ -8858,7 +8904,7 @@ function ar_default() {
 }
 var error;
 var init_ar = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ar.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ar.js"() {
     init_util2();
     error = () => {
       const Sizable = {
@@ -8968,7 +9014,7 @@ var init_ar = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/az.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/az.js
 function az_default() {
   return {
     localeError: error2()
@@ -8976,7 +9022,7 @@ function az_default() {
 }
 var error2;
 var init_az = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/az.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/az.js"() {
     init_util2();
     error2 = () => {
       const Sizable = {
@@ -9085,7 +9131,7 @@ var init_az = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/be.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/be.js
 function getBelarusianPlural(count, one, few, many) {
   const absCount = Math.abs(count);
   const lastDigit = absCount % 10;
@@ -9108,7 +9154,7 @@ function be_default() {
 }
 var error3;
 var init_be = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/be.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/be.js"() {
     init_util2();
     error3 = () => {
       const Sizable = {
@@ -9260,7 +9306,7 @@ var init_be = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/bg.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/bg.js
 function bg_default() {
   return {
     localeError: error4()
@@ -9268,7 +9314,7 @@ function bg_default() {
 }
 var error4;
 var init_bg = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/bg.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/bg.js"() {
     init_util2();
     error4 = () => {
       const Sizable = {
@@ -9392,7 +9438,7 @@ var init_bg = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/bn.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/bn.js
 function bn_default() {
   return {
     localeError: error5()
@@ -9400,7 +9446,7 @@ function bn_default() {
 }
 var error5;
 var init_bn = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/bn.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/bn.js"() {
     init_util2();
     error5 = () => {
       const Sizable = {
@@ -9512,7 +9558,7 @@ var init_bn = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ca.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ca.js
 function ca_default() {
   return {
     localeError: error6()
@@ -9520,7 +9566,7 @@ function ca_default() {
 }
 var error6;
 var init_ca = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ca.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ca.js"() {
     init_util2();
     error6 = () => {
       const Sizable = {
@@ -9632,7 +9678,7 @@ var init_ca = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ckb.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ckb.js
 function ckb_default() {
   return {
     localeError: error7()
@@ -9640,7 +9686,7 @@ function ckb_default() {
 }
 var error7;
 var init_ckb = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ckb.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ckb.js"() {
     init_util2();
     error7 = () => {
       const Sizable = {
@@ -9771,7 +9817,7 @@ var init_ckb = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/cs.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/cs.js
 function cs_default() {
   return {
     localeError: error8()
@@ -9779,7 +9825,7 @@ function cs_default() {
 }
 var error8;
 var init_cs = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/cs.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/cs.js"() {
     init_util2();
     error8 = () => {
       const Sizable = {
@@ -9894,7 +9940,7 @@ var init_cs = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/da.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/da.js
 function da_default() {
   return {
     localeError: error9()
@@ -9902,7 +9948,7 @@ function da_default() {
 }
 var error9;
 var init_da = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/da.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/da.js"() {
     init_util2();
     error9 = () => {
       const Sizable = {
@@ -10021,7 +10067,7 @@ var init_da = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/de.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/de.js
 function de_default() {
   return {
     localeError: error10()
@@ -10029,7 +10075,7 @@ function de_default() {
 }
 var error10;
 var init_de = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/de.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/de.js"() {
     init_util2();
     error10 = () => {
       const Sizable = {
@@ -10141,7 +10187,7 @@ var init_de = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/el.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/el.js
 function el_default() {
   return {
     localeError: error11()
@@ -10149,7 +10195,7 @@ function el_default() {
 }
 var error11;
 var init_el = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/el.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/el.js"() {
     init_util2();
     error11 = () => {
       const Sizable = {
@@ -10260,7 +10306,7 @@ var init_el = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/en.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/en.js
 function en_default2() {
   return {
     localeError: error12()
@@ -10268,7 +10314,7 @@ function en_default2() {
 }
 var error12;
 var init_en2 = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/en.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/en.js"() {
     init_util2();
     error12 = () => {
       const Sizable = {
@@ -10391,7 +10437,7 @@ var init_en2 = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/eo.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/eo.js
 function eo_default() {
   return {
     localeError: error13()
@@ -10399,7 +10445,7 @@ function eo_default() {
 }
 var error13;
 var init_eo = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/eo.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/eo.js"() {
     init_util2();
     error13 = () => {
       const Sizable = {
@@ -10512,7 +10558,7 @@ var init_eo = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/es.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/es.js
 function es_default() {
   return {
     localeError: error14()
@@ -10520,7 +10566,7 @@ function es_default() {
 }
 var error14;
 var init_es = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/es.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/es.js"() {
     init_util2();
     error14 = () => {
       const Sizable = {
@@ -10655,7 +10701,7 @@ var init_es = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/fa.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/fa.js
 function fa_default() {
   return {
     localeError: error15()
@@ -10663,7 +10709,7 @@ function fa_default() {
 }
 var error15;
 var init_fa = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/fa.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/fa.js"() {
     init_util2();
     error15 = () => {
       const Sizable = {
@@ -10781,7 +10827,7 @@ var init_fa = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/fi.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/fi.js
 function fi_default() {
   return {
     localeError: error16()
@@ -10789,7 +10835,7 @@ function fi_default() {
 }
 var error16;
 var init_fi = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/fi.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/fi.js"() {
     init_util2();
     error16 = () => {
       const Sizable = {
@@ -10905,7 +10951,7 @@ var init_fi = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/fr.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/fr.js
 function fr_default() {
   return {
     localeError: error17()
@@ -10913,7 +10959,7 @@ function fr_default() {
 }
 var error17;
 var init_fr = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/fr.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/fr.js"() {
     init_util2();
     error17 = () => {
       const Sizable = {
@@ -11041,7 +11087,7 @@ var init_fr = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/fr-CA.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/fr-CA.js
 function fr_CA_default() {
   return {
     localeError: error18()
@@ -11049,7 +11095,7 @@ function fr_CA_default() {
 }
 var error18;
 var init_fr_CA = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/fr-CA.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/fr-CA.js"() {
     init_util2();
     error18 = () => {
       const Sizable = {
@@ -11160,7 +11206,7 @@ var init_fr_CA = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/gu.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/gu.js
 function gu_default() {
   return {
     localeError: error19()
@@ -11168,7 +11214,7 @@ function gu_default() {
 }
 var error19;
 var init_gu = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/gu.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/gu.js"() {
     init_util2();
     error19 = () => {
       const Sizable = {
@@ -11280,7 +11326,7 @@ var init_gu = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/he.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/he.js
 function he_default() {
   return {
     localeError: error20()
@@ -11288,7 +11334,7 @@ function he_default() {
 }
 var error20;
 var init_he = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/he.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/he.js"() {
     init_util2();
     error20 = () => {
       const TypeNames = {
@@ -11488,7 +11534,7 @@ var init_he = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/hi.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/hi.js
 function hi_default() {
   return {
     localeError: error21()
@@ -11496,7 +11542,7 @@ function hi_default() {
 }
 var error21;
 var init_hi = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/hi.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/hi.js"() {
     init_util2();
     error21 = () => {
       const Sizable = {
@@ -11606,7 +11652,7 @@ var init_hi = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/hr.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/hr.js
 function hr_default() {
   return {
     localeError: error22()
@@ -11614,7 +11660,7 @@ function hr_default() {
 }
 var error22;
 var init_hr = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/hr.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/hr.js"() {
     init_util2();
     error22 = () => {
       const Sizable = {
@@ -11739,7 +11785,7 @@ var init_hr = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/hu.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/hu.js
 function hu_default() {
   return {
     localeError: error23()
@@ -11747,7 +11793,7 @@ function hu_default() {
 }
 var error23;
 var init_hu = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/hu.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/hu.js"() {
     init_util2();
     error23 = () => {
       const Sizable = {
@@ -11859,7 +11905,7 @@ var init_hu = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/hy.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/hy.js
 function getArmenianPlural(count, one, many) {
   return Math.abs(count) === 1 ? one : many;
 }
@@ -11877,7 +11923,7 @@ function hy_default() {
 }
 var error24;
 var init_hy = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/hy.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/hy.js"() {
     init_util2();
     error24 = () => {
       const Sizable = {
@@ -12024,7 +12070,7 @@ var init_hy = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/id.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/id.js
 function id_default() {
   return {
     localeError: error25()
@@ -12032,7 +12078,7 @@ function id_default() {
 }
 var error25;
 var init_id = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/id.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/id.js"() {
     init_util2();
     error25 = () => {
       const Sizable = {
@@ -12142,7 +12188,7 @@ var init_id = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/is.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/is.js
 function is_default() {
   return {
     localeError: error26()
@@ -12150,7 +12196,7 @@ function is_default() {
 }
 var error26;
 var init_is = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/is.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/is.js"() {
     init_util2();
     error26 = () => {
       const Sizable = {
@@ -12263,7 +12309,7 @@ var init_is = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/it.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/it.js
 function it_default() {
   return {
     localeError: error27()
@@ -12271,7 +12317,7 @@ function it_default() {
 }
 var error27;
 var init_it = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/it.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/it.js"() {
     init_util2();
     error27 = () => {
       const Sizable = {
@@ -12383,7 +12429,7 @@ var init_it = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ja.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ja.js
 function ja_default() {
   return {
     localeError: error28()
@@ -12391,7 +12437,7 @@ function ja_default() {
 }
 var error28;
 var init_ja = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ja.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ja.js"() {
     init_util2();
     error28 = () => {
       const Sizable = {
@@ -12502,7 +12548,7 @@ var init_ja = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ka.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ka.js
 function ka_default() {
   return {
     localeError: error29()
@@ -12510,7 +12556,7 @@ function ka_default() {
 }
 var error29;
 var init_ka = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ka.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ka.js"() {
     init_util2();
     error29 = () => {
       const Sizable = {
@@ -12626,7 +12672,7 @@ var init_ka = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/km.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/km.js
 function km_default() {
   return {
     localeError: error30()
@@ -12634,7 +12680,7 @@ function km_default() {
 }
 var error30;
 var init_km = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/km.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/km.js"() {
     init_util2();
     error30 = () => {
       const Sizable = {
@@ -12748,17 +12794,17 @@ var init_km = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/kh.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/kh.js
 function kh_default() {
   return km_default();
 }
 var init_kh = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/kh.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/kh.js"() {
     init_km();
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/kn.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/kn.js
 function kn_default() {
   return {
     localeError: error31()
@@ -12766,7 +12812,7 @@ function kn_default() {
 }
 var error31;
 var init_kn = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/kn.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/kn.js"() {
     init_util2();
     error31 = () => {
       const Sizable = {
@@ -12880,7 +12926,7 @@ var init_kn = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ko.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ko.js
 function ko_default() {
   return {
     localeError: error32()
@@ -12888,7 +12934,7 @@ function ko_default() {
 }
 var error32;
 var init_ko = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ko.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ko.js"() {
     init_util2();
     error32 = () => {
       const Sizable = {
@@ -13003,7 +13049,7 @@ var init_ko = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/lt.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/lt.js
 function getUnitTypeFromNumber(number4) {
   const abs = Math.abs(number4);
   const last = abs % 10;
@@ -13021,7 +13067,7 @@ function lt_default() {
 }
 var capitalizeFirstCharacter, error33;
 var init_lt = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/lt.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/lt.js"() {
     init_util2();
     capitalizeFirstCharacter = (text) => {
       return text.charAt(0).toUpperCase() + text.slice(1);
@@ -13217,7 +13263,7 @@ var init_lt = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/mk.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/mk.js
 function mk_default() {
   return {
     localeError: error34()
@@ -13225,7 +13271,7 @@ function mk_default() {
 }
 var error34;
 var init_mk = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/mk.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/mk.js"() {
     init_util2();
     error34 = () => {
       const Sizable = {
@@ -13338,7 +13384,7 @@ var init_mk = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ms.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ms.js
 function ms_default() {
   return {
     localeError: error35()
@@ -13346,7 +13392,7 @@ function ms_default() {
 }
 var error35;
 var init_ms = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ms.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ms.js"() {
     init_util2();
     error35 = () => {
       const Sizable = {
@@ -13457,7 +13503,7 @@ var init_ms = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ne.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ne.js
 function ne_default() {
   return {
     localeError: error36()
@@ -13465,7 +13511,7 @@ function ne_default() {
 }
 var error36;
 var init_ne = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ne.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ne.js"() {
     init_util2();
     error36 = () => {
       const Sizable = {
@@ -13575,7 +13621,7 @@ var init_ne = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/nl.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/nl.js
 function nl_default() {
   return {
     localeError: error37()
@@ -13583,7 +13629,7 @@ function nl_default() {
 }
 var error37;
 var init_nl = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/nl.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/nl.js"() {
     init_util2();
     error37 = () => {
       const Sizable = {
@@ -13697,7 +13743,7 @@ var init_nl = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/nn.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/nn.js
 function nn_default() {
   return {
     localeError: error38()
@@ -13705,7 +13751,7 @@ function nn_default() {
 }
 var error38;
 var init_nn = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/nn.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/nn.js"() {
     init_util2();
     error38 = () => {
       const Sizable = {
@@ -13817,7 +13863,7 @@ var init_nn = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/no.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/no.js
 function no_default() {
   return {
     localeError: error39()
@@ -13825,7 +13871,7 @@ function no_default() {
 }
 var error39;
 var init_no = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/no.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/no.js"() {
     init_util2();
     error39 = () => {
       const Sizable = {
@@ -13937,7 +13983,7 @@ var init_no = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ota.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ota.js
 function ota_default() {
   return {
     localeError: error40()
@@ -13945,7 +13991,7 @@ function ota_default() {
 }
 var error40;
 var init_ota = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ota.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ota.js"() {
     init_util2();
     error40 = () => {
       const Sizable = {
@@ -14058,7 +14104,7 @@ var init_ota = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ps.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ps.js
 function ps_default() {
   return {
     localeError: error41()
@@ -14066,7 +14112,7 @@ function ps_default() {
 }
 var error41;
 var init_ps = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ps.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ps.js"() {
     init_util2();
     error41 = () => {
       const Sizable = {
@@ -14184,7 +14230,7 @@ var init_ps = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/pl.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/pl.js
 function pl_default() {
   return {
     localeError: error42()
@@ -14192,7 +14238,7 @@ function pl_default() {
 }
 var error42;
 var init_pl = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/pl.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/pl.js"() {
     init_util2();
     error42 = () => {
       const Sizable = {
@@ -14305,7 +14351,7 @@ var init_pl = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/pt.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/pt.js
 function pt_default() {
   return {
     localeError: error43()
@@ -14313,7 +14359,7 @@ function pt_default() {
 }
 var error43;
 var init_pt = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/pt.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/pt.js"() {
     init_util2();
     error43 = () => {
       const Sizable = {
@@ -14455,7 +14501,7 @@ var init_pt = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/pt-BR.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/pt-BR.js
 function pt_BR_default() {
   return {
     localeError: error44()
@@ -14463,7 +14509,7 @@ function pt_BR_default() {
 }
 var error44;
 var init_pt_BR = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/pt-BR.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/pt-BR.js"() {
     init_util2();
     error44 = () => {
       const Sizable = {
@@ -14606,7 +14652,7 @@ var init_pt_BR = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ro.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ro.js
 function ro_default() {
   return {
     localeError: error45()
@@ -14614,7 +14660,7 @@ function ro_default() {
 }
 var error45;
 var init_ro = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ro.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ro.js"() {
     init_util2();
     error45 = () => {
       const Sizable = {
@@ -14735,7 +14781,7 @@ var init_ro = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ru.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ru.js
 function getRussianPlural(count, one, few, many) {
   const absCount = Math.abs(count);
   const lastDigit = absCount % 10;
@@ -14758,7 +14804,7 @@ function ru_default() {
 }
 var error46;
 var init_ru = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ru.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ru.js"() {
     init_util2();
     error46 = () => {
       const Sizable = {
@@ -14910,7 +14956,7 @@ var init_ru = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/sk.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/sk.js
 function sk_default() {
   return {
     localeError: error47()
@@ -14918,7 +14964,7 @@ function sk_default() {
 }
 var error47;
 var init_sk = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/sk.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/sk.js"() {
     init_util2();
     error47 = () => {
       const Sizable = {
@@ -15033,7 +15079,7 @@ var init_sk = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/sl.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/sl.js
 function sl_default() {
   return {
     localeError: error48()
@@ -15041,7 +15087,7 @@ function sl_default() {
 }
 var error48;
 var init_sl = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/sl.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/sl.js"() {
     init_util2();
     error48 = () => {
       const Sizable = {
@@ -15154,7 +15200,7 @@ var init_sl = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/sv.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/sv.js
 function sv_default() {
   return {
     localeError: error49()
@@ -15162,7 +15208,7 @@ function sv_default() {
 }
 var error49;
 var init_sv = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/sv.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/sv.js"() {
     init_util2();
     error49 = () => {
       const Sizable = {
@@ -15276,7 +15322,7 @@ var init_sv = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ta.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ta.js
 function ta_default() {
   return {
     localeError: error50()
@@ -15284,7 +15330,7 @@ function ta_default() {
 }
 var error50;
 var init_ta = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ta.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ta.js"() {
     init_util2();
     error50 = () => {
       const Sizable = {
@@ -15398,7 +15444,7 @@ var init_ta = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/tg.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/tg.js
 function tg_default() {
   return {
     localeError: error51()
@@ -15406,7 +15452,7 @@ function tg_default() {
 }
 var error51;
 var init_tg = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/tg.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/tg.js"() {
     init_util2();
     error51 = () => {
       const Sizable = {
@@ -15521,7 +15567,7 @@ var init_tg = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/th.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/th.js
 function th_default() {
   return {
     localeError: error52()
@@ -15529,7 +15575,7 @@ function th_default() {
 }
 var error52;
 var init_th = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/th.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/th.js"() {
     init_util2();
     error52 = () => {
       const Sizable = {
@@ -15643,7 +15689,7 @@ var init_th = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/tk.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/tk.js
 function tk_default() {
   return {
     localeError: error53()
@@ -15651,7 +15697,7 @@ function tk_default() {
 }
 var error53;
 var init_tk = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/tk.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/tk.js"() {
     init_util2();
     error53 = () => {
       const Sizable = {
@@ -15757,7 +15803,7 @@ var init_tk = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/tr.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/tr.js
 function tr_default() {
   return {
     localeError: error54()
@@ -15765,7 +15811,7 @@ function tr_default() {
 }
 var error54;
 var init_tr = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/tr.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/tr.js"() {
     init_util2();
     error54 = () => {
       const Sizable = {
@@ -15874,7 +15920,7 @@ var init_tr = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/uk.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/uk.js
 function uk_default() {
   return {
     localeError: error55()
@@ -15882,7 +15928,7 @@ function uk_default() {
 }
 var error55;
 var init_uk = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/uk.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/uk.js"() {
     init_util2();
     error55 = () => {
       const Sizable = {
@@ -15994,17 +16040,17 @@ var init_uk = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ua.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ua.js
 function ua_default() {
   return uk_default();
 }
 var init_ua = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ua.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ua.js"() {
     init_uk();
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ur.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ur.js
 function ur_default() {
   return {
     localeError: error56()
@@ -16012,7 +16058,7 @@ function ur_default() {
 }
 var error56;
 var init_ur = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/ur.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ur.js"() {
     init_util2();
     error56 = () => {
       const Sizable = {
@@ -16126,7 +16172,7 @@ var init_ur = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/uz.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/uz.js
 function uz_default() {
   return {
     localeError: error57()
@@ -16134,7 +16180,7 @@ function uz_default() {
 }
 var error57;
 var init_uz = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/uz.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/uz.js"() {
     init_util2();
     error57 = () => {
       const Sizable = {
@@ -16246,7 +16292,7 @@ var init_uz = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/vi.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/vi.js
 function vi_default() {
   return {
     localeError: error58()
@@ -16254,7 +16300,7 @@ function vi_default() {
 }
 var error58;
 var init_vi = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/vi.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/vi.js"() {
     init_util2();
     error58 = () => {
       const Sizable = {
@@ -16366,7 +16412,7 @@ var init_vi = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/zh-CN.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/zh-CN.js
 function zh_CN_default() {
   return {
     localeError: error59()
@@ -16374,7 +16420,7 @@ function zh_CN_default() {
 }
 var error59;
 var init_zh_CN = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/zh-CN.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/zh-CN.js"() {
     init_util2();
     error59 = () => {
       const Sizable = {
@@ -16487,7 +16533,7 @@ var init_zh_CN = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/zh-TW.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/zh-TW.js
 function zh_TW_default() {
   return {
     localeError: error60()
@@ -16495,7 +16541,7 @@ function zh_TW_default() {
 }
 var error60;
 var init_zh_TW = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/zh-TW.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/zh-TW.js"() {
     init_util2();
     error60 = () => {
       const Sizable = {
@@ -16606,7 +16652,7 @@ var init_zh_TW = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/yo.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/yo.js
 function yo_default() {
   return {
     localeError: error61()
@@ -16614,7 +16660,7 @@ function yo_default() {
 }
 var error61;
 var init_yo = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/yo.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/yo.js"() {
     init_util2();
     error61 = () => {
       const Sizable = {
@@ -16725,7 +16771,7 @@ var init_yo = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/index.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/index.js
 var locales_exports = {};
 __export(locales_exports, {
   ar: () => ar_default,
@@ -16793,7 +16839,7 @@ __export(locales_exports, {
   zhTW: () => zh_TW_default
 });
 var init_locales = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/index.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/index.js"() {
     init_ar();
     init_az();
     init_be();
@@ -16860,13 +16906,13 @@ var init_locales = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/registries.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/registries.js
 function registry() {
   return new $ZodRegistry();
 }
 var _a2, $output, $input, $ZodRegistry, globalRegistry;
 var init_registries = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/registries.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/registries.js"() {
     $output = /* @__PURE__ */ Symbol("ZodOutput");
     $input = /* @__PURE__ */ Symbol("ZodInput");
     $ZodRegistry = class {
@@ -16914,7 +16960,7 @@ var init_registries = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/compile.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/compile.js
 function compileValidator(schema, parser) {
   try {
     return compileFn(schema, { assertOnly: true });
@@ -17905,9 +17951,15 @@ function generateNullableCheck(doc, ctx, schema, accessor, buildsValue = true) {
   doc.write(`}`);
   return outputVar;
 }
+function generateSizeGate(doc, schema, size) {
+  for (const [max, check2] of sizeCaps(schema._zod.def.checks)) {
+    doc.write(`if (${size} > ${numericOperand(max, check2._zod.def.check)}) return INVALID;`);
+  }
+}
 function generateArrayCheck(doc, ctx, schema, accessor, buildsValue = true) {
   const def = schema._zod.def;
   doc.write(`if (!Array.isArray(${accessor})) return INVALID;`);
+  generateSizeGate(doc, schema, `${accessor}.length`);
   const outputVar = buildsValue ? newVar(ctx) : null;
   const iVar = newVar(ctx);
   const elemVar = newVar(ctx);
@@ -18307,6 +18359,7 @@ function literalPropertyKey(ctx, key) {
 function generateMapCheck(doc, ctx, schema, accessor) {
   const def = schema._zod.def;
   doc.write(`if (!(${accessor} instanceof Map)) return INVALID;`);
+  generateSizeGate(doc, schema, `${accessor}.size`);
   const outputVar = newVar(ctx);
   const kVar = newVar(ctx);
   const valVar = newVar(ctx);
@@ -18323,6 +18376,7 @@ function generateMapCheck(doc, ctx, schema, accessor) {
 function generateSetCheck(doc, ctx, schema, accessor) {
   const def = schema._zod.def;
   doc.write(`if (!(${accessor} instanceof Set)) return INVALID;`);
+  generateSizeGate(doc, schema, `${accessor}.size`);
   const outputVar = newVar(ctx);
   const valVar = newVar(ctx);
   doc.write(`const ${outputVar} = new Set();`);
@@ -18468,7 +18522,7 @@ function generateTransformCheck(doc, ctx, schema, accessor) {
 }
 var INVALID2, FALLBACK_FLAG, ZodCompileAsyncError, ZodCompileUnsupportedError, WHEN_DEFAULTED_CHECKS, PATTERN_IS_COMPLETE;
 var init_compile = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/compile.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/compile.js"() {
     init_core();
     init_doc();
     init_memoizer();
@@ -18527,7 +18581,7 @@ var init_compile = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/api.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/api.js
 function snapshotChecks(def) {
   if (def.checks)
     def.checks = [...def.checks];
@@ -19580,7 +19634,7 @@ function _stringFormat(Class2, format, fnOrRegex, _params = {}) {
 }
 var TimePrecision;
 var init_api = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/api.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/api.js"() {
     init_checks();
     init_registries();
     init_schemas();
@@ -19595,7 +19649,7 @@ var init_api = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/to-json-schema.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/to-json-schema.js
 function assignProps(target, ...sources) {
   for (const source of sources) {
     for (const key of Reflect.ownKeys(source)) {
@@ -20111,7 +20165,7 @@ function isTransforming(_schema, _ctx) {
 }
 var FOLDABLE_KEYS, UNION_KEYS, createToJSONSchemaMethod, createStandardJSONSchemaMethod;
 var init_to_json_schema = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/to-json-schema.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/to-json-schema.js"() {
     init_registries();
     init_util2();
     FOLDABLE_KEYS = /* @__PURE__ */ new Set(["type", "properties", "required", "additionalProperties"]);
@@ -20132,7 +20186,7 @@ var init_to_json_schema = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/json-schema-processors.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/json-schema-processors.js
 function aggregateChecks(schema) {
   const agg = {};
   const def = schema._zod.def;
@@ -20282,7 +20336,7 @@ function toJSONSchema(input2, params) {
 }
 var narrowMin, narrowMax, narrowBoth, addDivisor, addPattern, intersectMime, setFormat, minContributor, maxContributor, formatContributor, contributors, formatMap, exactPatterns, exactPattern, stringProcessor, numberProcessor, booleanProcessor, bigintProcessor, symbolProcessor, nullProcessor, undefinedProcessor, voidProcessor, neverProcessor, anyProcessor, unknownProcessor, dateProcessor, enumProcessor, literalProcessor, nanProcessor, templateLiteralProcessor, fileProcessor, successProcessor, customProcessor, functionProcessor, transformProcessor, mapProcessor, setProcessor, arrayProcessor, objectProcessor, unionProcessor, intersectionProcessor, tupleProcessor, pendingRecords, recordProcessor, nullableProcessor, nonoptionalProcessor, UNREPRESENTABLE_DEFAULT, defaultProcessor, prefaultProcessor, catchProcessor, pipeProcessor, readonlyProcessor, promiseProcessor, optionalProcessor, lazyProcessor, allProcessors;
 var init_json_schema_processors = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/json-schema-processors.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/json-schema-processors.js"() {
     init_regexes();
     init_schemas();
     init_to_json_schema();
@@ -20889,10 +20943,10 @@ var init_json_schema_processors = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/json-schema-generator.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/json-schema-generator.js
 var JSONSchemaGenerator;
 var init_json_schema_generator = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/json-schema-generator.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/json-schema-generator.js"() {
     init_json_schema_processors();
     init_to_json_schema();
     JSONSchemaGenerator = class {
@@ -20974,14 +21028,14 @@ var init_json_schema_generator = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/json-schema.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/json-schema.js
 var json_schema_exports = {};
 var init_json_schema = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/json-schema.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/json-schema.js"() {
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/index.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/index.js
 var core_exports2 = {};
 __export(core_exports2, {
   $ZodAny: () => $ZodAny,
@@ -21298,7 +21352,7 @@ __export(core_exports2, {
   withParser: () => withParser
 });
 var init_core2 = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/index.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/index.js"() {
     init_core();
     init_parse();
     init_errors2();
@@ -21321,14 +21375,14 @@ var init_core2 = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/mini/parse.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/mini/parse.js
 var init_parse2 = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/mini/parse.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/mini/parse.js"() {
     init_core2();
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/mini/schemas.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/mini/schemas.js
 // @__NO_SIDE_EFFECTS__
 function object(shape, params) {
   const def = {
@@ -21340,7 +21394,7 @@ function object(shape, params) {
 }
 var ZodMiniType, ZodMiniObject;
 var init_schemas2 = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/mini/schemas.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/mini/schemas.js"() {
     init_core2();
     init_util2();
     init_parse2();
@@ -21402,13 +21456,13 @@ var init_schemas2 = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/mini/checks.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/mini/checks.js
 var init_checks2 = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/mini/checks.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/mini/checks.js"() {
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/visit.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/visit.js
 function visit(schema, fnOrHandlers) {
   const fn = typeof fnOrHandlers === "function" ? fnOrHandlers : (node2, rewritten) => {
     const h = fnOrHandlers[node2._zod.def.type];
@@ -21563,28 +21617,28 @@ function visit(schema, fnOrHandlers) {
 }
 var RESOLVING;
 var init_visit = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/core/visit.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/visit.js"() {
     init_schemas();
     init_util2();
     RESOLVING = Symbol("z.visit/resolving");
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/mini/iso.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/mini/iso.js
 var init_iso = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/mini/iso.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/mini/iso.js"() {
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/mini/coerce.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/mini/coerce.js
 var init_coerce = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/mini/coerce.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/mini/coerce.js"() {
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/mini/external.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/mini/external.js
 var init_external2 = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/mini/external.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/mini/external.js"() {
     init_core2();
     init_parse2();
     init_schemas2();
@@ -21596,14 +21650,14 @@ var init_external2 = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4-mini/index.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4-mini/index.js
 var init_v4_mini = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4-mini/index.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4-mini/index.js"() {
     init_external2();
   }
 });
 
-// node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-compat.js
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-compat.js
 function isZ4Schema(s) {
   const schema = s;
   return !!schema._zod;
@@ -21763,13 +21817,13 @@ function getLiteralValue(schema) {
   return void 0;
 }
 var init_zod_compat = __esm({
-  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-compat.js"() {
+  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-compat.js"() {
     init_v3();
     init_v4_mini();
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/checks.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/checks.js
 var checks_exports2 = {};
 __export(checks_exports2, {
   endsWith: () => _endsWith,
@@ -21804,12 +21858,12 @@ __export(checks_exports2, {
   uppercase: () => _uppercase
 });
 var init_checks3 = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/checks.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/checks.js"() {
     init_core2();
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/errors.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/errors.js
 function _lazyMethod(proto, key, make) {
   Object.defineProperty(proto, key, {
     configurable: true,
@@ -21826,7 +21880,7 @@ function _lazyMethod(proto, key, make) {
 }
 var _installedErrorProtos, initializer2, ZodError2, ZodRealError;
 var init_errors3 = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/errors.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/errors.js"() {
     init_core2();
     init_core2();
     init_util2();
@@ -21863,10 +21917,10 @@ var init_errors3 = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/parse.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/parse.js
 var parse2, parseAsync2, safeParse3, safeParseAsync3, encode2, decode2, encodeAsync2, decodeAsync2, safeEncode2, safeDecode2, safeEncodeAsync2, safeDecodeAsync2;
 var init_parse3 = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/parse.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/parse.js"() {
     init_core2();
     init_errors3();
     init_core2();
@@ -21885,7 +21939,7 @@ var init_parse3 = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/schemas.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/schemas.js
 var schemas_exports2 = {};
 __export(schemas_exports2, {
   ZodAny: () => ZodAny2,
@@ -22559,7 +22613,7 @@ function preprocess(fn, schema) {
 }
 var ZodType2, _ZodString, ZodString2, ZodStringFormat, ZodISODateTime, ZodISODate, ZodISOTime, ZodISODuration, ZodEmail, ZodGUID, ZodUUID, ZodURL, ZodEmoji, ZodNanoID, ZodCUID, ZodCUID2, ZodULID, ZodXID, ZodKSUID, ZodIPv4, ZodMAC, ZodIPv6, ZodCIDRv4, ZodCIDRv6, ZodBase64, ZodBase64URL, ZodE164, ZodCreditCard, ZodIBAN, ZodJWT, ZodCustomStringFormat, ZodNumber2, ZodNumberFormat, ZodBoolean2, ZodBigInt2, ZodBigIntFormat, ZodSymbol2, ZodUndefined2, ZodNull2, ZodAny2, ZodUnknown2, ZodNever2, ZodVoid2, ZodDate2, ZodArray2, ZodObject2, ZodUnion2, ZodXor, ZodDiscriminatedUnion2, ZodIntersection2, ZodTuple2, ZodRecord2, ZodMap2, ZodSet2, ZodEnum2, ZodLiteral2, ZodFile, ZodTransform, ZodOptional2, ZodExactOptional, ZodNullable2, ZodDefault2, ZodPrefault, ZodNonOptional, ZodSuccess, ZodCatch2, ZodNaN2, ZodPipe, ZodCodec, ZodPreprocess, ZodReadonly2, ZodTemplateLiteral, ZodLazy2, ZodPromise2, ZodFunction2, ZodCustom, describe2, meta2, ZodInstanceOf, stringbool;
 var init_schemas3 = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/schemas.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/schemas.js"() {
     init_core2();
     init_core2();
     init_json_schema_processors();
@@ -23542,7 +23596,7 @@ var init_schemas3 = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/compat.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/compat.js
 function setErrorMap(map2) {
   config({
     customError: map2
@@ -23553,7 +23607,7 @@ function getErrorMap2() {
 }
 var ZodIssueCode2, ZodFirstPartyTypeKind2;
 var init_compat = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/compat.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/compat.js"() {
     init_core2();
     ZodIssueCode2 = {
       invalid_type: "invalid_type",
@@ -23573,7 +23627,7 @@ var init_compat = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/iso.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/iso.js
 var iso_exports2 = {};
 __export(iso_exports2, {
   ZodISODate: () => ZodISODate,
@@ -23598,14 +23652,14 @@ function duration2(params) {
   return _isoDuration(ZodISODuration, params);
 }
 var init_iso2 = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/iso.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/iso.js"() {
     init_core2();
     init_schemas3();
     init_schemas3();
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/from-json-schema.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/from-json-schema.js
 function detectVersion(schema, defaultTarget) {
   const $schema = schema.$schema;
   if ($schema === "https://json-schema.org/draft/2020-12/schema") {
@@ -24236,7 +24290,7 @@ function fromJSONSchema(schema, params) {
 }
 var z, RECOGNIZED_KEYS, SCHEMA_KEYWORDS, SCHEMA_MAP_KEYWORDS, fullTime;
 var init_from_json_schema = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/from-json-schema.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/from-json-schema.js"() {
     init_registries();
     init_util2();
     init_checks3();
@@ -24348,7 +24402,7 @@ var init_from_json_schema = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/deep-partial.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/deep-partial.js
 function deepPartial(schema) {
   return visit(schema, {
     object: (s) => s.partial(),
@@ -24360,13 +24414,13 @@ function deepPartial(schema) {
   });
 }
 var init_deep_partial = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/deep-partial.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/deep-partial.js"() {
     init_visit();
     init_schemas3();
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/in-out.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/in-out.js
 function withChecks(side, checks) {
   if (!checks?.length)
     return side;
@@ -24396,14 +24450,14 @@ function output(schema) {
   });
 }
 var init_in_out = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/in-out.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/in-out.js"() {
     init_util2();
     init_visit();
     init_schemas3();
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/coerce.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/coerce.js
 var coerce_exports2 = {};
 __export(coerce_exports2, {
   bigint: () => bigint3,
@@ -24428,13 +24482,13 @@ function date4(params) {
   return _coercedDate(ZodDate2, params);
 }
 var init_coerce2 = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/coerce.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/coerce.js"() {
     init_core2();
     init_schemas3();
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/external.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/external.js
 var external_exports = {};
 __export(external_exports, {
   $brand: () => $brand,
@@ -24697,7 +24751,7 @@ __export(external_exports, {
   xor: () => xor
 });
 var init_external3 = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/external.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/external.js"() {
     init_core2();
     init_schemas3();
     init_checks3();
@@ -24716,21 +24770,21 @@ var init_external3 = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/index.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/index.js
 var init_classic = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/index.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/index.js"() {
     init_external3();
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/index.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/index.js
 var init_v4 = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/index.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/index.js"() {
     init_classic();
   }
 });
 
-// node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/types.js
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/types.js
 function assertCompleteRequestPrompt(request) {
   if (request.params.ref.type !== "ref/prompt") {
     throw new TypeError(`Expected CompleteRequestPrompt, but got ${request.params.ref.type}`);
@@ -24745,7 +24799,7 @@ function assertCompleteRequestResourceTemplate(request) {
 }
 var LATEST_PROTOCOL_VERSION, SUPPORTED_PROTOCOL_VERSIONS, RELATED_TASK_META_KEY, JSONRPC_VERSION, AssertObjectSchema, ProgressTokenSchema, CursorSchema, TaskCreationParamsSchema, TaskMetadataSchema, RelatedTaskMetadataSchema, RequestMetaSchema, BaseRequestParamsSchema, TaskAugmentedRequestParamsSchema, isTaskAugmentedRequestParams, RequestSchema, NotificationsParamsSchema, NotificationSchema, ResultSchema, RequestIdSchema, JSONRPCRequestSchema, isJSONRPCRequest, JSONRPCNotificationSchema, isJSONRPCNotification, JSONRPCResultResponseSchema, isJSONRPCResultResponse, ErrorCode, JSONRPCErrorResponseSchema, isJSONRPCErrorResponse, JSONRPCMessageSchema, JSONRPCResponseSchema, EmptyResultSchema, CancelledNotificationParamsSchema, CancelledNotificationSchema, IconSchema, IconsSchema, BaseMetadataSchema, ImplementationSchema, FormElicitationCapabilitySchema, ElicitationCapabilitySchema, ClientTasksCapabilitySchema, ServerTasksCapabilitySchema, ClientCapabilitiesSchema, InitializeRequestParamsSchema, InitializeRequestSchema, ServerCapabilitiesSchema, InitializeResultSchema, InitializedNotificationSchema, PingRequestSchema, ProgressSchema, ProgressNotificationParamsSchema, ProgressNotificationSchema, PaginatedRequestParamsSchema, PaginatedRequestSchema, PaginatedResultSchema, TaskStatusSchema, TaskSchema, CreateTaskResultSchema, TaskStatusNotificationParamsSchema, TaskStatusNotificationSchema, GetTaskRequestSchema, GetTaskResultSchema, GetTaskPayloadRequestSchema, GetTaskPayloadResultSchema, ListTasksRequestSchema, ListTasksResultSchema, CancelTaskRequestSchema, CancelTaskResultSchema, ResourceContentsSchema, TextResourceContentsSchema, Base64Schema, BlobResourceContentsSchema, RoleSchema, AnnotationsSchema, ResourceSchema, ResourceTemplateSchema, ListResourcesRequestSchema, ListResourcesResultSchema, ListResourceTemplatesRequestSchema, ListResourceTemplatesResultSchema, ResourceRequestParamsSchema, ReadResourceRequestParamsSchema, ReadResourceRequestSchema, ReadResourceResultSchema, ResourceListChangedNotificationSchema, SubscribeRequestParamsSchema, SubscribeRequestSchema, UnsubscribeRequestParamsSchema, UnsubscribeRequestSchema, ResourceUpdatedNotificationParamsSchema, ResourceUpdatedNotificationSchema, PromptArgumentSchema, PromptSchema, ListPromptsRequestSchema, ListPromptsResultSchema, GetPromptRequestParamsSchema, GetPromptRequestSchema, TextContentSchema, ImageContentSchema, AudioContentSchema, ToolUseContentSchema, EmbeddedResourceSchema, ResourceLinkSchema, ContentBlockSchema, PromptMessageSchema, GetPromptResultSchema, PromptListChangedNotificationSchema, ToolAnnotationsSchema, ToolExecutionSchema, ToolSchema, ListToolsRequestSchema, ListToolsResultSchema, CallToolResultSchema, CompatibilityCallToolResultSchema, CallToolRequestParamsSchema, CallToolRequestSchema, ToolListChangedNotificationSchema, ListChangedOptionsBaseSchema, LoggingLevelSchema, SetLevelRequestParamsSchema, SetLevelRequestSchema, LoggingMessageNotificationParamsSchema, LoggingMessageNotificationSchema, ModelHintSchema, ModelPreferencesSchema, ToolChoiceSchema, ToolResultContentSchema, SamplingContentSchema, SamplingMessageContentBlockSchema, SamplingMessageSchema, CreateMessageRequestParamsSchema, CreateMessageRequestSchema, CreateMessageResultSchema, CreateMessageResultWithToolsSchema, BooleanSchemaSchema, StringSchemaSchema, NumberSchemaSchema, UntitledSingleSelectEnumSchemaSchema, TitledSingleSelectEnumSchemaSchema, LegacyTitledEnumSchemaSchema, SingleSelectEnumSchemaSchema, UntitledMultiSelectEnumSchemaSchema, TitledMultiSelectEnumSchemaSchema, MultiSelectEnumSchemaSchema, EnumSchemaSchema, PrimitiveSchemaDefinitionSchema, ElicitRequestFormParamsSchema, ElicitRequestURLParamsSchema, ElicitRequestParamsSchema, ElicitRequestSchema, ElicitationCompleteNotificationParamsSchema, ElicitationCompleteNotificationSchema, ElicitResultSchema, ResourceTemplateReferenceSchema, PromptReferenceSchema, CompleteRequestParamsSchema, CompleteRequestSchema, CompleteResultSchema, RootSchema, ListRootsRequestSchema, ListRootsResultSchema, RootsListChangedNotificationSchema, ClientRequestSchema, ClientNotificationSchema, ClientResultSchema, ServerRequestSchema, ServerNotificationSchema, ServerResultSchema, McpError, UrlElicitationRequiredError;
 var init_types2 = __esm({
-  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/types.js"() {
+  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/types.js"() {
     init_v4();
     LATEST_PROTOCOL_VERSION = "2025-11-25";
     SUPPORTED_PROTOCOL_VERSIONS = [LATEST_PROTOCOL_VERSION, "2025-06-18", "2025-03-26", "2024-11-05", "2024-10-07"];
@@ -26266,19 +26320,19 @@ var init_types2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/interfaces.js
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/interfaces.js
 function isTerminal(status) {
   return status === "completed" || status === "failed" || status === "cancelled";
 }
 var init_interfaces = __esm({
-  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/interfaces.js"() {
+  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/interfaces.js"() {
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/Options.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/Options.js
 var ignoreOverride, defaultOptions, getDefaultOptions;
 var init_Options = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/Options.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/Options.js"() {
     ignoreOverride = Symbol("Let zodToJsonSchema decide on which parser to use");
     defaultOptions = {
       name: void 0,
@@ -26314,10 +26368,10 @@ var init_Options = __esm({
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/Refs.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/Refs.js
 var getRefs;
 var init_Refs = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/Refs.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/Refs.js"() {
     init_Options();
     getRefs = (options) => {
       const _options = getDefaultOptions(options);
@@ -26341,7 +26395,7 @@ var init_Refs = __esm({
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/errorMessages.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/errorMessages.js
 function addErrorMessage(res, key, errorMessage, refs) {
   if (!refs?.errorMessages)
     return;
@@ -26357,14 +26411,14 @@ function setResponseValueAndErrors(res, key, value, errorMessage, refs) {
   addErrorMessage(res, key, errorMessage, refs);
 }
 var init_errorMessages = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/errorMessages.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/errorMessages.js"() {
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/getRelativePath.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/getRelativePath.js
 var getRelativePath;
 var init_getRelativePath = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/getRelativePath.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/getRelativePath.js"() {
     getRelativePath = (pathA, pathB) => {
       let i = 0;
       for (; i < pathA.length && i < pathB.length; i++) {
@@ -26376,7 +26430,7 @@ var init_getRelativePath = __esm({
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/any.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/any.js
 function parseAnyDef(refs) {
   if (refs.target !== "openAi") {
     return {};
@@ -26392,12 +26446,12 @@ function parseAnyDef(refs) {
   };
 }
 var init_any = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/any.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/any.js"() {
     init_getRelativePath();
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/array.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/array.js
 function parseArrayDef(def, refs) {
   const res = {
     type: "array"
@@ -26421,14 +26475,14 @@ function parseArrayDef(def, refs) {
   return res;
 }
 var init_array = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/array.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/array.js"() {
     init_v3();
     init_errorMessages();
     init_parseDef();
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/bigint.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/bigint.js
 function parseBigintDef(def, refs) {
   const res = {
     type: "integer",
@@ -26474,36 +26528,36 @@ function parseBigintDef(def, refs) {
   return res;
 }
 var init_bigint = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/bigint.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/bigint.js"() {
     init_errorMessages();
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/boolean.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/boolean.js
 function parseBooleanDef() {
   return {
     type: "boolean"
   };
 }
 var init_boolean = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/boolean.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/boolean.js"() {
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/branded.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/branded.js
 function parseBrandedDef(_def, refs) {
   return parseDef(_def.type._def, refs);
 }
 var init_branded = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/branded.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/branded.js"() {
     init_parseDef();
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/catch.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/catch.js
 var parseCatchDef;
 var init_catch = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/catch.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/catch.js"() {
     init_parseDef();
     parseCatchDef = (def, refs) => {
       return parseDef(def.innerType._def, refs);
@@ -26511,7 +26565,7 @@ var init_catch = __esm({
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/date.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/date.js
 function parseDateDef(def, refs, overrideDateStrategy) {
   const strategy = overrideDateStrategy ?? refs.dateStrategy;
   if (Array.isArray(strategy)) {
@@ -26537,7 +26591,7 @@ function parseDateDef(def, refs, overrideDateStrategy) {
 }
 var integerDateParser;
 var init_date = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/date.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/date.js"() {
     init_errorMessages();
     integerDateParser = (def, refs) => {
       const res = {
@@ -26576,7 +26630,7 @@ var init_date = __esm({
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/default.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/default.js
 function parseDefaultDef(_def, refs) {
   return {
     ...parseDef(_def.innerType._def, refs),
@@ -26584,23 +26638,23 @@ function parseDefaultDef(_def, refs) {
   };
 }
 var init_default = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/default.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/default.js"() {
     init_parseDef();
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/effects.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/effects.js
 function parseEffectsDef(_def, refs) {
   return refs.effectStrategy === "input" ? parseDef(_def.schema._def, refs) : parseAnyDef(refs);
 }
 var init_effects = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/effects.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/effects.js"() {
     init_parseDef();
     init_any();
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/enum.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/enum.js
 function parseEnumDef(def) {
   return {
     type: "string",
@@ -26608,11 +26662,11 @@ function parseEnumDef(def) {
   };
 }
 var init_enum = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/enum.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/enum.js"() {
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/intersection.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/intersection.js
 function parseIntersectionDef(def, refs) {
   const allOf = [
     parseDef(def.left._def, {
@@ -26650,7 +26704,7 @@ function parseIntersectionDef(def, refs) {
 }
 var isJsonSchema7AllOfType;
 var init_intersection = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/intersection.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/intersection.js"() {
     init_parseDef();
     isJsonSchema7AllOfType = (type) => {
       if ("type" in type && type.type === "string")
@@ -26660,7 +26714,7 @@ var init_intersection = __esm({
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/literal.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/literal.js
 function parseLiteralDef(def, refs) {
   const parsedType2 = typeof def.value;
   if (parsedType2 !== "bigint" && parsedType2 !== "number" && parsedType2 !== "boolean" && parsedType2 !== "string") {
@@ -26680,11 +26734,11 @@ function parseLiteralDef(def, refs) {
   };
 }
 var init_literal = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/literal.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/literal.js"() {
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/string.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/string.js
 function parseStringDef(def, refs) {
   const res = {
     type: "string"
@@ -26961,7 +27015,7 @@ function stringifyRegExpWithFlags(regex, refs) {
 }
 var emojiRegex2, zodPatterns, ALPHA_NUMERIC;
 var init_string = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/string.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/string.js"() {
     init_errorMessages();
     emojiRegex2 = void 0;
     zodPatterns = {
@@ -27015,7 +27069,7 @@ var init_string = __esm({
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/record.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/record.js
 function parseRecordDef(def, refs) {
   if (refs.target === "openAi") {
     console.warn("Warning: OpenAI may not support records in schemas! Try an array of key-value pairs instead.");
@@ -27067,7 +27121,7 @@ function parseRecordDef(def, refs) {
   return schema;
 }
 var init_record = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/record.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/record.js"() {
     init_v3();
     init_parseDef();
     init_string();
@@ -27076,7 +27130,7 @@ var init_record = __esm({
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/map.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/map.js
 function parseMapDef(def, refs) {
   if (refs.mapStrategy === "record") {
     return parseRecordDef(def, refs);
@@ -27101,14 +27155,14 @@ function parseMapDef(def, refs) {
   };
 }
 var init_map = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/map.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/map.js"() {
     init_parseDef();
     init_record();
     init_any();
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/nativeEnum.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/nativeEnum.js
 function parseNativeEnumDef(def) {
   const object3 = def.values;
   const actualKeys = Object.keys(def.values).filter((key) => {
@@ -27122,11 +27176,11 @@ function parseNativeEnumDef(def) {
   };
 }
 var init_nativeEnum = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/nativeEnum.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/nativeEnum.js"() {
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/never.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/never.js
 function parseNeverDef(refs) {
   return refs.target === "openAi" ? void 0 : {
     not: parseAnyDef({
@@ -27136,12 +27190,12 @@ function parseNeverDef(refs) {
   };
 }
 var init_never = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/never.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/never.js"() {
     init_any();
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/null.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/null.js
 function parseNullDef(refs) {
   return refs.target === "openApi3" ? {
     enum: ["null"],
@@ -27151,11 +27205,11 @@ function parseNullDef(refs) {
   };
 }
 var init_null = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/null.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/null.js"() {
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/union.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/union.js
 function parseUnionDef(def, refs) {
   if (refs.target === "openApi3")
     return asAnyOf(def, refs);
@@ -27210,7 +27264,7 @@ function parseUnionDef(def, refs) {
 }
 var primitiveMappings, asAnyOf;
 var init_union = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/union.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/union.js"() {
     init_parseDef();
     primitiveMappings = {
       ZodString: "string",
@@ -27229,7 +27283,7 @@ var init_union = __esm({
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/nullable.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/nullable.js
 function parseNullableDef(def, refs) {
   if (["ZodString", "ZodNumber", "ZodBigInt", "ZodBoolean", "ZodNull"].includes(def.innerType._def.typeName) && (!def.innerType._def.checks || !def.innerType._def.checks.length)) {
     if (refs.target === "openApi3") {
@@ -27261,13 +27315,13 @@ function parseNullableDef(def, refs) {
   return base && { anyOf: [base, { type: "null" }] };
 }
 var init_nullable = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/nullable.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/nullable.js"() {
     init_parseDef();
     init_union();
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/number.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/number.js
 function parseNumberDef(def, refs) {
   const res = {
     type: "number"
@@ -27316,12 +27370,12 @@ function parseNumberDef(def, refs) {
   return res;
 }
 var init_number = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/number.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/number.js"() {
     init_errorMessages();
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/object.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/object.js
 function parseObjectDef(def, refs) {
   const forceOptionalIntoNullable = refs.target === "openAi";
   const result = {
@@ -27391,15 +27445,15 @@ function safeIsOptional(schema) {
   }
 }
 var init_object = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/object.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/object.js"() {
     init_parseDef();
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/optional.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/optional.js
 var parseOptionalDef;
 var init_optional = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/optional.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/optional.js"() {
     init_parseDef();
     init_any();
     parseOptionalDef = (def, refs) => {
@@ -27422,10 +27476,10 @@ var init_optional = __esm({
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/pipeline.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/pipeline.js
 var parsePipelineDef;
 var init_pipeline = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/pipeline.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/pipeline.js"() {
     init_parseDef();
     parsePipelineDef = (def, refs) => {
       if (refs.pipeStrategy === "input") {
@@ -27448,17 +27502,17 @@ var init_pipeline = __esm({
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/promise.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/promise.js
 function parsePromiseDef(def, refs) {
   return parseDef(def.type._def, refs);
 }
 var init_promise = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/promise.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/promise.js"() {
     init_parseDef();
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/set.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/set.js
 function parseSetDef(def, refs) {
   const items = parseDef(def.valueType._def, {
     ...refs,
@@ -27478,13 +27532,13 @@ function parseSetDef(def, refs) {
   return schema;
 }
 var init_set = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/set.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/set.js"() {
     init_errorMessages();
     init_parseDef();
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/tuple.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/tuple.js
 function parseTupleDef(def, refs) {
   if (def.rest) {
     return {
@@ -27512,37 +27566,37 @@ function parseTupleDef(def, refs) {
   }
 }
 var init_tuple = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/tuple.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/tuple.js"() {
     init_parseDef();
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/undefined.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/undefined.js
 function parseUndefinedDef(refs) {
   return {
     not: parseAnyDef(refs)
   };
 }
 var init_undefined = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/undefined.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/undefined.js"() {
     init_any();
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/unknown.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/unknown.js
 function parseUnknownDef(refs) {
   return parseAnyDef(refs);
 }
 var init_unknown = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/unknown.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/unknown.js"() {
     init_any();
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/readonly.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/readonly.js
 var parseReadonlyDef;
 var init_readonly = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parsers/readonly.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parsers/readonly.js"() {
     init_parseDef();
     parseReadonlyDef = (def, refs) => {
       return parseDef(def.innerType._def, refs);
@@ -27550,10 +27604,10 @@ var init_readonly = __esm({
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/selectParser.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/selectParser.js
 var selectParser;
 var init_selectParser = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/selectParser.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/selectParser.js"() {
     init_v3();
     init_any();
     init_array();
@@ -27662,7 +27716,7 @@ var init_selectParser = __esm({
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parseDef.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parseDef.js
 function parseDef(def, refs, forceResolution = false) {
   const seenItem = refs.seen.get(def);
   if (refs.override) {
@@ -27694,7 +27748,7 @@ function parseDef(def, refs, forceResolution = false) {
 }
 var get$ref, addMeta;
 var init_parseDef = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parseDef.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parseDef.js"() {
     init_Options();
     init_selectParser();
     init_getRelativePath();
@@ -27727,16 +27781,16 @@ var init_parseDef = __esm({
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parseTypes.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parseTypes.js
 var init_parseTypes = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/parseTypes.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/parseTypes.js"() {
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/zodToJsonSchema.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/zodToJsonSchema.js
 var zodToJsonSchema;
 var init_zodToJsonSchema = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/zodToJsonSchema.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/zodToJsonSchema.js"() {
     init_parseDef();
     init_Refs();
     init_any();
@@ -27803,9 +27857,9 @@ var init_zodToJsonSchema = __esm({
   }
 });
 
-// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/index.js
+// node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/index.js
 var init_esm = __esm({
-  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.5/node_modules/zod-to-json-schema/dist/esm/index.js"() {
+  "node_modules/.pnpm/zod-to-json-schema@3.25.2_zod@4.6.7/node_modules/zod-to-json-schema/dist/esm/index.js"() {
     init_Options();
     init_Refs();
     init_errorMessages();
@@ -27848,7 +27902,7 @@ var init_esm = __esm({
   }
 });
 
-// node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-json-schema-compat.js
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-json-schema-compat.js
 function mapMiniTarget(t) {
   if (!t)
     return "draft-7";
@@ -27890,14 +27944,14 @@ function parseWithCompat(schema, data) {
   return result.data;
 }
 var init_zod_json_schema_compat = __esm({
-  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-json-schema-compat.js"() {
+  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-json-schema-compat.js"() {
     init_v4_mini();
     init_zod_compat();
     init_esm();
   }
 });
 
-// node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/protocol.js
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/protocol.js
 function isPlainObject2(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
@@ -27919,7 +27973,7 @@ function mergeCapabilities(base, additional) {
 }
 var DEFAULT_REQUEST_TIMEOUT_MSEC, Protocol;
 var init_protocol = __esm({
-  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/protocol.js"() {
+  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/protocol.js"() {
     init_zod_compat();
     init_types2();
     init_interfaces();
@@ -27964,6 +28018,9 @@ var init_protocol = __esm({
           this.setRequestHandler(GetTaskPayloadRequestSchema, async (request, extra) => {
             const handleTaskResult = async () => {
               const taskId = request.params.taskId;
+              if (!await this._taskStore.getTask(taskId, extra.sessionId)) {
+                throw new McpError(ErrorCode.InvalidParams, `Task not found: ${taskId}`);
+              }
               if (this._taskMessageQueue) {
                 let queuedMessage;
                 while (queuedMessage = await this._taskMessageQueue.dequeue(taskId, extra.sessionId)) {
@@ -27994,12 +28051,12 @@ var init_protocol = __esm({
                 throw new McpError(ErrorCode.InvalidParams, `Task not found: ${taskId}`);
               }
               if (!isTerminal(task.status)) {
-                await this._waitForTaskUpdate(taskId, extra.signal);
+                await this._waitForTaskUpdate(taskId, extra.signal, extra.sessionId);
                 return await handleTaskResult();
               }
               if (isTerminal(task.status)) {
                 const result = await this._taskStore.getTaskResult(taskId, extra.sessionId);
-                this._clearTaskQueue(taskId);
+                this._clearTaskQueue(taskId, extra.sessionId);
                 return {
                   ...result,
                   _meta: {
@@ -28036,7 +28093,7 @@ var init_protocol = __esm({
                 throw new McpError(ErrorCode.InvalidParams, `Cannot cancel task in terminal status: ${task.status}`);
               }
               await this._taskStore.updateTaskStatus(request.params.taskId, "cancelled", "Client cancelled task execution.", extra.sessionId);
-              this._clearTaskQueue(request.params.taskId);
+              this._clearTaskQueue(request.params.taskId, extra.sessionId);
               const cancelledTask = await this._taskStore.getTask(request.params.taskId, extra.sessionId);
               if (!cancelledTask) {
                 throw new McpError(ErrorCode.InvalidParams, `Task not found after cancellation: ${request.params.taskId}`);
@@ -28164,6 +28221,19 @@ var init_protocol = __esm({
         const handler = this._requestHandlers.get(request.method) ?? this.fallbackRequestHandler;
         const capturedTransport = this._transport;
         const relatedTaskId = request.params?._meta?.[RELATED_TASK_META_KEY]?.taskId;
+        const sessionId = capturedTransport?.sessionId;
+        const store = this._taskStore;
+        let relatedTaskFound = true;
+        let relatedTaskLookup;
+        if (relatedTaskId && store && this._taskMessageQueue && sessionId !== void 0) {
+          relatedTaskFound = false;
+          relatedTaskLookup = (async () => {
+            if (!await store.getTask(relatedTaskId, sessionId)) {
+              throw new McpError(ErrorCode.InvalidParams, `Task not found: ${relatedTaskId}`);
+            }
+            relatedTaskFound = true;
+          })();
+        }
         if (handler === void 0) {
           const errorResponse = {
             jsonrpc: "2.0",
@@ -28173,7 +28243,10 @@ var init_protocol = __esm({
               message: "Method not found"
             }
           };
-          if (relatedTaskId && this._taskMessageQueue) {
+          if (relatedTaskId && relatedTaskLookup) {
+            const queuedError = { type: "error", message: errorResponse, timestamp: Date.now() };
+            relatedTaskLookup.then(() => this._enqueueTaskMessage(relatedTaskId, queuedError, sessionId), () => capturedTransport?.send(errorResponse)).catch((error62) => this._onerror(new Error(`Failed to send an error response: ${error62}`)));
+          } else if (relatedTaskId && this._taskMessageQueue) {
             this._enqueueTaskMessage(relatedTaskId, {
               type: "error",
               message: errorResponse,
@@ -28224,7 +28297,10 @@ var init_protocol = __esm({
           closeSSEStream: extra?.closeSSEStream,
           closeStandaloneSSEStream: extra?.closeStandaloneSSEStream
         };
-        Promise.resolve().then(() => {
+        (relatedTaskLookup ?? Promise.resolve()).then(() => {
+          if (relatedTaskLookup && abortController.signal.aborted) {
+            throw new McpError(ErrorCode.ConnectionClosed, "Request was cancelled");
+          }
           if (taskCreationParams) {
             this.assertTaskHandlerCapability(request.method);
           }
@@ -28259,7 +28335,7 @@ var init_protocol = __esm({
               ...error62["data"] !== void 0 && { data: error62["data"] }
             }
           };
-          if (relatedTaskId && this._taskMessageQueue) {
+          if (relatedTaskId && this._taskMessageQueue && relatedTaskFound) {
             await this._enqueueTaskMessage(relatedTaskId, {
               type: "error",
               message: errorResponse,
@@ -28739,7 +28815,7 @@ var init_protocol = __esm({
           throw new Error("Cannot enqueue task message: taskStore and taskMessageQueue are not configured");
         }
         const maxQueueSize = this._options?.maxTaskQueueSize;
-        await this._taskMessageQueue.enqueue(taskId, message, sessionId, maxQueueSize);
+        await this._taskMessageQueue.enqueue(taskId, message, sessionId ?? this._transport?.sessionId, maxQueueSize);
       }
       /**
        * Clears the message queue for a task and rejects any pending request resolvers.
@@ -28768,12 +28844,13 @@ var init_protocol = __esm({
        * Uses polling to check for updates at the task's configured poll interval.
        * @param taskId The task ID to wait for
        * @param signal Abort signal to cancel the wait
+       * @param sessionId Session of the request that waits, passed to the task store
        * @returns Promise that resolves when an update occurs or rejects if aborted
        */
-      async _waitForTaskUpdate(taskId, signal) {
+      async _waitForTaskUpdate(taskId, signal, sessionId) {
         let interval = this._options?.defaultTaskPollInterval ?? 1e3;
         try {
-          const task = await this._taskStore?.getTask(taskId);
+          const task = await this._taskStore?.getTask(taskId, sessionId);
           if (task?.pollInterval) {
             interval = task.pollInterval;
           }
@@ -31930,9 +32007,9 @@ var require_data = __commonJS({
   }
 });
 
-// node_modules/.pnpm/fast-uri@3.1.8/node_modules/fast-uri/lib/utils.js
+// node_modules/.pnpm/fast-uri@3.1.9/node_modules/fast-uri/lib/utils.js
 var require_utils = __commonJS({
-  "node_modules/.pnpm/fast-uri@3.1.8/node_modules/fast-uri/lib/utils.js"(exports, module) {
+  "node_modules/.pnpm/fast-uri@3.1.9/node_modules/fast-uri/lib/utils.js"(exports, module) {
     "use strict";
     var isUUID = RegExp.prototype.test.bind(/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/iu);
     var isIPv4 = RegExp.prototype.test.bind(/^(?:(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)$/u);
@@ -32163,6 +32240,37 @@ var require_utils = __commonJS({
         }
       }
       return output2.join("");
+    }
+    function removeDotSegmentsRelative(path10) {
+      if (path10 === "" || path10[0] === "/") {
+        return removeDotSegments(path10);
+      }
+      const segments = path10.split("/");
+      const last = segments.length - 1;
+      const output2 = [];
+      let trailingDirectory = false;
+      for (let i = 0; i <= last; i++) {
+        const segment = segments[i];
+        if (segment === "." || segment === "..") {
+          if (segment === "..") {
+            if (output2.length !== 0 && output2[output2.length - 1] !== "..") {
+              output2.pop();
+            } else {
+              output2.push("..");
+            }
+          }
+          trailingDirectory = i === last;
+        } else {
+          output2.push(segment);
+        }
+      }
+      if (trailingDirectory && output2[output2.length - 1] !== "..") {
+        output2.push("");
+      }
+      if (output2.length === 0 || output2[0] === "" || output2[0].includes(":")) {
+        output2.unshift(".");
+      }
+      return output2.join("/");
     }
     var HOST_DELIMS = { "@": "%40", "/": "%2F", "?": "%3F", "#": "%23", ":": "%3A" };
     var HOST_DELIM_RE = /[@/?#:]/g;
@@ -32424,6 +32532,7 @@ var require_utils = __commonJS({
       encodeFragment,
       escapePreservingEscapes,
       removeDotSegments,
+      removeDotSegmentsRelative,
       isIPv4,
       isUUID,
       normalizeIPv6,
@@ -32432,9 +32541,9 @@ var require_utils = __commonJS({
   }
 });
 
-// node_modules/.pnpm/fast-uri@3.1.8/node_modules/fast-uri/lib/schemes.js
+// node_modules/.pnpm/fast-uri@3.1.9/node_modules/fast-uri/lib/schemes.js
 var require_schemes = __commonJS({
-  "node_modules/.pnpm/fast-uri@3.1.8/node_modules/fast-uri/lib/schemes.js"(exports, module) {
+  "node_modules/.pnpm/fast-uri@3.1.9/node_modules/fast-uri/lib/schemes.js"(exports, module) {
     "use strict";
     var { isUUID } = require_utils();
     var URN_REG = /^([\da-z][\d\-a-z]{0,31}):((?:[\w!$'()*+,\-./:;=@]|%[\da-f]{2})+)$/iu;
@@ -32643,20 +32752,22 @@ var require_schemes = __commonJS({
   }
 });
 
-// node_modules/.pnpm/fast-uri@3.1.8/node_modules/fast-uri/index.js
+// node_modules/.pnpm/fast-uri@3.1.9/node_modules/fast-uri/index.js
 var require_fast_uri = __commonJS({
-  "node_modules/.pnpm/fast-uri@3.1.8/node_modules/fast-uri/index.js"(exports, module) {
+  "node_modules/.pnpm/fast-uri@3.1.9/node_modules/fast-uri/index.js"(exports, module) {
     "use strict";
-    var { normalizeIPv6, removeDotSegments, recomposeAuthority, normalizePercentEncoding, normalizePathEncoding, serializePathEncoding, normalizeQueryFragmentEncoding, encodeQuery, encodeFragment, reescapeHostDelimiters, isIPv4, nonSimpleDomain } = require_utils();
+    var { normalizeIPv6, removeDotSegments, removeDotSegmentsRelative, recomposeAuthority, normalizePercentEncoding, normalizePathEncoding, serializePathEncoding, normalizeQueryFragmentEncoding, encodeQuery, encodeFragment, reescapeHostDelimiters, isIPv4, nonSimpleDomain } = require_utils();
     var { SCHEMES, getSchemeHandler } = require_schemes();
     var VALID_SCHEME = /^[A-Za-z][A-Za-z0-9+.-]*$/u;
     var MALFORMED_SCHEME_ERROR = "URI scheme is malformed.";
-    function decodeValidScheme(scheme) {
-      const decodedScheme = unescape(String(scheme));
-      if (!VALID_SCHEME.test(decodedScheme)) {
+    var MALFORMED_HOST_ERROR = "URI host is malformed.";
+    var FORBIDDEN_DOMAIN_HOST_CHARACTER = /[\0-\x20"#/:<>?@[\\\]^`{|}\x7F]/u;
+    function validateScheme(scheme) {
+      const stringScheme = String(scheme);
+      if (!VALID_SCHEME.test(stringScheme)) {
         throw new TypeError(MALFORMED_SCHEME_ERROR);
       }
-      return decodedScheme;
+      return stringScheme;
     }
     function normalize(uri, options) {
       if (typeof uri === "string") {
@@ -32693,6 +32804,9 @@ var require_fast_uri = __commonJS({
       const resolvedSchemeHandler = getSchemeHandler(options && options.scheme || resolved.scheme);
       const resolvedHost = resolved.host;
       const resolvedHostIsIP = resolvedHost !== void 0 && resolvedHost !== "" && (isIPv4(resolvedHost) || normalizeIPv6(resolvedHost).isIPV6);
+      if (hasForbiddenDomainHost(resolved, options || {}, resolvedSchemeHandler, resolvedHostIsIP)) {
+        throw new Error(MALFORMED_HOST_ERROR);
+      }
       canonicalizeHost(resolved, options || {}, resolvedSchemeHandler, resolvedHostIsIP);
       const encodedASCIIHost = resolvedHost && resolvedHost.indexOf("%") !== -1 && !new RegExp("\\P{ASCII}", "u").test(resolvedHost);
       if (resolved.error && !encodedASCIIHost) {
@@ -32734,14 +32848,15 @@ var require_fast_uri = __commonJS({
             if (relative.path[0] === "/") {
               target.path = removeDotSegments(relative.path);
             } else {
-              if ((base.userinfo !== void 0 || base.host !== void 0 || base.port !== void 0) && !base.path) {
+              const baseHasAuthority = base.userinfo !== void 0 || base.host !== void 0 || base.port !== void 0;
+              if (baseHasAuthority && !base.path) {
                 target.path = "/" + relative.path;
               } else if (!base.path) {
                 target.path = relative.path;
               } else {
                 target.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative.path;
               }
-              target.path = removeDotSegments(target.path);
+              target.path = base.scheme === void 0 && !baseHasAuthority && target.path[0] !== "/" ? removeDotSegmentsRelative(target.path) : removeDotSegments(target.path);
             }
             target.query = relative.query;
           }
@@ -32779,12 +32894,13 @@ var require_fast_uri = __commonJS({
       const options = Object.assign({}, opts);
       const uriTokens = [];
       if (component.scheme) {
-        component.scheme = decodeValidScheme(component.scheme);
+        component.scheme = validateScheme(component.scheme);
       }
       const schemeHandler = getSchemeHandler(options.scheme || component.scheme);
       if (schemeHandler && schemeHandler.serialize) schemeHandler.serialize(component, options);
       const hasAuthority = component.userinfo !== void 0 || component.host !== void 0 || component.port !== void 0;
-      const pathNoScheme = !options.skipEscape && component.scheme === void 0 && !hasAuthority;
+      const schemelessReference = (component.scheme === void 0 || options.reference === "suffix") && !hasAuthority;
+      const pathNoScheme = !options.skipEscape && schemelessReference;
       if (component.path !== void 0) {
         if (!options.skipEscape) {
           component.path = serializePathEncoding(component.path, pathNoScheme);
@@ -32793,7 +32909,7 @@ var require_fast_uri = __commonJS({
         }
       }
       if (options.reference !== "suffix" && component.scheme) {
-        component.scheme = decodeValidScheme(component.scheme);
+        component.scheme = validateScheme(component.scheme);
         uriTokens.push(component.scheme, ":");
       }
       const authority = recomposeAuthority(component);
@@ -32809,9 +32925,9 @@ var require_fast_uri = __commonJS({
       if (component.path !== void 0) {
         let s = component.path;
         if (!options.absolutePath && (!schemeHandler || !schemeHandler.absolutePath)) {
-          s = removeDotSegments(s);
+          s = schemelessReference && s[0] !== "/" ? removeDotSegmentsRelative(s) : removeDotSegments(s);
         }
-        if (pathNoScheme) {
+        if (schemelessReference) {
           s = serializePathEncoding(s, true);
         }
         if (authority === void 0 && s[0] === "/" && s[1] === "/") {
@@ -32858,15 +32974,33 @@ var require_fast_uri = __commonJS({
       return hasMalformedPercentEncoding(matches[3]) || host !== void 0 && !isIPLiteral(host) && hasMalformedPercentEncoding(host) || hasMalformedPercentEncoding(matches[6]) || hasMalformedPercentEncoding(matches[7]) || hasMalformedPercentEncoding(matches[8]);
     }
     function canonicalizeHost(parsed, options, schemeHandler, isIP) {
+      if (hasForbiddenDomainHost(parsed, options, schemeHandler, isIP)) {
+        parsed.error = parsed.error || MALFORMED_HOST_ERROR;
+        return true;
+      }
       if (!options.unicodeSupport && (!schemeHandler || !schemeHandler.unicodeSupport) && parsed.host && !isIPLiteral(parsed.host) && (options.domainHost || schemeHandler && schemeHandler.domainHost) && isIP === false && nonSimpleDomain(parsed.host)) {
+        let url2;
         try {
-          parsed.host = new URL("http://" + parsed.host).hostname;
+          url2 = new URL("http://" + parsed.host);
         } catch (e) {
           parsed.error = parsed.error || "Host's domain name can not be converted to ASCII: " + e;
           return true;
         }
+        if (!isHostOnlyURL(url2)) {
+          parsed.error = parsed.error || MALFORMED_HOST_ERROR;
+          return true;
+        }
+        parsed.host = url2.hostname;
       }
       return false;
+    }
+    function hasForbiddenDomainHost(parsed, options, schemeHandler, isIP) {
+      return Boolean(
+        parsed.host && isIP === false && !isIPLiteral(parsed.host) && (options.domainHost || schemeHandler && schemeHandler.domainHost) && FORBIDDEN_DOMAIN_HOST_CHARACTER.test(parsed.host)
+      );
+    }
+    function isHostOnlyURL(url2) {
+      return url2.username === "" && url2.password === "" && url2.port === "" && url2.pathname === "/" && url2.search === "" && url2.hash === "" && url2.hostname !== "";
     }
     function parseWithStatus(uri, opts) {
       const options = Object.assign({}, opts);
@@ -32922,9 +33056,8 @@ var require_fast_uri = __commonJS({
         parsed.query = matches[7];
         parsed.fragment = matches[8];
         if (parsed.scheme !== void 0) {
-          const decodedScheme = unescape(parsed.scheme);
-          if (VALID_SCHEME.test(decodedScheme)) {
-            parsed.scheme = decodedScheme.toLowerCase();
+          if (VALID_SCHEME.test(parsed.scheme)) {
+            parsed.scheme = parsed.scheme.toLowerCase();
           } else {
             parsed.error = parsed.error || MALFORMED_SCHEME_ERROR;
             malformedScheme = true;
@@ -32952,7 +33085,7 @@ var require_fast_uri = __commonJS({
             malformedIPLiteral = hasIPLiteralBracket && (!bracketedIPLiteral || ipv6result.error === true);
             parsed.host = isIP ? ipv6result.host : ipv6result.host.toLowerCase();
             if (malformedIPLiteral) {
-              parsed.error = parsed.error || "URI host is malformed.";
+              parsed.error = parsed.error || MALFORMED_HOST_ERROR;
               malformedAuthorityOrPort = true;
             }
           } else {
@@ -32980,7 +33113,7 @@ var require_fast_uri = __commonJS({
           if (!isIP) {
             host = normalizePercentEncoding(host.toLowerCase());
           }
-          parsed.host = reescapeHostDelimiters(host, isIP);
+          parsed.host = isIP || options.scheme !== "null" ? reescapeHostDelimiters(host, isIP) : host;
         }
         if (!schemeHandler || schemeHandler && !schemeHandler.skipNormalize) {
           if (parsed.path) {
@@ -36026,7 +36159,7 @@ var require_dist = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/validation/ajv-provider.js
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/validation/ajv-provider.js
 function createDefaultAjvInstance() {
   const ajv = new import_ajv.default({
     strict: false,
@@ -36040,7 +36173,7 @@ function createDefaultAjvInstance() {
 }
 var import_ajv, import_ajv_formats, AjvJsonSchemaValidator;
 var init_ajv_provider = __esm({
-  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/validation/ajv-provider.js"() {
+  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/validation/ajv-provider.js"() {
     import_ajv = __toESM(require_ajv(), 1);
     import_ajv_formats = __toESM(require_dist(), 1);
     AjvJsonSchemaValidator = class {
@@ -36099,10 +36232,10 @@ var init_ajv_provider = __esm({
   }
 });
 
-// node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/server.js
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/server.js
 var ExperimentalServerTasks;
 var init_server = __esm({
-  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/server.js"() {
+  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/server.js"() {
     init_types2();
     ExperimentalServerTasks = class {
       constructor(_server) {
@@ -36318,7 +36451,7 @@ var init_server = __esm({
   }
 });
 
-// node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/helpers.js
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/helpers.js
 function assertToolsCallTaskCapability(requests, method, entityName) {
   if (!requests) {
     throw new Error(`${entityName} does not support task creation (required for ${method})`);
@@ -36353,14 +36486,14 @@ function assertClientRequestTaskCapability(requests, method, entityName) {
   }
 }
 var init_helpers = __esm({
-  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/helpers.js"() {
+  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/helpers.js"() {
   }
 });
 
-// node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/server/index.js
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/server/index.js
 var Server;
 var init_server2 = __esm({
-  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/server/index.js"() {
+  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/server/index.js"() {
     init_protocol();
     init_types2();
     init_ajv_provider();
@@ -36739,7 +36872,7 @@ var init_server2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/server/completable.js
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/server/completable.js
 function isCompletable(schema) {
   return !!schema && typeof schema === "object" && COMPLETABLE_SYMBOL in schema;
 }
@@ -36749,7 +36882,7 @@ function getCompleter(schema) {
 }
 var COMPLETABLE_SYMBOL, McpZodTypeKind;
 var init_completable = __esm({
-  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/server/completable.js"() {
+  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/server/completable.js"() {
     COMPLETABLE_SYMBOL = Symbol.for("mcp.completable");
     (function(McpZodTypeKind2) {
       McpZodTypeKind2["Completable"] = "McpCompletable";
@@ -36757,13 +36890,13 @@ var init_completable = __esm({
   }
 });
 
-// node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/uriTemplate.js
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/uriTemplate.js
 var init_uriTemplate = __esm({
-  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/uriTemplate.js"() {
+  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/uriTemplate.js"() {
   }
 });
 
-// node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/toolNameValidation.js
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/toolNameValidation.js
 function validateToolName(name) {
   const warnings = [];
   if (name.length === 0) {
@@ -36821,15 +36954,15 @@ function validateAndWarnToolName(name) {
 }
 var TOOL_NAME_REGEX;
 var init_toolNameValidation = __esm({
-  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/toolNameValidation.js"() {
+  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/toolNameValidation.js"() {
     TOOL_NAME_REGEX = /^[A-Za-z0-9._-]{1,128}$/;
   }
 });
 
-// node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/mcp-server.js
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/mcp-server.js
 var ExperimentalMcpServerTasks;
 var init_mcp_server = __esm({
-  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/mcp-server.js"() {
+  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/mcp-server.js"() {
     ExperimentalMcpServerTasks = class {
       constructor(_mcpServer) {
         this._mcpServer = _mcpServer;
@@ -36846,15 +36979,51 @@ var init_mcp_server = __esm({
   }
 });
 
-// node_modules/.pnpm/zod@4.6.5/node_modules/zod/index.js
+// node_modules/.pnpm/zod@4.6.7/node_modules/zod/index.js
 var init_zod = __esm({
-  "node_modules/.pnpm/zod@4.6.5/node_modules/zod/index.js"() {
+  "node_modules/.pnpm/zod@4.6.7/node_modules/zod/index.js"() {
     init_external3();
     init_external3();
   }
 });
 
-// node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/server/mcp.js
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/server/mcp.js
+function toolInputElementCount(value, max) {
+  let count = 0;
+  const stack = [value];
+  while (stack.length > 0) {
+    const node2 = stack.pop();
+    if (node2 === null || typeof node2 !== "object")
+      continue;
+    if (Array.isArray(node2)) {
+      for (const child of node2) {
+        if (++count > max)
+          return count;
+        if (child !== null && typeof child === "object")
+          stack.push(child);
+      }
+    } else {
+      for (const key in node2) {
+        if (!Object.prototype.hasOwnProperty.call(node2, key))
+          continue;
+        if (++count > max)
+          return count;
+        const child = node2[key];
+        if (child !== null && typeof child === "object")
+          stack.push(child);
+      }
+    }
+  }
+  return count;
+}
+function resolveMaxToolInputElements(value) {
+  if (value === void 0 || value === Infinity)
+    return void 0;
+  if (typeof value !== "number" || Number.isNaN(value) || value < 1) {
+    throw new RangeError(`maxToolInputElements must be a number of at least 1, or Infinity, got ${String(value)}`);
+  }
+  return value;
+}
 function isZodTypeLike(value) {
   return value !== null && typeof value === "object" && "parse" in value && typeof value.parse === "function" && "safeParse" in value && typeof value.safeParse === "function";
 }
@@ -36922,7 +37091,7 @@ function createCompletionResult(suggestions) {
 }
 var McpServer, EMPTY_OBJECT_JSON_SCHEMA, EMPTY_COMPLETION_RESULT;
 var init_mcp = __esm({
-  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/server/mcp.js"() {
+  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/server/mcp.js"() {
     init_server2();
     init_zod_compat();
     init_zod_json_schema_compat();
@@ -36943,6 +37112,16 @@ var init_mcp = __esm({
         this._resourceHandlersInitialized = false;
         this._promptHandlersInitialized = false;
         this.server = new Server(serverInfo, options);
+        this._maxToolInputElements = resolveMaxToolInputElements(options?.maxToolInputElements);
+        if (options?.capabilities?.tools) {
+          this.setToolRequestHandlers();
+        }
+        if (options?.capabilities?.resources) {
+          this.setResourceRequestHandlers();
+        }
+        if (options?.capabilities?.prompts) {
+          this.setPromptRequestHandlers();
+        }
       }
       /**
        * Access experimental features.
@@ -37073,12 +37252,15 @@ var init_mcp = __esm({
        * Validates tool input arguments against the tool's input schema.
        */
       async validateToolInput(tool, args, toolName) {
+        if (this._maxToolInputElements !== void 0 && toolInputElementCount(args, this._maxToolInputElements) > this._maxToolInputElements) {
+          throw new McpError(ErrorCode.InvalidParams, `Invalid arguments for tool ${toolName}: arguments contain more than the maximum of ${this._maxToolInputElements} elements`);
+        }
         if (!tool.inputSchema) {
           return void 0;
         }
         const inputObj = normalizeObjectSchema(tool.inputSchema);
         const schemaToParse = inputObj ?? tool.inputSchema;
-        const parseResult = await safeParseAsync2(schemaToParse, args);
+        const parseResult = await safeParseAsync2(schemaToParse, args ?? {});
         if (!parseResult.success) {
           const error62 = "error" in parseResult ? parseResult.error : "Unknown error";
           const errorMessage = getParseErrorMessage(error62);
@@ -37316,7 +37498,7 @@ var init_mcp = __esm({
           }
           if (prompt.argsSchema) {
             const argsObj = normalizeObjectSchema(prompt.argsSchema);
-            const parseResult = await safeParseAsync2(argsObj, request.params.arguments);
+            const parseResult = await safeParseAsync2(argsObj, request.params.arguments ?? {});
             if (!parseResult.success) {
               const error62 = "error" in parseResult ? parseResult.error : "Unknown error";
               const errorMessage = getParseErrorMessage(error62);
@@ -37660,7 +37842,7 @@ var init_mcp = __esm({
   }
 });
 
-// node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/stdio.js
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/stdio.js
 function deserializeMessage(line) {
   return JSONRPCMessageSchema.parse(JSON.parse(line));
 }
@@ -37669,7 +37851,7 @@ function serializeMessage(message) {
 }
 var STDIO_DEFAULT_MAX_BUFFER_SIZE, ReadBuffer;
 var init_stdio = __esm({
-  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/stdio.js"() {
+  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/stdio.js"() {
     init_types2();
     STDIO_DEFAULT_MAX_BUFFER_SIZE = 10 * 1024 * 1024;
     ReadBuffer = class {
@@ -37703,11 +37885,11 @@ var init_stdio = __esm({
   }
 });
 
-// node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js
 import process2 from "node:process";
 var StdioServerTransport;
 var init_stdio2 = __esm({
-  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js"() {
+  "node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.2_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js"() {
     init_stdio();
     StdioServerTransport = class {
       constructor(_stdin = process2.stdin, _stdout = process2.stdout, options) {
@@ -39358,10 +39540,10 @@ var init_server3 = __esm({
 function requireSupportedNode(version2 = process.versions.node) {
   const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(version2);
   const [major, minor, patch] = match ? match.slice(1).map(Number) : [];
-  const minimum = { 24: [22, 1], 26: [12, 1] }[major];
+  const minimum = { 24: [22, 3], 26: [13, 1] }[major];
   if (!minimum || minor < minimum[0] || minor === minimum[0] && patch < minimum[1]) {
     throw new Error(
-      `farcall-mcp requires Node 24.22.1+ (24.x) or 26.12.1+ (26.x); found ${version2}. This security baseline includes CVE-2026-111497. Check the parent host's PATH. After active jobs finish, restart the parent client and any persistent daemon with a supported Node version.`
+      `farcall-mcp requires Node 24.22.3+ (24.x) or 26.13.1+ (26.x). Found ${version2}. This baseline includes the November 2026 Node security fixes. Check the parent host's PATH. After active jobs finish, restart the parent client and any persistent daemon with a supported Node version.`
     );
   }
 }
