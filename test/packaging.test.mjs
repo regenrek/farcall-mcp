@@ -127,7 +127,13 @@ test("each bundle enforces the security floor before initializing dependencies",
         `${file}: ${version}`,
       );
     }
-    for (const version of ["24.22.3", "24.23.0", "26.13.1"]) {
+    for (const version of [
+      "24.22.3",
+      "24.22.4",
+      "24.23.0",
+      "26.13.1",
+      "26.14.0",
+    ]) {
       assert.doesNotThrow(
         () =>
           runInNewContext(prefix, { process: { versions: { node: version } } }),
