@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.11] - 2026-11-26
+
 ### Security
 
 - Update Zod to 4.6.7 to prevent memory exhaustion when validating oversized arrays.
